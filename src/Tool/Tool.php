@@ -166,7 +166,7 @@ abstract class Tool
     {
         $content = [
             'type' => 'image',
-            'data' => $data,
+            'data' => base64_encode($data),
             'mimeType' => $mimeType
         ];
 
