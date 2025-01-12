@@ -1,7 +1,16 @@
 {
-    "name": "mcp/server",
-    "description": "Model Context Protocol server implementation in PHP",
+    "name": "james2037/mcp-php-server",
+    "description": "Model Context Protocol server framework in PHP",
     "type": "library",
+    "keywords": ["mcp"],
+    "homepage": "https://github.com/james2037/mcp-php-server",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "james2037",
+            "role": "Developer"
+        }
+    ],
     "require": {
         "php": "^8.1"
     },
