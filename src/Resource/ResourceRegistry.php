@@ -10,11 +10,11 @@ use ReflectionClass;
 
 class ResourceRegistry extends Registry
 {
-    protected function createFromReflection(ReflectionClass $reflection): ?Resource
+    protected function createFromReflection(ReflectionClass $reflection, array $config = []): ?Resource
     {
         $resourceAttr = $reflection->getAttributes(ResourceUri::class)[0] ?? null;
         if ($resourceAttr !== null) {
-            $resource = new ($reflection->getName());
+            $resource = new ($reflection->getName())($config);
             if ($resource instanceof Resource) {
                 return $resource;
             }

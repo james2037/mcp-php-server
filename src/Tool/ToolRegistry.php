@@ -10,11 +10,11 @@ use ReflectionClass;
 
 class ToolRegistry extends Registry
 {
-    protected function createFromReflection(ReflectionClass $reflection): ?Tool
+    protected function createFromReflection(ReflectionClass $reflection, array $config = []): ?Tool
     {
         $toolAttr = $reflection->getAttributes(ToolAttribute::class)[0] ?? null;
         if ($toolAttr !== null) {
-            $tool = new ($reflection->getName());
+            $tool = new ($reflection->getName())($config);
             if ($tool instanceof Tool) {
                 return $tool;
             }

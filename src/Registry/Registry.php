@@ -12,7 +12,7 @@ abstract class Registry
 {
     private array $items = [];
 
-    public function discover(string $directory): void
+    public function discover(string $directory, array $config = []): void
     {
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($directory)
@@ -35,7 +35,7 @@ abstract class Registry
                 continue;
             }
 
-            if ($item = $this->createFromReflection($reflection)) {
+            if ($item = $this->createFromReflection($reflection, $config)) {
                 $this->register($item);
             }
         }
@@ -68,6 +68,6 @@ abstract class Registry
         return $namespace ? $namespace . '\\' . $class : $class;
     }
 
-    abstract protected function createFromReflection(ReflectionClass $reflection): ?object;
+    abstract protected function createFromReflection(ReflectionClass $reflection, array $config): ?object;
     abstract protected function getItemKey(object $item): string;
 }

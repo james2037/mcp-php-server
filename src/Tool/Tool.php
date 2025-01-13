@@ -14,9 +14,14 @@ abstract class Tool
 {
     private ?ToolAttribute $metadata = null;
     private array $parameters = [];
+    private array $config = [];
 
-    public function __construct()
+    public function __construct(?array $config = null)
     {
+        if (!is_null($config)) {
+            $this->config = $config;
+        }
+
         $this->initializeMetadata();
     }
 
