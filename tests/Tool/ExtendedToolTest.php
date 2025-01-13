@@ -46,7 +46,7 @@ class MultiOutputTool extends Tool
         if ($arguments['format'] === 'text') {
             return $this->text('Hello world');
         }
-        return $this->image(base64_encode('fake-image-data'), 'image/png');
+        return $this->image('fake-image-data', 'image/png');
     }
 }
 
