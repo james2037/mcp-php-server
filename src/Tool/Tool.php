@@ -59,17 +59,20 @@ abstract class Tool
 
     public function getInputSchema(): array
     {
-        $properties = [];
+        $properties = new \stdClass();
         $required = [];
 
         foreach ($this->parameters as $name => $param) {
-            $properties[$name] = [
-                'type' => $param->type
-            ];
+            // Create a property object for each parameter
+            $propObj = new \stdClass();
+            $propObj->type = $param->type;
 
             if ($param->description !== null) {
-                $properties[$name]['description'] = $param->description;
+                $propObj->description = $param->description;
             }
+
+            // Assign the property object to the properties object
+            $properties->$name = $propObj;
 
             if ($param->required) {
                 $required[] = $name;
@@ -79,8 +82,11 @@ abstract class Tool
         $schema = [
             'type' => 'object',
             'properties' => $properties,
-            'required' => !empty($required) ? $required : null
         ];
+
+        if (!empty($required)) {
+            $schema['required'] = $required;
+        }
 
         return $schema;
     }

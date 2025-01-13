@@ -58,7 +58,7 @@ class ExtendedToolTest extends TestCase
 
         // Test schema includes optional parameter
         $schema = $tool->getInputSchema();
-        $this->assertArrayHasKey('title', $schema['properties']);
+        $this->assertTrue(isset($schema['properties']->title));
         $this->assertContains('name', $schema['required']);
         $this->assertNotContains('title', $schema['required']);
 
@@ -86,8 +86,8 @@ class ExtendedToolTest extends TestCase
 
         // Test schema types
         $schema = $tool->getInputSchema();
-        $this->assertEquals('array', $schema['properties']['numbers']['type']);
-        $this->assertEquals('boolean', $schema['properties']['enabled']['type']);
+        $this->assertEquals('array', $schema['properties']->numbers->type);
+        $this->assertEquals('boolean', $schema['properties']->enabled->type);
 
         // Test array processing
         $result = $tool->execute(
@@ -159,7 +159,7 @@ class ExtendedToolTest extends TestCase
         $tool = new OptionalParamTool();
         $schema = $tool->getInputSchema();
 
-        $this->assertEquals('Name to greet', $schema['properties']['name']['description']);
-        $this->assertEquals('Optional title', $schema['properties']['title']['description']);
+        $this->assertEquals('Name to greet', $schema['properties']->name->description);
+        $this->assertEquals('Optional title', $schema['properties']->title->description);
     }
 }

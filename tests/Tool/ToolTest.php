@@ -53,9 +53,9 @@ class ToolTest extends TestCase
         $schema = $tool->getInputSchema();
 
         $this->assertEquals('object', $schema['type']);
-        $this->assertArrayHasKey('properties', $schema);
-        $this->assertArrayHasKey('name', $schema['properties']);
-        $this->assertEquals('string', $schema['properties']['name']['type']);
+        $this->assertInstanceOf(\stdClass::class, $schema['properties']);
+        $this->assertTrue(isset($schema['properties']->name));
+        $this->assertEquals('string', $schema['properties']->name->type);
     }
 
     public function testParameterSchema(): void
@@ -64,18 +64,21 @@ class ToolTest extends TestCase
         $schema = $tool->getInputSchema();
 
         $this->assertEquals('object', $schema['type']);
-        $this->assertArrayHasKey('properties', $schema);
+        $this->assertInstanceOf(\stdClass::class, $schema['properties']);
 
         // Check operation parameter
-        $this->assertArrayHasKey('operation', $schema['properties']);
-        $this->assertEquals('string', $schema['properties']['operation']['type']);
-        $this->assertEquals('Operation to perform (add/subtract)', $schema['properties']['operation']['description']);
+        $this->assertTrue(isset($schema['properties']->operation));
+        $this->assertEquals('string', $schema['properties']->operation->type);
+        $this->assertEquals(
+            'Operation to perform (add/subtract)',
+            $schema['properties']->operation->description
+        );
 
         // Check number parameters
-        $this->assertArrayHasKey('a', $schema['properties']);
-        $this->assertEquals('number', $schema['properties']['a']['type']);
-        $this->assertArrayHasKey('b', $schema['properties']);
-        $this->assertEquals('number', $schema['properties']['b']['type']);
+        $this->assertTrue(isset($schema['properties']->a));
+        $this->assertEquals('number', $schema['properties']->a->type);
+        $this->assertTrue(isset($schema['properties']->b));
+        $this->assertEquals('number', $schema['properties']->b->type);
 
         // Check required fields are present (all parameters are required by default)
         $this->assertContains('operation', $schema['required']);
@@ -172,5 +175,120 @@ class ToolTest extends TestCase
             'b' => 3
             ]
         );
+    }
+
+    public function testSchemaEncodesAsValidJson(): void
+    {
+        $tool = new CalculatorTool();
+        $schema = $tool->getInputSchema();
+
+        // Test that properties is an object, not an array
+        $this->assertInstanceOf(\stdClass::class, $schema['properties']);
+
+        // Encode and decode to check JSON structure
+        $json = json_encode($schema);
+        $decoded = json_decode($json, true);
+
+        // Validate the decoded structure
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('properties', $decoded);
+        $this->assertIsArray($decoded['properties']); // JSON decodes objects as associative arrays
+        $this->assertArrayHasKey('operation', $decoded['properties']);
+        $this->assertArrayHasKey('type', $decoded['properties']['operation']);
+
+        // Verify no numeric keys in properties
+        foreach (array_keys($decoded['properties']) as $key) {
+            $this->assertIsString($key, "Property key should be string, got: " . gettype($key));
+            $this->assertMatchesRegularExpression(
+                '/^[a-zA-Z_][a-zA-Z0-9_]*$/',
+                $key,
+                "Property key should be a valid identifier: $key"
+            );
+        }
+    }
+
+    public function testSchemaValidatesAgainstTypeScript(): void
+    {
+        $tool = new CalculatorTool();
+        $schema = $tool->getInputSchema();
+
+        // Create a JSON Schema representation of the TypeScript interface
+        $tsSchema = [
+            'type' => 'object',
+            'properties' => [
+                'type' => ['type' => 'string', 'const' => 'object'],
+                'properties' => [
+                    'type' => 'object',
+                    'additionalProperties' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'type' => ['type' => 'string'],
+                            'description' => ['type' => 'string']
+                        ],
+                        'required' => ['type']
+                    ]
+                ],
+                'required' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string']
+                ]
+            ],
+            'required' => ['type', 'properties']
+        ];
+
+        // Validate schema matches expected structure
+        $this->assertTrue(
+            $this->validateAgainstSchema($schema, $tsSchema),
+            "Schema should match TypeScript interface definition"
+        );
+    }
+
+    /**
+     * Simple JSON Schema validator
+     */
+    private function validateAgainstSchema($data, array $schema): bool
+    {
+        if (isset($schema['type'])) {
+            switch ($schema['type']) {
+                case 'object':
+                    if (!is_object($data) && !is_array($data)) {
+                        return false;
+                    }
+                    if (isset($schema['properties'])) {
+                        foreach ($schema['properties'] as $prop => $propSchema) {
+                            if (
+                                isset($schema['required'])
+                                && in_array($prop, $schema['required'])
+                                && !array_key_exists($prop, $data)
+                            ) {
+                                return false;
+                            }
+                            if (array_key_exists($prop, $data)) {
+                                if (!$this->validateAgainstSchema($data[$prop], $propSchema)) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                case 'array':
+                    if (!is_array($data)) {
+                        return false;
+                    }
+                    if (isset($schema['items'])) {
+                        foreach ($data as $item) {
+                            if (!$this->validateAgainstSchema($item, $schema['items'])) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                case 'string':
+                    return is_string($data);
+                default:
+                    return true;
+            }
+        }
+        return true;
     }
 }
