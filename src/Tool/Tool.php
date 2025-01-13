@@ -14,7 +14,7 @@ abstract class Tool
 {
     private ?ToolAttribute $metadata = null;
     private array $parameters = [];
-    private array $config = [];
+    protected array $config = [];
 
     public function __construct(?array $config = null)
     {

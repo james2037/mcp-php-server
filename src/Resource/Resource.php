@@ -9,7 +9,7 @@ use MCP\Server\Resource\Attribute\ResourceUri;
 abstract class Resource
 {
     private ?ResourceUri $metadata = null;
-    private array $config = [];
+    protected array $config = [];
 
     public function __construct(?array $config = null)
     {
