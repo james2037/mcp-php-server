@@ -8,23 +8,7 @@ use MCP\Server\Resource\ResourceContents;
 use MCP\Server\Resource\Attribute\ResourceUri;
 use PHPUnit\Framework\TestCase;
 
-#[ResourceUri('test://one')]
-class MockResource extends Resource
-{
-    public function read(array $parameters = []): ResourceContents
-    {
-        return $this->text('Resource One');
-    }
-}
-
-#[ResourceUri('test://two')]
-class OtherMockResource extends Resource
-{
-    public function read(array $parameters = []): ResourceContents
-    {
-        return $this->text('Resource Two');
-    }
-}
+// MockResource and OtherMockResource are now in separate files.
 
 class ResourceRegistryTest extends TestCase
 {

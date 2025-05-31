@@ -8,23 +8,7 @@ use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use PHPUnit\Framework\TestCase;
 
-#[ToolAttribute('test', 'Test Tool')]
-class MockTool extends Tool
-{
-    protected function doExecute(array $arguments): array
-    {
-        return $this->text('Hello World');
-    }
-}
-
-#[ToolAttribute('other', 'Other Tool')]
-class OtherMockTool extends Tool
-{
-    protected function doExecute(array $arguments): array
-    {
-        return $this->text('Other Result');
-    }
-}
+// MockTool and OtherMockTool are now in separate files.
 
 class ToolRegistryTest extends TestCase
 {

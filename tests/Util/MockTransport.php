@@ -13,6 +13,7 @@ class MockTransport implements TransportInterface
     /**
      * Queues a batch of messages that receive() will return once.
      * Each call to this method adds one "line" or "packet" the server will read.
+     *
      * @param JsonRpcMessage[] $messagesBatch An array of JsonRpcMessage objects.
      */
     public function queueIncomingMessages(array $messagesBatch): void

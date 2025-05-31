@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace MCP\Server\Resource;
 
 use MCP\Server\Resource\Attribute\ResourceUri;
-use MCP\Server\Tool\Content\Annotations; // Added
+use MCP\Server\Tool\Content\Annotations;
+
+// Added
 
 abstract class Resource
 {

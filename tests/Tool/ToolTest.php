@@ -7,35 +7,7 @@ use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use PHPUnit\Framework\TestCase;
 
-#[ToolAttribute('test.tool', 'A test tool')]
-class TestTool extends Tool
-{
-    protected function doExecute(
-        #[ParameterAttribute('name', type: 'string', description: 'Name to greet')]
-        array $arguments
-    ): array {
-        return [$this->createTextContent('Hello ' . $arguments['name'])];
-    }
-}
-
-#[ToolAttribute('calculator', 'A calculator tool')]
-class CalculatorTool extends Tool
-{
-    protected function doExecute(
-        #[ParameterAttribute('operation', type: 'string', description: 'Operation to perform (add/subtract)')]
-        #[ParameterAttribute('a', type: 'number', description: 'First number')]
-        #[ParameterAttribute('b', type: 'number', description: 'Second number')]
-        array $arguments
-    ): array {
-        $result = match ($arguments['operation']) {
-            'add' => $arguments['a'] + $arguments['b'],
-            'subtract' => $arguments['a'] - $arguments['b'],
-            default => throw new \InvalidArgumentException('Invalid operation')
-        };
-
-        return [$this->createTextContent((string)$result)];
-    }
-}
+// TestTool and CalculatorTool are now in separate files.
 
 class ToolTest extends TestCase
 {

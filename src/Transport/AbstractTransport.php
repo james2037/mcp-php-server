@@ -1,19 +1,30 @@
 <?php
 
+/**
+ * This file contains the AbstractTransport class.
+ */
+
 namespace MCP\Server\Transport;
 
 use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Exception\TransportException;
 
+/**
+ * Abstract base class for message transports.
+ */
 abstract class AbstractTransport implements TransportInterface
 {
     /**
-     * Maximum allowed message size in bytes (10MB)
+     * Maximum allowed message size in bytes (10MB).
      */
     protected const MAX_MESSAGE_SIZE = 10 * 1024 * 1024;
 
     /**
-     * Validates and encodes a message for transport
+     * Validates and encodes a message for transport.
+     *
+     * @param JsonRpcMessage $message The message to encode.
+     * @return string The JSON encoded message.
+     * @throws TransportException If the message exceeds the size limit.
      */
     protected function encodeMessage(JsonRpcMessage $message): string
     {
@@ -27,7 +38,11 @@ abstract class AbstractTransport implements TransportInterface
     }
 
     /**
-     * Decodes and validates a received message
+     * Decodes and validates a received message.
+     *
+     * @param string $data The raw data received from the transport.
+     * @return JsonRpcMessage|null The decoded message or null if decoding fails.
+     * @throws TransportException If the received data exceeds the size limit.
      */
     protected function decodeMessage(string $data): ?JsonRpcMessage
     {
@@ -45,7 +60,12 @@ abstract class AbstractTransport implements TransportInterface
     }
 
     /**
-     * Logs a message. Default implementation writes to error_log.
+     * Logs a message.
+     *
+     * Default implementation writes to error_log.
+     *
+     * @param string $message The message to log.
+     * @return void
      */
     public function log(string $message): void
     {

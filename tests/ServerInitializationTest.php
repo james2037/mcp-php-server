@@ -73,28 +73,60 @@ class ServerInitializationTest extends TestCase
     {
         $handledBy = null; // Variable to track who handled the message
 
-        $cap1 = new class($handledBy) implements CapabilityInterface {
-            public function __construct(private &$handledByRef) {}
-            public function getCapabilities(): array { return ['conflict_cap' => true]; }
-            public function canHandleMessage(JsonRpcMessage $message): bool { return $message->method === 'conflict.method'; }
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage { $this->handledByRef = 'cap1'; return JsonRpcMessage::result(['handled_by' => 'cap1'], $message->id); }
-            public function initialize(): void {}
-            public function shutdown(): void {}
+        $cap1 = new class ($handledBy) implements CapabilityInterface {
+            public function __construct(private &$handledByRef)
+            {
+            }
+            public function getCapabilities(): array
+            {
+                return ['conflict_cap' => true];
+            }
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return $message->method === 'conflict.method';
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                $this->handledByRef = 'cap1';
+                return JsonRpcMessage::result(['handled_by' => 'cap1'], $message->id);
+            }
+            public function initialize(): void
+            {
+            }
+            public function shutdown(): void
+            {
+            }
         };
 
-        $cap2 = new class($handledBy) implements CapabilityInterface {
-            public function __construct(private &$handledByRef) {}
-            public function getCapabilities(): array { return ['conflict_cap_alt' => true]; } // Different capability name to avoid simple array merge overwrite
-            public function canHandleMessage(JsonRpcMessage $message): bool { return $message->method === 'conflict.method'; }
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage { $this->handledByRef = 'cap2'; return JsonRpcMessage::result(['handled_by' => 'cap2'], $message->id); }
-            public function initialize(): void {}
-            public function shutdown(): void {}
+        $cap2 = new class ($handledBy) implements CapabilityInterface {
+            public function __construct(private &$handledByRef)
+            {
+            }
+            public function getCapabilities(): array
+            {
+                return ['conflict_cap_alt' => true];
+            } // Different capability name to avoid simple array merge overwrite
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return $message->method === 'conflict.method';
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                $this->handledByRef = 'cap2';
+                return JsonRpcMessage::result(['handled_by' => 'cap2'], $message->id);
+            }
+            public function initialize(): void
+            {
+            }
+            public function shutdown(): void
+            {
+            }
         };
 
         $this->server->addCapability($cap1);
         $this->server->addCapability($cap2); // cap2 added second
 
-        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name'=>'c', 'version'=>'1']], 'init_conflict');
+        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']], 'init_conflict');
         $conflictMessage = new JsonRpcMessage('conflict.method', [], 'conflict_call_1');
 
         $this->transport->queueIncomingMessages([$initMessage]);
@@ -109,7 +141,7 @@ class ServerInitializationTest extends TestCase
         $this->assertCount(3, $sentMessages); // Init, conflict_method_response, shutdown_response
 
         $conflictResponse = null;
-        foreach($sentMessages as $msg) {
+        foreach ($sentMessages as $msg) {
             if ($msg->id === 'conflict_call_1') {
                 $conflictResponse = $msg;
                 break;
@@ -127,26 +159,58 @@ class ServerInitializationTest extends TestCase
         $initOrder = []; // Passed by reference
 
         $cap1 = new class ($initOrder) implements CapabilityInterface { /* ... constructor and methods ... */
-            public function __construct(private array &$orderRef) {}
-            public function initialize(): void { $this->orderRef[] = 'cap1'; }
-            public function getCapabilities(): array { return ['cap1_feature' => new \stdClass()];}
-            public function canHandleMessage(JsonRpcMessage $message): bool {return false;}
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage {return null;}
-            public function shutdown(): void {}
+            public function __construct(private array &$orderRef)
+            {
+            }
+            public function initialize(): void
+            {
+                $this->orderRef[] = 'cap1';
+            }
+            public function getCapabilities(): array
+            {
+                return ['cap1_feature' => new \stdClass()];
+            }
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return false;
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                return null;
+            }
+            public function shutdown(): void
+            {
+            }
         };
         $cap2 = new class ($initOrder) implements CapabilityInterface { /* ... constructor and methods ... */
-            public function __construct(private array &$orderRef) {}
-            public function initialize(): void { $this->orderRef[] = 'cap2'; }
-            public function getCapabilities(): array { return ['cap2_feature' => new \stdClass()];}
-            public function canHandleMessage(JsonRpcMessage $message): bool {return false;}
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage {return null;}
-            public function shutdown(): void {}
+            public function __construct(private array &$orderRef)
+            {
+            }
+            public function initialize(): void
+            {
+                $this->orderRef[] = 'cap2';
+            }
+            public function getCapabilities(): array
+            {
+                return ['cap2_feature' => new \stdClass()];
+            }
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return false;
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                return null;
+            }
+            public function shutdown(): void
+            {
+            }
         };
 
         $this->server->addCapability($cap1);
         $this->server->addCapability($cap2);
 
-        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name'=>'c', 'version'=>'1']], 'init_order_1');
+        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']], 'init_order_1');
         $this->transport->queueIncomingMessages([$initMessage]);
         $this->server->run();
 
@@ -197,7 +261,7 @@ class ServerInitializationTest extends TestCase
         $this->server->connect($this->transport);
         // No capabilities needed for this specific server feature test
 
-        $initMsg = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name'=>'c', 'version'=>'1']], 'init_log_test');
+        $initMsg = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']], 'init_log_test');
         $setLevelMsg = new JsonRpcMessage('logging/setLevel', ['level' => 'debug'], 'set_level_log_test');
 
         // Queue messages in separate "receive" batches

@@ -6,3 +6,6 @@ composer.lock
 
 #PHPUnit Cache
 .phpunit.cache
+
+# Test outputs
+test_outputs/

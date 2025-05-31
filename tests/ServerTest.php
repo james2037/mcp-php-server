@@ -9,50 +9,8 @@ use MCP\Server\Server;
 use MCP\Server\Capability\CapabilityInterface;
 use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Tests\Transport\TestableStdioTransport;
-
-class TestCapability implements CapabilityInterface
-{
-    private array $expectedResponses = [];
-    private array $receivedMessages = [];
-
-    public function addExpectedResponse(string $method, ?JsonRpcMessage $response): void
-    {
-        $this->expectedResponses[$method] = $response;
-    }
-
-    public function getReceivedMessages(): array
-    {
-        return $this->receivedMessages;
-    }
-
-    public function resetReceivedMessages(): void
-    {
-        $this->receivedMessages = [];
-    }
-
-    public function getCapabilities(): array
-    {
-        return ['test' => ['enabled' => true]];
-    }
-
-    public function canHandleMessage(JsonRpcMessage $message): bool
-    {
-        return isset($this->expectedResponses[$message->method]);
-    }
-
-    public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
-    {
-        $this->receivedMessages[] = $message;
-        return $this->expectedResponses[$message->method] ?? null;
-    }
-
-    public function initialize(): void
-    {
-    }
-    public function shutdown(): void
-    {
-    }
-}
+// TestCapability is now in a separate file.
+use MCP\Server\Tests\TestCapability;
 
 class ServerTest extends TestCase
 {
@@ -95,11 +53,9 @@ class ServerTest extends TestCase
                 if ((string)$item['id'] === $idToFindStr) {
                     return $item;
                 }
-            }
-            // Case 2: $item is an array of response objects (a batch response)
-            // This is for when findResponseById is called on a known batch array, like findResponseById($batchResponseArray, ...)
-            // Or if $responsesToSearch contains a mix of single responses and batch arrays (though less common for $responsesToSearch itself)
-            elseif (is_array($item)) {
+            } elseif (is_array($item)) { // Case 2: $item is an array of response objects (a batch response)
+// This is for when findResponseById is called on a known batch array, like findResponseById($batchResponseArray, ...)
+// Or if $responsesToSearch contains a mix of single responses and batch arrays (though less common for $responsesToSearch itself)
                 foreach ($item as $subItem) {
                     if (is_array($subItem) && isset($subItem['jsonrpc']) && isset($subItem['id'])) {
                         if ((string)$subItem['id'] === $idToFindStr) {
@@ -163,7 +119,7 @@ class ServerTest extends TestCase
         $actualResponses = $rawOutput;
 
         $initResponse = $this->findResponseById($actualResponses, $initId);
-        $this->assertNotNull($initResponse, "Init response missing in capability test run. Raw: ".json_encode($rawOutput));
+        $this->assertNotNull($initResponse, "Init response missing in capability test run. Raw: " . json_encode($rawOutput));
 
         $testMethodResponse = $this->findResponseById($actualResponses, $capTestId);
         $this->assertNotNull($testMethodResponse, "Test method response not found. Raw: " . json_encode($rawOutput));
@@ -193,7 +149,7 @@ class ServerTest extends TestCase
 
         $errorResponse = $this->findResponseById($actualResponses, $unknownId);
         $this->assertNotNull($errorResponse, "Error response for unknown method not found. Got: " . json_encode($rawOutput));
-        if($errorResponse){
+        if ($errorResponse) {
             $this->assertEquals($unknownId, $errorResponse['id']);
             $this->assertArrayHasKey('error', $errorResponse);
             $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorResponse['error']['code']);
@@ -259,19 +215,19 @@ class ServerTest extends TestCase
 
         $this->assertNotNull($batchResponseArray, "Batch response array not found as serverResponses[1] or is not a batch. Output: " . json_encode($serverResponses));
 
-        if($batchResponseArray) {
+        if ($batchResponseArray) {
             $this->assertCount(2, $batchResponseArray, "Batch response should contain 2 items (1 result, 1 error)");
 
             $response1 = $this->findResponseById($batchResponseArray, $batchId1);
-            $this->assertNotNull($response1, "Response for $batchId1 not found in batch. Batch array: " .json_encode($batchResponseArray));
-            if($response1) {
+            $this->assertNotNull($response1, "Response for $batchId1 not found in batch. Batch array: " . json_encode($batchResponseArray));
+            if ($response1) {
                 $this->assertArrayHasKey('result', $response1);
                 $this->assertEquals(['received' => 'batch1'], $response1['result']);
             }
 
             $response2 = $this->findResponseById($batchResponseArray, $batchId2);
-            $this->assertNotNull($response2, "Response for $batchId2 not found in batch. Batch array: " .json_encode($batchResponseArray));
-            if($response2) {
+            $this->assertNotNull($response2, "Response for $batchId2 not found in batch. Batch array: " . json_encode($batchResponseArray));
+            if ($response2) {
                 $this->assertArrayHasKey('error', $response2);
                 $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response2['error']['code']);
             }
@@ -319,7 +275,7 @@ class ServerTest extends TestCase
 
         $errorResponse = $this->findResponseById($actualResponses, $initId);
         $this->assertNotNull($errorResponse, "Error response for missing token not found. Got: " . json_encode($actualResponses));
-        if($errorResponse) {
+        if ($errorResponse) {
             $this->assertArrayHasKey('error', $errorResponse);
             $this->assertEquals(-32000, $errorResponse['error']['code']);
         }
@@ -347,7 +303,7 @@ class ServerTest extends TestCase
 
         $errorResponse = $this->findResponseById($actualResponses, $initId);
         $this->assertNotNull($errorResponse, "Error response for invalid token not found. Got: " . json_encode($actualResponses));
-        if($errorResponse) {
+        if ($errorResponse) {
             $this->assertArrayHasKey('error', $errorResponse);
             $this->assertEquals(-32001, $errorResponse['error']['code']);
         }
@@ -377,7 +333,7 @@ class ServerTest extends TestCase
 
         $setLevelResponse = $this->findResponseById($actualResponses, $setLevelRequestId);
         $this->assertNotNull($setLevelResponse, "SetLevel response not found. Got: " . json_encode($actualResponses));
-        if($setLevelResponse){
+        if ($setLevelResponse) {
             $this->assertArrayHasKey('result', $setLevelResponse);
             $this->assertEquals([], $setLevelResponse['result']);
         }
