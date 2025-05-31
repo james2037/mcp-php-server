@@ -23,7 +23,7 @@ class TestableStdioTransport extends StdioTransport
         parent::__construct();
     }
 
-    protected function getInputStream()
+    public function getInputStream() // Changed from protected
     {
         return $this->input;
     }
@@ -67,6 +67,30 @@ class TestableStdioTransport extends StdioTransport
         fseek($this->error, 0);
         return $content;
     }
+
+    public function readMultipleJsonOutputs(): array
+    {
+        fseek($this->output, 0);
+        $content = stream_get_contents($this->output);
+        ftruncate($this->output, 0);
+        fseek($this->output, 0);
+
+        if (trim($content) === '') {
+            return [];
+        }
+
+        $lines = explode("\n", trim($content));
+        $decodedOutputs = [];
+        foreach ($lines as $line) {
+            if (trim($line) === '') continue;
+            $decoded = json_decode($line, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \RuntimeException("Failed to decode JSON line: " . $line . " - Error: " . json_last_error_msg());
+            }
+            $decodedOutputs[] = $decoded;
+        }
+        return $decodedOutputs;
+    }
 }
 
 class StdioTransportTest extends TestCase
@@ -78,57 +102,108 @@ class StdioTransportTest extends TestCase
         $this->transport = new TestableStdioTransport();
     }
 
-    public function testCanSendAndReceiveMessage(): void
+    // testCanSendAndReceiveMessage is removed.
+
+    public function testReceiveSingleRequest(): void
     {
-        // Write a test message to input
-        $requestMsg = [
-            'jsonrpc' => '2.0',
-            'method' => 'test.method',
-            'params' => ['hello' => 'world'],
-            'id' => '123'
+        $request = ['jsonrpc' => '2.0', 'method' => 'test', 'id' => 1];
+        $this->transport->writeToInput(json_encode($request));
+
+        $messages = $this->transport->receive();
+        $this->assertIsArray($messages);
+        $this->assertCount(1, $messages);
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[0]);
+        $this->assertEquals('test', $messages[0]->method);
+        $this->assertEquals(1, $messages[0]->id);
+    }
+
+    public function testReceiveBatchRequest(): void
+    {
+        $batch = [
+            ['jsonrpc' => '2.0', 'method' => 'notify1', 'params' => ['p1' => 'v1']],
+            ['jsonrpc' => '2.0', 'method' => 'req1', 'id' => 'abc']
         ];
-        $this->transport->writeToInput(json_encode($requestMsg));
+        $this->transport->writeToInput(json_encode($batch));
 
-        // Read the message using transport
-        $received = $this->transport->receive();
-        $this->assertInstanceOf(JsonRpcMessage::class, $received);
-        $this->assertEquals('test.method', $received->method);
-        $this->assertEquals(['hello' => 'world'], $received->params);
-        $this->assertEquals('123', $received->id);
+        $messages = $this->transport->receive();
+        $this->assertIsArray($messages);
+        $this->assertCount(2, $messages);
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[0]);
+        $this->assertEquals('notify1', $messages[0]->method);
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[1]);
+        $this->assertEquals('req1', $messages[1]->method);
+        $this->assertEquals('abc', $messages[1]->id);
+    }
 
-        // Send a response
-        $response = JsonRpcMessage::result(['result' => 'success'], '123');
-        $this->transport->send($response);
+    public function testReceiveEmptyJsonArray(): void
+    {
+        $this->transport->writeToInput('[]');
+        $messages = $this->transport->receive();
+        $this->assertIsArray($messages);
+        $this->assertEmpty($messages);
+    }
 
-        // Check output contains correct response
+    public function testReceiveInvalidJsonThrowsException(): void // Renamed and Updated
+    {
+        $this->transport->writeToInput('{"invalidjson');
+        $this->expectException(\RuntimeException::class);
+        // StdioTransport::receive catches JsonException and re-throws RuntimeException with code PARSE_ERROR
+        $this->expectExceptionCode(JsonRpcMessage::PARSE_ERROR);
+        $this->transport->receive();
+    }
+
+    public function testReceiveEmptyLineReturnsNull(): void // Renamed and Updated
+    {
+        $this->transport->writeToInput(''); // Empty line, but still a line
+        $receivedMessages = $this->transport->receive();
+        $this->assertNull($receivedMessages); // As per StdioTransport logic for empty line
+    }
+
+    public function testReceiveStreamClosedReturnsEmptyArray(): void // Revised logic for EOF
+    {
+        // Write one line
+        $this->transport->writeToInput('{"jsonrpc":"2.0","method":"ping","id":1}');
+        // Consume that one line
+        $firstResult = $this->transport->receive();
+        $this->assertNotNull($firstResult);
+        if ($firstResult !== null) { // Check to satisfy static analyzer
+             $this->assertCount(1, $firstResult);
+        }
+
+        // Now try to receive again, fgets should return false as no more data
+        $messages = $this->transport->receive();
+        $this->assertIsArray($messages);
+        $this->assertEmpty($messages);
+    }
+
+    public function testSendSingleMessage(): void
+    {
+        $message = JsonRpcMessage::result(['foo' => 'bar'], '1');
+        $this->transport->send($message);
         $output = $this->transport->readFromOutput();
-        $decoded = json_decode(trim($output), true);
-        $this->assertEquals('2.0', $decoded['jsonrpc']);
-        $this->assertEquals('123', $decoded['id']);
-        $this->assertEquals(['result' => 'success'], $decoded['result']);
+        // StdioTransport send adds a newline
+        $this->assertJsonStringEqualsJsonString('{"jsonrpc":"2.0","id":"1","result":{"foo":"bar"}}', trim($output));
     }
 
-    public function testHandlesInvalidJson(): void
+    public function testSendBatchMessage(): void
     {
-        $this->transport->writeToInput('invalid json');
-        $received = $this->transport->receive();
-        $this->assertNull($received);
-
-        $error = $this->transport->readFromError();
-        $this->assertStringContainsString('Error parsing message', $error);
+        $batchResponse = [
+            JsonRpcMessage::result(['foo' => 'bar'], '1'),
+            JsonRpcMessage::error(-32600, 'Invalid Request', '2')
+        ];
+        $this->transport->send($batchResponse);
+        $output = $this->transport->readFromOutput();
+        // StdioTransport send adds a newline
+        $expectedJson = '[{"jsonrpc":"2.0","id":"1","result":{"foo":"bar"}},{"jsonrpc":"2.0","id":"2","error":{"code":-32600,"message":"Invalid Request"}}]';
+        $this->assertJsonStringEqualsJsonString($expectedJson, trim($output));
     }
 
-    public function testHandlesEmptyInput(): void
-    {
-        $this->transport->writeToInput('');
-        $received = $this->transport->receive();
-        $this->assertNull($received);
-    }
-
-    public function testLogging(): void
+    public function testLogging(): void // Updated assertion
     {
         $this->transport->log('Test log message');
-        $error = $this->transport->readFromError();
-        $this->assertEquals("Test log message\n", $error);
+        $errorLogOutput = $this->transport->readFromError();
+        // StdioTransport::log uses fwrite($this->stderr, $message . "\n");
+        // It does not add static::class prefix when errorStream is available (which it is in TestableStdioTransport)
+        $this->assertEquals("Test log message\n", $errorLogOutput);
     }
 }

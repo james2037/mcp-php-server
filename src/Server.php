@@ -17,7 +17,11 @@ class Server
     private bool $initialized = false;
     private bool $shuttingDown = false;
     private ?TransportInterface $transport = null;
-    private ?string $clientSetLogLevel = null; // Added
+    private ?string $clientSetLogLevel = null;
+
+    // Authorization properties
+    private bool $isAuthorizationRequired = false;
+    private ?string $expectedAuthTokenValue = null;
 
     // PSR-3 Log Levels (RFC 5424)
     private static array $logLevelPriorities = [
@@ -35,6 +39,23 @@ class Server
         private readonly string $name,
         private readonly string $version = '1.0.0'
     ) {
+    }
+
+    /**
+     * Configures server authorization based on a shared token.
+     * When set, the server will expect this token to be passed via the
+     * MCP_AUTHORIZATION_TOKEN environment variable during initialization.
+     *
+     * @param string $expectedToken The token the server will expect.
+     * @return void
+     */
+    public function requireAuthorization(string $expectedToken): void
+    {
+        if (empty($expectedToken)) {
+            $this->logMessage('warning', 'Authorization required but an empty token was configured.', 'Server.Authorization');
+        }
+        $this->isAuthorizationRequired = true;
+        $this->expectedAuthTokenValue = $expectedToken;
     }
 
     public function addCapability(CapabilityInterface $capability): void
@@ -194,16 +215,43 @@ class Server
 
     private function handleInitialize(JsonRpcMessage $message): JsonRpcMessage
     {
-        if (!isset($message->params['protocolVersion'])) {
+        if ($this->isAuthorizationRequired) {
+            $tokenFromEnv = getenv('MCP_AUTHORIZATION_TOKEN');
+
+            if ($tokenFromEnv === false || $tokenFromEnv === '') {
+                $this->logMessage('error', 'Client failed to provide MCP_AUTHORIZATION_TOKEN during initialization.', 'Server.Authorization');
                 return JsonRpcMessage::error(
-                    JsonRpcMessage::INVALID_REQUEST,
-                    'Server not initialized',
+                    -32000, // Implementation-defined server error
+                    'Authorization required: MCP_AUTHORIZATION_TOKEN environment variable not set or empty.',
                     $message->id
                 );
             }
+
+            if ($this->expectedAuthTokenValue === null) {
+                 $this->logMessage('critical', 'Authorization is required but no expected token is configured on the server.', 'Server.Authorization');
+                 return JsonRpcMessage::error(
+                    JsonRpcMessage::INTERNAL_ERROR,
+                    'Server authorization configuration error.',
+                    $message->id
+                 );
+            }
+
+            if (!hash_equals((string)$this->expectedAuthTokenValue, $tokenFromEnv)) {
+                $this->logMessage('error', 'Client provided an invalid MCP_AUTHORIZATION_TOKEN during initialization.', 'Server.Authorization');
+                return JsonRpcMessage::error(
+                    -32001, // Implementation-defined server error
+                    'Authorization failed: Invalid token.',
+                    $message->id
+                );
+            }
+            $this->logMessage('info', 'Client successfully authorized via MCP_AUTHORIZATION_TOKEN.', 'Server.Authorization');
+        }
+
+        if (!isset($message->params['protocolVersion'])) {
+            // This was the duplicated error block in the source read, it should be a single check for protocolVersion
             return JsonRpcMessage::error(
                 JsonRpcMessage::INVALID_PARAMS,
-                'Missing protocol version',
+                'Missing protocol version parameter in initialize request.',
                 $message->id
             );
         }

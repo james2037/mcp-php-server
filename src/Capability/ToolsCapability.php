@@ -32,7 +32,7 @@ class ToolsCapability implements CapabilityInterface
     public function canHandleMessage(JsonRpcMessage $message): bool
     {
         return match ($message->method) {
-            'tools/list', 'tools/call' => true,
+            'tools/list', 'tools/call', 'completion/complete' => true,
             default => false
         };
     }
@@ -42,6 +42,7 @@ class ToolsCapability implements CapabilityInterface
         return match ($message->method) {
             'tools/list' => $this->handleList($message),
             'tools/call' => $this->handleCall($message),
+            'completion/complete' => $this->handleComplete($message),
             default => throw new MethodNotSupportedException($message->method)
         };
     }
@@ -131,5 +132,67 @@ class ToolsCapability implements CapabilityInterface
         ];
 
         return JsonRpcMessage::result($callToolResultData, $message->id);
+    }
+
+    private function handleComplete(JsonRpcMessage $message): JsonRpcMessage
+    {
+        if (!isset($message->params['ref']) || !is_array($message->params['ref'])) {
+            return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref" parameter for completion/complete', $message->id);
+        }
+        if (!isset($message->params['argument']) || !is_array($message->params['argument'])) {
+            return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "argument" parameter for completion/complete', $message->id);
+        }
+
+        $ref = $message->params['ref'];
+        $argumentParams = $message->params['argument'];
+
+        if (!isset($ref['type']) || !is_string($ref['type'])) {
+            return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Invalid "ref.type" for completion/complete', $message->id);
+        }
+
+        // For now, we'll assume 'ref/prompt' where 'name' is the tool name,
+        // as 'ref/tool' is not in the current MCP schema's CompleteRequest.ref.
+        // This interpretation might need refinement based on how clients use this.
+        if ($ref['type'] !== 'ref/prompt' && $ref['type'] !== 'ref/tool') { // Allow 'ref/tool' as a practical interpretation
+             return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Unsupported "ref.type" for tool completion: ' . $ref['type'], $message->id);
+        }
+
+        if (!isset($ref['name']) || !is_string($ref['name'])) {
+             return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref.name" (tool name) for completion/complete', $message->id);
+        }
+        $toolName = $ref['name'];
+
+        if (!isset($argumentParams['name']) || !is_string($argumentParams['name'])) {
+            return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "argument.name" for completion/complete', $message->id);
+        }
+        $argumentName = $argumentParams['name'];
+        // Value can be any type, but getCompletionSuggestions expects mixed. Default to empty string if not set.
+        $currentValue = $argumentParams['value'] ?? '';
+
+
+        $tool = $this->tools[$toolName] ?? null;
+
+        if (!$tool instanceof Tool) {
+            return JsonRpcMessage::error(JsonRpcMessage::METHOD_NOT_FOUND, "Tool not found for completion: {$toolName}", $message->id);
+        }
+
+        // Assuming allArguments might be useful, but not directly in schema for 'completion/complete' params.
+        // We'll pass an empty array for now, or if other arguments are somehow available.
+        // The current message structure for completion/complete doesn't provide 'allArguments'.
+        // This is a limitation of the current design if tools need full context.
+        // For now, Tool::getCompletionSuggestions will receive only arg name and its value.
+        $allCurrentArguments = $message->params['arguments'] ?? []; // Pass other arguments if available under 'arguments' key, like in tools/call
+
+        $suggestions = $tool->getCompletionSuggestions($argumentName, $currentValue, $allCurrentArguments);
+
+        // Validate suggestions structure slightly (must have 'values' array)
+        if (!isset($suggestions['values']) || !is_array($suggestions['values'])) {
+             // Tool provided invalid suggestion format, log this server-side
+             // Consider using the Server's logMessage method if accessible, or a direct error_log
+             error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}'.");
+             $suggestions = ['values' => [], 'total' => 0, 'hasMore' => false]; // Default to empty valid response
+        }
+
+        return JsonRpcMessage::result(['completion' => $suggestions], $message->id);
     }
 }

@@ -221,4 +221,21 @@ abstract class Tool
     {
         return new Content\EmbeddedResource($resourceData, $annotations);
     }
+
+    /**
+     * Provides completion suggestions for an argument.
+     * Subclasses should override this method to provide actual suggestions.
+     *
+     * @param string $argumentName The name of the argument being completed.
+     * @param mixed $currentValue The current partial value of the argument (type can vary).
+     * @param array $allArguments All arguments provided so far in the context of the completion.
+     * @return array{values: string[], total?: int, hasMore?: bool}
+     *               An array matching the 'completion' object structure in CompleteResult.
+     *               Example: ['values' => ['suggestion1', 'suggestion2'], 'total' => 2, 'hasMore' => false]
+     */
+    public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allArguments = []): array
+    {
+        // Default implementation: no suggestions
+        return ['values' => [], 'total' => 0, 'hasMore' => false];
+    }
 }
