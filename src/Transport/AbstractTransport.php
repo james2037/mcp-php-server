@@ -71,4 +71,9 @@ abstract class AbstractTransport implements TransportInterface
     {
         error_log($message);
     }
+
+    public function preferSseStream(bool $prefer = true): void
+    {
+        // Default implementation does nothing, to be overridden by transports that support SSE.
+    }
 }

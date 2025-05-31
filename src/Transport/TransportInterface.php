@@ -48,4 +48,6 @@ interface TransportInterface
      * @return bool True if the transport is closed, false otherwise.
      */
     public function isClosed(): bool;
+
+    public function preferSseStream(bool $prefer = true): void;
 }

@@ -479,3 +479,40 @@ data: ".
     // - Specific timing of flushes if that becomes configurable/critical.
     // - Interaction with `isClosed()` during an active SSE stream.
 }
+
+    public function testServerCanForceSseForSinglePostResponse()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'application/json, text/event-stream'], // Client accepts SSE
+            ['Origin', ''],
+            ['Content-Type', 'application/json'], // For the request
+            ['Mcp-Session-Id', ''],
+            ['Last-Event-ID', '']
+        ]);
+
+        $transport = $this->createTransport();
+        // Explicitly prefer SSE - This now uses the method on HttpTransport directly
+        $transport->preferSseStream(true);
+
+        $singleResponse = JsonRpcMessage::result(['data' => 'this should be SSE'], 'singleSse');
+
+        ob_start();
+        $transport->send($singleResponse);
+        // Data is now in the response body stream. We get the response first.
+        $response = $transport->getResponse();
+        $outputFromBody = (string) $response->getBody();
+        $echoedOutput = ob_get_contents(); // this should be empty now due to SSE refactor
+        ob_end_clean();
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+
+        // Check if the $outputFromBody (from response body stream) contains the SSE formatted event
+        // The ID is generated, so we check for the data part and the presence of an ID line.
+        $expectedSseData = 'data: {"jsonrpc":"2.0","result":{"data":"this should be SSE"},"id":"singleSse"}';
+        $this->assertStringContainsString($expectedSseData, $outputFromBody);
+        $this->assertMatchesRegularExpression('/^id: .+\n/m', $outputFromBody); // Check for an ID line (multiline)
+        $this->assertEmpty($echoedOutput, "No direct echo output should occur with PSR-7 stream refactor.");
+    }
+} // This is the class closing brace

@@ -12,7 +12,9 @@ use MCP\Server\Capability\CapabilityInterface;
 use MCP\Server\Transport\HttpTransport;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter; // Add this
 use Psr\Http\Message\ServerRequestInterface; // For type hinting if needed
-use MCP\Server\Exception\TransportException; // Ensure this is used if thrown by HttpTransport
+use MCP\Server\Exception\TransportException;
+
+// Ensure this is used if thrown by HttpTransport
 
 /**
  * Represents the MCP Server.
@@ -58,6 +60,13 @@ class Server
         private readonly string $name,
         private readonly string $version = '1.0.0'
     ) {
+    }
+
+    public function setNextResponsePrefersSse(bool $prefer = true): void
+    {
+        if ($this->transport instanceof TransportInterface) { // Check against interface
+            $this->transport->preferSseStream($prefer);
+        }
     }
 
     // Add a method to set the current HTTP request, if passed from an entry point
@@ -254,7 +263,7 @@ class Server
         } elseif ($this->currentHttpRequest && $this->currentHttpRequest->getMethod() === 'GET') {
             // For GET requests (SSE stream initiation), if no errors and no specific messages to send,
             // call send([]) to trigger SSE header emission if not already handled by an Origin error.
-             if (!$this->transport->getResponse()->getStatusCode() || $this->transport->getResponse()->getStatusCode() === 200) { // check if not already a 403
+            if (!$this->transport->getResponse()->getStatusCode() || $this->transport->getResponse()->getStatusCode() === 200) { // check if not already a 403
                 $this->transport->send([]);
             }
         } else {
@@ -607,8 +616,12 @@ class Server
 
         if ($this->transport && $this->clientSetLogLevel !== null && $this->shouldSendToClient($levelLower)) {
             $params = ['level' => $levelLower, 'message' => $logContent];
-            if ($structuredData !== null) $params['data'] = $structuredData;
-            if ($loggerName !== null) $params['logger'] = $loggerName;
+            if ($structuredData !== null) {
+                $params['data'] = $structuredData;
+            }
+            if ($loggerName !== null) {
+                $params['logger'] = $loggerName;
+            }
             try {
                 $notification = new JsonRpcMessage('notifications/message', $params);
                 $this->transport->send([$notification]);
@@ -637,7 +650,9 @@ class Server
      */
     private function shouldSendToClient(string $messageLevel): bool
     {
-        if ($this->clientSetLogLevel === null) return false;
+        if ($this->clientSetLogLevel === null) {
+            return false;
+        }
         $messageLevelLower = strtolower($messageLevel);
         $clientSetLogLevelLower = strtolower($this->clientSetLogLevel);
         $messagePriority = self::$logLevelPriorities[$messageLevelLower] ?? LOG_DEBUG;

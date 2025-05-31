@@ -162,14 +162,20 @@ class JsonRpcMessage
      */
     public static function toJsonArray(array $messages): string
     {
-        $responseArray = [];
+        $dataArray = [];
         foreach ($messages as $message) {
             if (!$message instanceof self) {
                 throw new \InvalidArgumentException('All items in the array must be JsonRpcMessage objects.');
             }
-            $responseArray[] = $message->toResponseArray();
+            // Each message (request, response, or notification) is converted to its array form
+            // json_decode($message->toJson(), true) correctly gets the array structure for any message type
+            $decodedMessage = json_decode($message->toJson(), true);
+            if ($decodedMessage === null && json_last_error() !== JSON_ERROR_NONE) {
+                throw new \RuntimeException('Failed to decode individual message to array: ' . json_last_error_msg());
+            }
+            $dataArray[] = $decodedMessage;
         }
 
-        return json_encode($responseArray, JSON_THROW_ON_ERROR);
+        return json_encode($dataArray, JSON_THROW_ON_ERROR);
     }
 }

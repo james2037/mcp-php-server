@@ -24,6 +24,7 @@ class HttpTransport extends AbstractTransport
     private int $sseEventCounter = 0;
     private array $allowedOrigins;
     private bool $originValidationFailed = false;
+    private bool $sseStreamPreferred = false; // Added for SSE preference
 
     // TODO: Add SSL configuration options (less relevant if behind a reverse proxy)
 
@@ -124,6 +125,10 @@ class HttpTransport extends AbstractTransport
             return;
         }
 
+        // Reset SSE preference at the start of a new send cycle, get current preference
+        $ssePreferenceForThisSend = $this->sseStreamPreferred;
+        $this->sseStreamPreferred = false;
+
         // Determine if this should be an SSE response or a single JSON response.
         $acceptHeader = $this->request->getHeaderLine('Accept');
         $isSseRequestedByClient = stripos($acceptHeader, 'text/event-stream') !== false;
@@ -139,43 +144,73 @@ class HttpTransport extends AbstractTransport
 
         // Simplified decision for now:
         $useSse = false;
-        if ($isGetRequest && $isSseRequestedByClient) {
-            $useSse = true;
-        } elseif ($this->request->getMethod() === 'POST' && $isSseRequestedByClient) {
-            // If it's a batch response, or if we want to keep the connection open for more messages.
-            // For now, let's say if $message is an array (batch response), use SSE if requested.
-            // A more sophisticated check is needed for "server intends to stream".
-            if (is_array($message) && count($message) > 1) { // Simple heuristic for batch
-                 $useSse = true;
-            }
-            // Also, if the input was *only* notifications/responses, spec says 202 Accepted.
-            if ($this->isNotificationOrResponseOnlyBatch($message)) {
-                $this->response = $this->responseFactory->createResponse(202);
-                $this->headersSent = true; // Mark as "final" response sent
-                return; // No further output
-            }
+
+        if ($this->isNotificationOrResponseOnlyBatch($message)) {
+            $this->response = $this->responseFactory->createResponse(202);
+            $this->headersSent = true;
+            return;
         }
 
+        // If it's not a 202-batch, then determine if SSE or JSON
+        if ($isSseRequestedByClient) {
+            if ($isGetRequest) { // GET request explicitly asking for SSE
+                $useSse = true;
+            } else { // POST request and client accepts SSE
+                if ($ssePreferenceForThisSend) { // Explicit server preference
+                    $useSse = true;
+                } elseif (!is_array($message)) {
+                    // Fallback: If it's a single message, assume it could be the start of an SSE stream.
+                    // If it's an array (batch of responses), it will use JSON by default ($useSse remains false).
+                    $useSse = true;
+                }
+                // else: $message is an array (batch) and no explicit SSE preference, $useSse remains false for JSON batch.
+            }
+        }
+        // If $isSseRequestedByClient is false, $useSse also remains false (unless $ssePreferenceForThisSend was true, which is a bit contradictory but possible)
+        // However, if client doesn't accept SSE, we should probably not force it.
+        // Let's refine: SSE is only used if client accepts it AND (GET or (POST with preference or POST single message))
+        if (!$isSseRequestedByClient && $useSse) { // Correcting: if client doesn't want SSE, don't force it.
+            $useSse = false;
+        }
 
         if ($useSse) {
             $this->startSseStreamHeaders();
-            $this->sendSseEventData($this->prepareSseData($message));
-        } else {
+
+            if ($this->originValidationFailed) { // If origin validation failed in startSseStreamHeaders
+                return; // The response is already set to 403, headersSent=true. Exit send().
+            }
+
+            // Only proceed to send data if the stream is actually open
+            // (which implies origin was OK and startSseStreamHeaders completed successfully to that point)
+            if ($this->streamOpen) {
+                $this->sendSseEventData($this->prepareSseData($message));
+            } else {
+                // This case implies SSE was intended ($useSse=true) but stream didn't open,
+                // and it wasn't due to an origin validation failure that startSseStreamHeaders handled by returning.
+                // The response might still be the initial one (e.g. 200 OK with SSE headers but no body yet if startSseStreamHeaders didn't set 403).
+            }
+        } else { // Not using SSE
             $this->prepareJsonResponse($message);
         }
     }
 
-    private function isNotificationOrResponseOnlyBatch(JsonRpcMessage|array $messages): bool
+    private function isNotificationOrResponseOnlyBatch(JsonRpcMessage|array $messageOrMessages): bool
     {
-        if (!is_array($messages) || empty($messages)) {
+        $messages = is_array($messageOrMessages) ? $messageOrMessages : [$messageOrMessages];
+
+        if (empty($messages)) { // No messages, so not a batch to consider for 202
             return false;
         }
+
         foreach ($messages as $msg) {
             if ($msg instanceof JsonRpcMessage && $msg->isRequest()) {
-                return false; // Found a request, so not "response/notification only"
+                return false;
+            }
+            if (!$msg instanceof JsonRpcMessage) { // Should not happen with proper usage
+                return false;
             }
         }
-        return true; // All messages are responses or notifications
+        return true;
     }
 
     private function prepareJsonResponse(JsonRpcMessage|array $message): void
@@ -198,56 +233,31 @@ class HttpTransport extends AbstractTransport
             // This state should ideally prevent Server from even calling send() with actual data.
             $this->response = $this->responseFactory->createResponse(403)->withBody($this->streamFactory->createStream('Origin not allowed'));
             $this->headersSent = true; // Mark as "final" response prepared
-            // Ensure the response object is updated for getResponse()
-            if (!headers_sent()) {
-                 // Send minimal headers for the 403 response
-                http_response_code($this->response->getStatusCode());
-                header('Content-Type: text/plain'); // Or application/json if sending a JSON error
-                echo $this->response->getBody();
-            }
-            // We must not proceed to send SSE headers or open the stream further.
-            // Throwing an exception here might be cleaner if Server::run can catch it before streamSseEvent.
-            // For now, setting response and returning.
+            // Direct echo and header calls removed. The Server/Emitter will handle sending the 403 response.
             return;
         }
+
+        // Ensure response is fresh for SSE headers if it was previously used (e.g. for a non-200 initial response)
+        // However, the constructor always creates a new response, and normal flow would use that.
+        // If $this->response was set to 403, we would have returned already.
+        // So, we can assume $this->response is the one from the constructor or a 200 response.
+        $this->response = $this->responseFactory->createResponse(200) // Start with a fresh 200 response for SSE
+            ->withHeader('Content-Type', 'text/event-stream')
+            ->withHeader('Cache-Control', 'no-cache')
+            ->withHeader('X-Accel-Buffering', 'no');
+
         if ($this->serverSessionId !== null) {
             $this->response = $this->response->withHeader('Mcp-Session-Id', $this->serverSessionId);
         }
-        $this->response = $this->response
-            ->withHeader('Content-Type', 'text/event-stream')
-            ->withHeader('Cache-Control', 'no-cache')
-            ->withHeader('X-Accel-Buffering', 'no'); // For Nginx
 
-        // SSE body will be written progressively. We need a way to signal this.
-        // The actual sending of headers and initial body content happens when `getResponse` is called
-        // and the PSR-7 emitter sends it.
-        // For now, we are "preparing" the response.
-        // The body of this initial response for SSE should be empty or just initial comments.
-        // The actual stream writing needs a different mechanism than just setting $this->response.
-        // This design needs refinement for PSR-7 stream emitting.
-
-        // Option: `send()` returns the initial SSE response. A separate method `streamSseEvent()` echoes.
-        // This means the Server's `run()` loop needs to change significantly for HttpTransport.
-
-        // For this subtask, let's focus on making `send` prepare $this->response.
-        // The actual *streaming* part will require more architectural thought.
-        $this->response = $this->response->withBody($this->streamFactory->createStream('')); // Empty initial body for SSE
-        $this->headersSent = true; // Initial headers are set
+        // Set the body to a new stream for progressive writing by sendSseEventData
+        $this->response = $this->response->withBody($this->streamFactory->createStream(''));
+        $this->headersSent = false; // Headers are prepared on $this->response, but not "sent" by the transport itself.
+                                   // The Server/Emitter will send them when getResponse() is called.
+                                   // For SSE, headersSent might mean the *initial* headers for the stream.
+                                   // Let's consider headersSent true once the stream is initiated.
+        $this->headersSent = true;
         $this->streamOpen = true;
-
-        // To actually send headers and start stream for real-time echo:
-        // This part breaks strict PSR-7 return, but is needed for classic PHP SSE.
-        if (!headers_sent()) {
-            http_response_code($this->response->getStatusCode());
-            foreach ($this->response->getHeaders() as $name => $values) {
-                foreach ($values as $value) {
-                    header(sprintf('%s: %s', $name, $value), false);
-                }
-            }
-            // Echo initial SSE comment to open stream if desired by spec/client
-            // echo ": stream open\n\n";
-            // $this->flushOutput();
-        }
     }
 
     private function prepareSseData(JsonRpcMessage|array $messages): string
@@ -272,18 +282,18 @@ class HttpTransport extends AbstractTransport
             // This is an internal error in logic.
             throw new TransportException("SSE Stream not open, cannot send event data.");
         }
-        // This is where we'd write to the actual output stream.
-        // In a classic PHP setup, this is `echo`.
-        echo $sseFormattedData;
-        $this->flushOutput();
+        // Write to the response body stream instead of echoing
+        $this->response->getBody()->write($sseFormattedData);
+        // Flushing the stream might be necessary depending on the stream implementation and server setup.
+        // For now, direct flushOutput call is removed here. SAPI may handle flushing.
     }
 
     private function flushOutput(): void
     {
-        if (function_exists('ob_flush')) {
-            @ob_flush();
-        }
-        @flush();
+        // if (function_exists('ob_flush')) { // Keep PHP's output buffer intact for tests
+        //     ob_flush();
+        // }
+        flush(); // Flush system output buffer if possible/needed
     }
 
     public function log(string $message): void
@@ -339,5 +349,10 @@ class HttpTransport extends AbstractTransport
     public function getLastEventId(): ?string
     {
         return $this->lastEventId;
+    }
+
+    public function preferSseStream(bool $prefer = true): void
+    {
+        $this->sseStreamPreferred = $prefer;
     }
 }
