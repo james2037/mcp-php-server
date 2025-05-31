@@ -3,7 +3,7 @@
  ------ --------------------------------------------------
   Line   src/Capability/ResourcesCapability.php
  ------ --------------------------------------------------
-  89     Call to an undefined method
+  178    Call to an undefined method
          MCP\Server\Resource\ResourceContents::toArray().
  ------ --------------------------------------------------
 
@@ -137,3 +137,4 @@
  ------ ------------------------------------------------------------------
 
  [ERROR] Found 30 errors
+

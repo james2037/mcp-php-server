@@ -3,14 +3,14 @@ PHPUnit 10.5.46 by Sebastian Bergmann and contributors.
 Runtime:       PHP 8.1.32
 Configuration: /app/phpunit.xml.dist
 
-.......E...F...F.....F.F.F.......EEEEEE.EF.F..F[2025-05-31 04:36:38] [INFO] Client log level set to: debug
+.......E...F...F.....F.F.F.......EEEEEE.EF.F..F[2025-05-31 04:57:49] [INFO] Client log level set to: debug
 Failed to send log notification to client: Call to undefined method MCP\Server\Message\JsonRpcMessage::notification()
-[2025-05-31 04:36:38] [DEBUG] test-logger: test client log message | Data: {"extra":"data"}
+[2025-05-31 04:57:49] [DEBUG] test-logger: test client log message | Data: {"extra":"data"}
 Failed to send log notification to client: Call to undefined method MCP\Server\Message\JsonRpcMessage::notification()
 FFFFFFFFFFFE...... 65 / 87 ( 74%)
 ......F...............                                            87 / 87 (100%)
 
-Time: 00:00.051, Memory: 10.00 MB
+Time: 00:00.043, Memory: 10.00 MB
 
 There were 9 errors:
 
