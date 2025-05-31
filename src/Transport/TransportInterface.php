@@ -8,14 +8,18 @@ interface TransportInterface
 {
     /**
      * Read a message from the transport
-     * Returns null if no message is available
+     * Returns JsonRpcMessage[] if a message or messages are received, null if no message is available, or an empty array if the transport is closed.
+     *
+     * @return JsonRpcMessage[]|null
      */
-    public function receive(): ?JsonRpcMessage;
+    public function receive(): ?array;
 
     /**
      * Send a message through the transport
+     *
+     * @param JsonRpcMessage|JsonRpcMessage[] $message
      */
-    public function send(JsonRpcMessage $message): void;
+    public function send(JsonRpcMessage|array $message): void;
 
     /**
      * Log a message (typically debug/error info)

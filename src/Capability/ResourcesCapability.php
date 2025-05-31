@@ -58,16 +58,13 @@ class ResourcesCapability implements CapabilityInterface
 
     private function handleList(JsonRpcMessage $message): JsonRpcMessage
     {
-        $resources = [];
+        $resourceList = [];
         foreach ($this->resources as $resource) {
-            $resources[] = [
-                'uri' => $resource->getUri(),
-                'name' => $resource->getUri(), // Could be nicer
-                'description' => $resource->getDescription()
-            ];
+            // The Resource class now has a toArray() method that includes all necessary fields
+            $resourceList[] = $resource->toArray();
         }
 
-        return JsonRpcMessage::result(['resources' => $resources], $message->id);
+        return JsonRpcMessage::result(['resources' => $resourceList], $message->id);
     }
 
     private function handleRead(JsonRpcMessage $message): JsonRpcMessage
@@ -87,9 +84,15 @@ class ResourcesCapability implements CapabilityInterface
             $parameters = $this->matchUriTemplate($template, $uri);
             if ($parameters !== null) {
                 try {
-                    $contents = $resource->read($parameters);
-                    return JsonRpcMessage::result(['contents' => [$contents]], $message->id);
+                    $resourceContent = $resource->read($parameters);
+                    // The result structure must be ['contents' => [ResourceContents->toArray()]]
+                    return JsonRpcMessage::result(['contents' => [$resourceContent->toArray()]], $message->id);
                 } catch (\Exception $e) {
+                    // Error reporting for read should also conform to a structure if defined,
+                    // but for now, this is how it was. The subtask didn't specify changing this error structure.
+                    // However, the successful path returns `contents` as an array of content item arrays.
+                    // For consistency, an error could also be structured similarly.
+                    // For now, sticking to the specific change requested for the success path.
                     return JsonRpcMessage::result(
                         [
                         'contents' => [[

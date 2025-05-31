@@ -6,6 +6,8 @@ namespace MCP\Server\Tool;
 
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
+use MCP\Server\Tool\Attribute\ToolAnnotations;
+use MCP\Server\Tool\Content; // Import the namespace
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -13,6 +15,7 @@ use ReflectionParameter;
 abstract class Tool
 {
     private ?ToolAttribute $metadata = null;
+    private ?array $toolAnnotationsData = null;
     private array $parameters = [];
     protected array $config = [];
 
@@ -45,6 +48,32 @@ abstract class Tool
                 $this->parameters[$paramAttr->name] = $paramAttr;
             }
         }
+
+        // Get ToolAnnotations attribute
+        $toolAnnotationsAttribute = $reflection->getAttributes(ToolAnnotations::class);
+        if (!empty($toolAnnotationsAttribute)) {
+            $toolAnnotationsInstance = $toolAnnotationsAttribute[0]->newInstance();
+            $annotationsData = [];
+            if ($toolAnnotationsInstance->title !== null) {
+                $annotationsData['title'] = $toolAnnotationsInstance->title;
+            }
+            if ($toolAnnotationsInstance->readOnlyHint !== null) {
+                $annotationsData['readOnlyHint'] = $toolAnnotationsInstance->readOnlyHint;
+            }
+            if ($toolAnnotationsInstance->destructiveHint !== null) {
+                $annotationsData['destructiveHint'] = $toolAnnotationsInstance->destructiveHint;
+            }
+            if ($toolAnnotationsInstance->idempotentHint !== null) {
+                $annotationsData['idempotentHint'] = $toolAnnotationsInstance->idempotentHint;
+            }
+            if ($toolAnnotationsInstance->openWorldHint !== null) {
+                $annotationsData['openWorldHint'] = $toolAnnotationsInstance->openWorldHint;
+            }
+
+            if (!empty($annotationsData)) {
+                $this->toolAnnotationsData = $annotationsData;
+            }
+        }
     }
 
     public function getName(): string
@@ -55,6 +84,11 @@ abstract class Tool
     public function getDescription(): ?string
     {
         return $this->metadata?->description;
+    }
+
+    public function getAnnotations(): ?array
+    {
+        return $this->toolAnnotationsData;
     }
 
     public function getInputSchema(): array
@@ -102,7 +136,20 @@ abstract class Tool
     final public function execute(array $arguments): array
     {
         $this->validateArguments($arguments);
-        return $this->doExecute($arguments);
+        $contentItems = $this->doExecute($arguments);
+        $resultArray = [];
+        foreach ($contentItems as $item) {
+            if (!$item instanceof Content\ContentItemInterface) {
+                // Or throw an exception, depending on how strict we want to be
+                // For now, let's assume doExecute correctly returns ContentItemInterface objects
+                // and skip invalid items if any for robustness.
+                // A stricter approach might be:
+                // throw new \LogicException('doExecute must return an array of ContentItemInterface objects.');
+                continue;
+            }
+            $resultArray[] = $item->toArray();
+        }
+        return $resultArray;
     }
 
     protected function validateArguments(array $arguments): void
@@ -149,67 +196,29 @@ abstract class Tool
      * Execute the tool implementation
      *
      * @param  array<string,mixed> $arguments Validated arguments
-     * @return array Tool response content
+     * @return Content\ContentItemInterface[] Tool response content items
      */
     abstract protected function doExecute(array $arguments): array;
 
-    /**
-     * Create a text content response
-     */
-    protected function text(string $text, ?array $annotations = null): array
+    // New Content Creation Helper Methods
+
+    protected final function createTextContent(string $text, ?Content\Annotations $annotations = null): Content\TextContent
     {
-        $content = [
-            'type' => 'text',
-            'text' => $text
-        ];
-
-        if ($annotations !== null) {
-            $content['annotations'] = $annotations;
-        }
-
-        return [$content];
+        return new Content\TextContent($text, $annotations);
     }
 
-    /**
-     * Create an image content response
-     */
-    protected function image(string $data, string $mimeType, ?array $annotations = null): array
+    protected final function createImageContent(string $base64Data, string $mimeType, ?Content\Annotations $annotations = null): Content\ImageContent
     {
-        $content = [
-            'type' => 'image',
-            'data' => base64_encode($data),
-            'mimeType' => $mimeType
-        ];
-
-        if ($annotations !== null) {
-            $content['annotations'] = $annotations;
-        }
-
-        return [$content];
+        return new Content\ImageContent($base64Data, $mimeType, $annotations);
     }
 
-    /**
-     * Create a resource content response
-     */
-    protected function resource(ResourceContents $resource, ?array $annotations = null): array
+    protected final function createAudioContent(string $base64Data, string $mimeType, ?Content\Annotations $annotations = null): Content\AudioContent
     {
-        $content = [
-            'type' => 'resource',
-            'resource' => $resource
-        ];
-
-        if ($annotations !== null) {
-            $content['annotations'] = $annotations;
-        }
-
-        return [$content];
+        return new Content\AudioContent($base64Data, $mimeType, $annotations);
     }
 
-    /**
-     * Combine multiple content responses
-     */
-    protected function combine(array ...$contents): array
+    protected final function createEmbeddedResource(array $resourceData, ?Content\Annotations $annotations = null): Content\EmbeddedResource
     {
-        return array_merge(...$contents);
+        return new Content\EmbeddedResource($resourceData, $annotations);
     }
 }

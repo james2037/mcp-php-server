@@ -108,4 +108,68 @@ class JsonRpcMessage
         }
         return $msg;
     }
+
+    /**
+     * Returns the array representation of the message, for responses or errors.
+     *
+     * @return array The array representation of the message.
+     * @throws \LogicException If the message is not a response or error.
+     */
+    public function toResponseArray(): array
+    {
+        if (isset($this->error)) {
+            return ['jsonrpc' => $this->jsonrpc, 'id' => $this->id, 'error' => $this->error];
+        }
+
+        if (isset($this->result)) {
+            return ['jsonrpc' => $this->jsonrpc, 'id' => $this->id, 'result' => $this->result];
+        }
+
+        throw new \LogicException('Message is not a response or error, cannot convert to response array.');
+    }
+
+    /**
+     * Parses a JSON string representing an array of JSON-RPC messages.
+     *
+     * @param string $json The JSON string to parse.
+     * @return array An array of JsonRpcMessage objects.
+     * @throws \RuntimeException If JSON decoding fails or the result is not an array.
+     */
+    public static function fromJsonArray(string $json): array
+    {
+        $data = json_decode($json, false, 512, JSON_THROW_ON_ERROR);
+
+        if (!is_array($data)) {
+            throw new \RuntimeException('Invalid JSON: Expected an array of messages.', self::PARSE_ERROR);
+        }
+
+        $messages = [];
+        foreach ($data as $item) {
+            // Re-encode each item to use the existing fromJson method
+            // This is less efficient but reuses existing parsing logic
+            $itemJson = json_encode($item, JSON_THROW_ON_ERROR);
+            $messages[] = self::fromJson($itemJson);
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Serializes an array of JsonRpcMessage objects into a JSON string.
+     *
+     * @param array $messages An array of JsonRpcMessage objects.
+     * @return string The JSON string representation of the messages.
+     */
+    public static function toJsonArray(array $messages): string
+    {
+        $responseArray = [];
+        foreach ($messages as $message) {
+            if (!$message instanceof self) {
+                throw new \InvalidArgumentException('All items in the array must be JsonRpcMessage objects.');
+            }
+            $responseArray[] = $message->toResponseArray();
+        }
+
+        return json_encode($responseArray, JSON_THROW_ON_ERROR);
+    }
 }

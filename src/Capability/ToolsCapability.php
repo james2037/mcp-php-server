@@ -64,11 +64,17 @@ class ToolsCapability implements CapabilityInterface
     {
         $tools = [];
         foreach ($this->tools as $tool) {
-            $tools[] = [
+            $toolData = [
                 'name' => $tool->getName(),
                 'description' => $tool->getDescription(),
                 'inputSchema' => $tool->getInputSchema()
             ];
+
+            $annotations = $tool->getAnnotations();
+            if ($annotations !== null) {
+                $toolData['annotations'] = $annotations;
+            }
+            $tools[] = $toolData;
         }
 
         return JsonRpcMessage::result(['tools' => $tools], $message->id);
@@ -77,42 +83,53 @@ class ToolsCapability implements CapabilityInterface
     private function handleCall(JsonRpcMessage $message): JsonRpcMessage
     {
         $params = $message->params;
-        $name = $params['name'] ?? null;
-        $arguments = $params['arguments'] ?? [];
+        $toolName = $params['name'] ?? null;
+        $toolArguments = $params['arguments'] ?? []; // Default to empty array if not provided
 
-        if (!$name || !isset($this->tools[$name])) {
-            return JsonRpcMessage::result(
-                [
-                'content' => [[
+        if (!is_string($toolName) || empty($toolName)) {
+            $contentItemsArray = [[
+                'type' => 'text',
+                'text' => "Invalid or missing tool name.",
+            ]];
+            $isError = true;
+        } elseif (!isset($this->tools[$toolName])) {
+            $contentItemsArray = [[
+                'type' => 'text',
+                'text' => "Tool not found: " . $toolName,
+            ]];
+            $isError = true;
+        } elseif (!is_array($toolArguments)) {
+            // JSON-RPC params are decoded to PHP associative arrays (objects) or indexed arrays (arrays).
+            // Tool arguments are expected to be a JSON object, hence a PHP associative array.
+            $contentItemsArray = [[
+                'type' => 'text',
+                'text' => "Invalid arguments format: arguments must be an object/map.",
+            ]];
+            $isError = true;
+        } else {
+            $tool = $this->tools[$toolName];
+            try {
+                // $tool->execute() returns an array of content item arrays
+                $contentItemsArray = $tool->execute($toolArguments);
+                $isError = false; // Explicitly set after successful execution
+            } catch (\Throwable $e) {
+                // Optional: Log the full error internally
+                // error_log("Tool execution error for '{$tool->getName()}': " . $e->getMessage() . "\n" . $e->getTraceAsString());
+
+                $errorMessageContent = [
                     'type' => 'text',
-                    'text' => "Tool not found: " . ($name ?? 'undefined')
-                ]],
-                'isError' => true
-                ],
-                $message->id
-            );
+                    'text' => "Error executing tool '{$tool->getName()}': " . $e->getMessage(),
+                ];
+                $contentItemsArray = [$errorMessageContent]; // Report error as content
+                $isError = true;
+            }
         }
 
-        try {
-            $result = $this->tools[$name]->execute($arguments);
-            return JsonRpcMessage::result(
-                [
-                'content' => $result,
-                'isError' => false
-                ],
-                $message->id
-            );
-        } catch (\Exception $e) {
-            return JsonRpcMessage::result(
-                [
-                'content' => [[
-                    'type' => 'text',
-                    'text' => $e->getMessage()
-                ]],
-                'isError' => true
-                ],
-                $message->id
-            );
-        }
+        $callToolResultData = [
+            'content' => $contentItemsArray,
+            'isError' => $isError,
+        ];
+
+        return JsonRpcMessage::result($callToolResultData, $message->id);
     }
 }
