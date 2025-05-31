@@ -48,21 +48,21 @@ class ParameterizedResource extends Resource
 
 class ResourcesCapabilityTest extends TestCase
 {
-    private ResourcesCapability $capability;
+    private ResourcesCapability $_capability;
 
     protected function setUp(): void
     {
-        $this->capability = new ResourcesCapability();
+        $this->_capability = new ResourcesCapability();
         $staticAnnotations = new Annotations(audience: ['user'], priority: 0.7);
         // Pass name, mimeType, size, annotations to MockResource constructor
-        $this->capability->addResource(
+        $this->_capability->addResource(
             new MockResource('Static Test Resource', 'text/plain', 123, $staticAnnotations)
         );
     }
 
     public function testGetCapabilities(): void
     {
-        $caps = $this->capability->getCapabilities();
+        $caps = $this->_capability->getCapabilities();
         $this->assertArrayHasKey('resources', $caps);
         $this->assertArrayHasKey('subscribe', $caps['resources']);
         $this->assertArrayHasKey('listChanged', $caps['resources']);
@@ -71,7 +71,7 @@ class ResourcesCapabilityTest extends TestCase
     public function testHandleList(): void
     {
         $request = new JsonRpcMessage('resources/list', [], '1');
-        $response = $this->capability->handleMessage($request);
+        $response = $this->_capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
@@ -96,7 +96,7 @@ class ResourcesCapabilityTest extends TestCase
             ['uri' => 'test://static'],
             '1'
         );
-        $response = $this->capability->handleMessage($request);
+        $response = $this->_capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
@@ -112,7 +112,7 @@ class ResourcesCapabilityTest extends TestCase
 
     public function testHandleReadWithParameters(): void
     {
-        $this->capability->addResource(
+        $this->_capability->addResource(
             new ParameterizedResource("User Data", "application/json")
         );
         $request = new JsonRpcMessage(
@@ -120,7 +120,7 @@ class ResourcesCapabilityTest extends TestCase
             ['uri' => 'test://users/123'],
             '1'
         );
-        $response = $this->capability->handleMessage($request);
+        $response = $this->_capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
@@ -147,7 +147,7 @@ class ResourcesCapabilityTest extends TestCase
             ['uri' => 'test://unknown'],
             '1'
         );
-        $response = $this->capability->handleMessage($request);
+        $response = $this->_capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object.");
@@ -158,7 +158,7 @@ class ResourcesCapabilityTest extends TestCase
     public function testHandleMissingUri(): void
     {
         $request = new JsonRpcMessage('resources/read', [], '1');
-        $response = $this->capability->handleMessage($request);
+        $response = $this->_capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object.");

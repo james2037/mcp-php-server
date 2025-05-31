@@ -1,9 +1,9 @@
-  0/41 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 41/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+  0/41 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 20/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░]  48%[1G[2K 40/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░]  97%[1G[2K 41/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
 
  ------ --------------------------------------------------
   Line   src/Capability/ResourcesCapability.php
  ------ --------------------------------------------------
-  178    Call to an undefined method
+  180    Call to an undefined method
          MCP\Server\Resource\ResourceContents::toArray().
  ------ --------------------------------------------------
 
@@ -25,39 +25,22 @@
  ------ -----------------------------------------------------------------------
   Line   src/Server.php
  ------ -----------------------------------------------------------------------
-  124    Class MCP\Server\Exception\InvalidRequestException not found.
+  125    Class MCP\Server\Exception\InvalidRequestException not found.
          💡 Learn more at https://phpstan.org/user-guide/discovering-symbols
-  126    Class MCP\Server\Exception\InvalidParamsException not found.
+  127    Class MCP\Server\Exception\InvalidParamsException not found.
          💡 Learn more at https://phpstan.org/user-guide/discovering-symbols
-  135    Strict comparison using === between (int<min, -1>|int<1, max>|string)
+  136    Strict comparison using === between (int<min, -1>|int<1, max>|string)
          and 0 will always evaluate to false.
-  431    Strict comparison using !== between null and null will always
+  456    Strict comparison using !== between null and null will always
          evaluate to false.
-  443    Call to an undefined static method
-         MCP\Server\Message\JsonRpcMessage::notification().
  ------ -----------------------------------------------------------------------
 
- ------ -----------------------------------------------------------------------
-  Line   tests/Resource/ResourceRegistryTest.php
- ------ -----------------------------------------------------------------------
-  40     Class MCP\Server\Tests\Resource\MockResource constructor invoked with
-         0 parameters, 1-5 required.
- ------ -----------------------------------------------------------------------
-
- ------ -----------------------------------------------------------------------
+ ------ --------------------------------------------------------------------
   Line   tests/Resource/ResourceTest.php
- ------ -----------------------------------------------------------------------
-  34     Class MCP\Server\Tests\Resource\TestResource constructor invoked with
-         0 parameters, 1-5 required.
-  42     Class MCP\Server\Tests\Resource\TestResource constructor invoked with
-         0 parameters, 1-5 required.
-  52     Class MCP\Server\Tests\Resource\DynamicResource constructor invoked
-         with 0 parameters, 1-5 required.
-  62     Class class@anonymous/tests/Resource/ResourceTest.php:62 constructor
-         invoked with 0 parameters, 1-5 required.
+ ------ --------------------------------------------------------------------
   63     Attribute class MCP\Server\Resource\Attribute\ResourceUri does not
          have the method target.
- ------ -----------------------------------------------------------------------
+ ------ --------------------------------------------------------------------
 
  ------ -----------------------------------------------------------------------------
   Line   tests/ServerErrorHandlingTest.php
@@ -97,25 +80,10 @@
          never read, only written.
          💡 See:
             https://phpstan.org/developing-extensions/always-read-written-properties
+  227    Access to an undefined property object::$id.
+         💡 Learn more:
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property
  ------ -----------------------------------------------------------------------------
-
- ------ --------------------------------------------------------------------
-  Line   tests/Tool/ExtendedToolTest.php
- ------ --------------------------------------------------------------------
-  19     Method MCP\Server\Tests\Tool\OptionalParamTool::doExecute() should
-         return array<MCP\Server\Tool\Content\ContentItemInterface> but
-         returns array<int, array<string, string>>.
-  32     Method MCP\Server\Tests\Tool\ArrayParamTool::doExecute() should
-         return array<MCP\Server\Tool\Content\ContentItemInterface> but
-         returns array<int, array<string, string>>.
-  35     Method MCP\Server\Tests\Tool\ArrayParamTool::doExecute() should
-         return array<MCP\Server\Tool\Content\ContentItemInterface> but
-         returns array<int, array<string, string>>.
-  47     Call to an undefined method
-         MCP\Server\Tests\Tool\MultiOutputTool::text().
-  49     Call to an undefined method
-         MCP\Server\Tests\Tool\MultiOutputTool::image().
- ------ --------------------------------------------------------------------
 
  ------ ---------------------------------------------------------------------
   Line   tests/Tool/ToolRegistryTest.php
@@ -125,16 +93,5 @@
          MCP\Server\Tests\Tool\OtherMockTool::text().
  ------ ---------------------------------------------------------------------
 
- ------ ------------------------------------------------------------------
-  Line   tests/Tool/ToolTest.php
- ------ ------------------------------------------------------------------
-  17     Method MCP\Server\Tests\Tool\TestTool::doExecute() should return
-         array<MCP\Server\Tool\Content\ContentItemInterface> but returns
-         array<int, array<string, string>>.
-  36     Method MCP\Server\Tests\Tool\CalculatorTool::doExecute() should
-         return array<MCP\Server\Tool\Content\ContentItemInterface> but
-         returns array<int, array<string, string>>.
- ------ ------------------------------------------------------------------
-
- [ERROR] Found 30 errors
+ [ERROR] Found 18 errors
 

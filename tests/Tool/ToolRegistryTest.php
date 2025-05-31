@@ -28,19 +28,19 @@ class OtherMockTool extends Tool
 
 class ToolRegistryTest extends TestCase
 {
-    private ToolRegistry $registry;
+    private ToolRegistry $_registry;
 
     protected function setUp(): void
     {
-        $this->registry = new ToolRegistry();
+        $this->_registry = new ToolRegistry();
     }
 
     public function testRegister(): void
     {
         $tool = new MockTool();
-        $this->registry->register($tool);
+        $this->_registry->register($tool);
 
-        $tools = $this->registry->getTools();
+        $tools = $this->_registry->getTools();
         $this->assertCount(1, $tools);
         $this->assertArrayHasKey('test', $tools);
         $this->assertSame($tool, $tools['test']);
@@ -51,10 +51,10 @@ class ToolRegistryTest extends TestCase
         $tool1 = new MockTool();
         $tool2 = new OtherMockTool();
 
-        $this->registry->register($tool1);
-        $this->registry->register($tool2);
+        $this->_registry->register($tool1);
+        $this->_registry->register($tool2);
 
-        $tools = $this->registry->getTools();
+        $tools = $this->_registry->getTools();
         $this->assertCount(2, $tools);
         $this->assertArrayHasKey('test', $tools);
         $this->assertArrayHasKey('other', $tools);
@@ -65,10 +65,10 @@ class ToolRegistryTest extends TestCase
         $tool1 = new MockTool();
         $tool2 = new MockTool();  // Same name as tool1
 
-        $this->registry->register($tool1);
-        $this->registry->register($tool2);
+        $this->_registry->register($tool1);
+        $this->_registry->register($tool2);
 
-        $tools = $this->registry->getTools();
+        $tools = $this->_registry->getTools();
         $this->assertCount(1, $tools);
         $this->assertSame($tool2, $tools['test']);
     }
@@ -97,9 +97,9 @@ class ToolRegistryTest extends TestCase
 
             file_put_contents($tempDir . '/DiscoveredTool.php', $toolContent);
 
-            $this->registry->discover($tempDir);
+            $this->_registry->discover($tempDir);
 
-            $tools = $this->registry->getTools();
+            $tools = $this->_registry->getTools();
             $this->assertCount(1, $tools);
             $this->assertArrayHasKey('discovered', $tools);
         } finally {
@@ -112,7 +112,7 @@ class ToolRegistryTest extends TestCase
     public function testDiscoverToolsWithInvalidDirectory(): void
     {
         $this->expectException(\RuntimeException::class);
-        $this->registry->discover('/nonexistent/directory');
+        $this->_registry->discover('/nonexistent/directory');
     }
 
     public function testDiscoverToolsWithInvalidFile(): void
@@ -136,9 +136,9 @@ class ToolRegistryTest extends TestCase
             file_put_contents($tempDir . '/InvalidTool.php', $invalidTool);
 
             // Should not throw but should ignore the invalid tool
-            $this->registry->discover($tempDir);
+            $this->_registry->discover($tempDir);
 
-            $tools = $this->registry->getTools();
+            $tools = $this->_registry->getTools();
             $this->assertCount(0, $tools);
         } finally {
             // Cleanup

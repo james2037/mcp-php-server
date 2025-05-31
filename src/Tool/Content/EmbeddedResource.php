@@ -8,8 +8,8 @@ use InvalidArgumentException;
 
 final class EmbeddedResource implements ContentItemInterface
 {
-    private array $resource; // Represents TextResourceContents or BlobResourceContents
-    private ?Annotations $annotations;
+    private array $_resource; // Represents TextResourceContents or BlobResourceContents
+    private ?Annotations $_annotations;
 
     public function __construct(array $resourceData, ?Annotations $annotations = null)
     {
@@ -26,19 +26,19 @@ final class EmbeddedResource implements ContentItemInterface
             throw new InvalidArgumentException("EmbeddedResource 'blob' must be a string (base64 encoded).");
         }
 
-        $this->resource = $resourceData;
-        $this->annotations = $annotations;
+        $this->_resource = $resourceData;
+        $this->_annotations = $annotations;
     }
 
     public function toArray(): array
     {
         $data = [
             'type' => 'resource',
-            'resource' => $this->resource,
+            'resource' => $this->_resource,
         ];
 
-        if ($this->annotations !== null) {
-            $annotationsArray = $this->annotations->toArray();
+        if ($this->_annotations !== null) {
+            $annotationsArray = $this->_annotations->toArray();
             if (!empty($annotationsArray)) {
                 $data['annotations'] = $annotationsArray;
             }

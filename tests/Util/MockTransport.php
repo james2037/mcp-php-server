@@ -7,17 +7,18 @@ use MCP\Server\Transport\TransportInterface;
 
 class MockTransport implements TransportInterface
 {
-    private array $incomingMessages = []; // Stores batches of messages (JsonRpcMessage[])
-    private array $sentMessages = [];     // Stores individual JsonRpcMessage objects
+    private array $_incomingMessages = []; // Stores batches of messages (JsonRpcMessage[])
+    private array $_sentMessages = [];     // Stores individual JsonRpcMessage objects
 
     /**
      * Queues a batch of messages that receive() will return once.
      * Each call to this method adds one "line" or "packet" the server will read.
+     *
      * @param JsonRpcMessage[] $messagesBatch An array of JsonRpcMessage objects.
      */
     public function queueIncomingMessages(array $messagesBatch): void
     {
-        $this->incomingMessages[] = $messagesBatch;
+        $this->_incomingMessages[] = $messagesBatch;
     }
 
     /**
@@ -25,10 +26,10 @@ class MockTransport implements TransportInterface
      */
     public function receive(): ?array
     {
-        if (empty($this->incomingMessages)) {
+        if (empty($this->_incomingMessages)) {
             return null; // No more messages or batches to receive
         }
-        return array_shift($this->incomingMessages);
+        return array_shift($this->_incomingMessages);
     }
 
     /**
@@ -38,34 +39,34 @@ class MockTransport implements TransportInterface
     {
         if (is_array($message)) {
             // If it's an array of JsonRpcMessage objects (batch response/notifications)
-            $this->sentMessages = array_merge($this->sentMessages, $message);
+            $this->_sentMessages = array_merge($this->_sentMessages, $message);
         } else {
             // If it's a single JsonRpcMessage object
-            $this->sentMessages[] = $message;
+            $this->_sentMessages[] = $message;
         }
     }
 
     public function getLastSent(): ?JsonRpcMessage
     {
-        return end($this->sentMessages) ?: null;
+        return end($this->_sentMessages) ?: null;
     }
 
     public function getAllSentMessages(): array
     {
-        return $this->sentMessages;
+        return $this->_sentMessages;
     }
 
     public function reset(): void
     {
-        $this->incomingMessages = [];
-        $this->sentMessages = [];
+        $this->_incomingMessages = [];
+        $this->_sentMessages = [];
     }
 
     public function isClosed(): bool
     {
         // MockTransport can be considered closed if no more incoming messages are queued.
         // This helps server loop to terminate in tests if not explicitly given a shutdown.
-        return empty($this->incomingMessages);
+        return empty($this->_incomingMessages);
     }
 
     public function log(string $message): void

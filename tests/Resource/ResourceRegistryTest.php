@@ -28,19 +28,19 @@ class OtherMockResource extends Resource
 
 class ResourceRegistryTest extends TestCase
 {
-    private ResourceRegistry $registry;
+    private ResourceRegistry $_registry;
 
     protected function setUp(): void
     {
-        $this->registry = new ResourceRegistry();
+        $this->_registry = new ResourceRegistry();
     }
 
     public function testRegister(): void
     {
         $resource = new MockResource("mock_resource_name_test_register");
-        $this->registry->register($resource);
+        $this->_registry->register($resource);
 
-        $resources = $this->registry->getResources();
+        $resources = $this->_registry->getResources();
         $this->assertCount(1, $resources);
         $this->assertArrayHasKey('test://one', $resources);
         $this->assertSame($resource, $resources['test://one']);
@@ -75,9 +75,9 @@ class ResourceRegistryTest extends TestCase
 
             file_put_contents($tempDir . '/DiscoveredResource.php', $resourceContent);
 
-            $this->registry->discover($tempDir);
+            $this->_registry->discover($tempDir);
 
-            $resources = $this->registry->getResources();
+            $resources = $this->_registry->getResources();
             $this->assertCount(1, $resources);
             $this->assertArrayHasKey('test://discovered', $resources);
         } finally {

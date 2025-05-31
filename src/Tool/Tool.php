@@ -14,9 +14,9 @@ use ReflectionParameter;
 
 abstract class Tool
 {
-    private ?ToolAttribute $metadata = null;
-    private ?array $toolAnnotationsData = null;
-    private array $parameters = [];
+    private ?ToolAttribute $_metadata = null;
+    private ?array $_toolAnnotationsData = null;
+    private array $_parameters = [];
     protected array $config = [];
 
     public function __construct(?array $config = null)
@@ -25,17 +25,17 @@ abstract class Tool
             $this->config = $config;
         }
 
-        $this->initializeMetadata();
+        $this->_initializeMetadata();
     }
 
-    private function initializeMetadata(): void
+    private function _initializeMetadata(): void
     {
         $reflection = new ReflectionClass($this);
 
         // Get tool metadata
         $toolAttrs = $reflection->getAttributes(ToolAttribute::class);
         if (count($toolAttrs) > 0) {
-            $this->metadata = $toolAttrs[0]->newInstance();
+            $this->_metadata = $toolAttrs[0]->newInstance();
         }
 
         // Get parameter metadata from doExecute method
@@ -45,7 +45,7 @@ abstract class Tool
             foreach ($attrs as $attr) {
                 $paramAttr = $attr->newInstance();
                 // Store using the attribute name as key
-                $this->parameters[$paramAttr->name] = $paramAttr;
+                $this->_parameters[$paramAttr->name] = $paramAttr;
             }
         }
 
@@ -71,24 +71,24 @@ abstract class Tool
             }
 
             if (!empty($annotationsData)) {
-                $this->toolAnnotationsData = $annotationsData;
+                $this->_toolAnnotationsData = $annotationsData;
             }
         }
     }
 
     public function getName(): string
     {
-        return $this->metadata?->name ?? static::class;
+        return $this->_metadata?->name ?? static::class;
     }
 
     public function getDescription(): ?string
     {
-        return $this->metadata?->description;
+        return $this->_metadata?->description;
     }
 
     public function getAnnotations(): ?array
     {
-        return $this->toolAnnotationsData;
+        return $this->_toolAnnotationsData;
     }
 
     public function getInputSchema(): array
@@ -96,7 +96,7 @@ abstract class Tool
         $properties = new \stdClass();
         $required = [];
 
-        foreach ($this->parameters as $name => $param) {
+        foreach ($this->_parameters as $name => $param) {
             // Create a property object for each parameter
             $propObj = new \stdClass();
             $propObj->type = $param->type;
@@ -156,13 +156,13 @@ abstract class Tool
     {
         // Check for unknown arguments
         foreach ($arguments as $name => $value) {
-            if (!isset($this->parameters[$name])) {
+            if (!isset($this->_parameters[$name])) {
                 throw new \InvalidArgumentException("Unknown argument: {$name}");
             }
         }
 
         // Check required parameters
-        foreach ($this->parameters as $name => $param) {
+        foreach ($this->_parameters as $name => $param) {
             if ($param->required && !isset($arguments[$name])) {
                 throw new \InvalidArgumentException("Missing required argument: {$name}");
             }
@@ -170,8 +170,8 @@ abstract class Tool
 
         // Check parameter types
         foreach ($arguments as $name => $value) {
-            $param = $this->parameters[$name];
-            if (!$this->validateType($value, $param->type)) {
+            $param = $this->_parameters[$name];
+            if (!$this->_validateType($value, $param->type)) {
                 throw new \InvalidArgumentException(
                     "Invalid type for argument {$name}: expected {$param->type}"
                 );
@@ -179,7 +179,7 @@ abstract class Tool
         }
     }
 
-    private function validateType($value, string $type): bool
+    private function _validateType($value, string $type): bool
     {
         return match ($type) {
             'string' => is_string($value),
@@ -226,9 +226,9 @@ abstract class Tool
      * Provides completion suggestions for an argument.
      * Subclasses should override this method to provide actual suggestions.
      *
-     * @param string $argumentName The name of the argument being completed.
-     * @param mixed $currentValue The current partial value of the argument (type can vary).
-     * @param array $allArguments All arguments provided so far in the context of the completion.
+     * @param  string $argumentName The name of the argument being completed.
+     * @param  mixed  $currentValue The current partial value of the argument (type can vary).
+     * @param  array  $allArguments All arguments provided so far in the context of the completion.
      * @return array{values: string[], total?: int, hasMore?: bool}
      *               An array matching the 'completion' object structure in CompleteResult.
      *               Example: ['values' => ['suggestion1', 'suggestion2'], 'total' => 2, 'hasMore' => false]

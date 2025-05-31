@@ -1,0 +1,2131 @@
+
+FILE: /app/src/Tool/Content/TextContent.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AFFECTING 4 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR | Missing doc comment for class TextContent
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 12 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 12 | ERROR | Doc comment for parameter "$text" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 12 | ERROR | Doc comment for parameter "$annotations" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 19 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 19 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/AudioContent.php
+--------------------------------------------------------------------------------
+FOUND 8 ERRORS AND 1 WARNING AFFECTING 5 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for class AudioContent
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 13 | ERROR   | Doc comment for parameter "$base64Data" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 13 | ERROR   | Doc comment for parameter "$mimeType" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 13 | ERROR   | Doc comment for parameter "$annotations" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 14 | WARNING | Line exceeds 85 characters; contains 103 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 21 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 21 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/EmbeddedResource.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AND 6 WARNINGS AFFECTING 10 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  9 | ERROR   | Missing doc comment for class EmbeddedResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 11 | WARNING | Line exceeds 85 characters; contains 88 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 14 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 14 | ERROR   | Doc comment for parameter "$resourceData" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 14 | ERROR   | Doc comment for parameter "$annotations" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 15 | WARNING | Line exceeds 85 characters; contains 86 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 18 | WARNING | Line exceeds 85 characters; contains 98 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 21 | WARNING | Line exceeds 85 characters; contains 118 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 24 | WARNING | Line exceeds 85 characters; contains 92 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 27 | WARNING | Line exceeds 85 characters; contains 109 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 34 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 34 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/ImageContent.php
+--------------------------------------------------------------------------------
+FOUND 8 ERRORS AND 1 WARNING AFFECTING 5 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for class ImageContent
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 13 | ERROR   | Doc comment for parameter "$base64Data" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 13 | ERROR   | Doc comment for parameter "$mimeType" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 13 | ERROR   | Doc comment for parameter "$annotations" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 14 | WARNING | Line exceeds 85 characters; contains 103 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 21 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 21 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/Annotations.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AND 2 WARNINGS AFFECTING 6 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  9 | ERROR   | Missing doc comment for class Annotations
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 14 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 14 | ERROR   | Doc comment for parameter "$audience" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 14 | ERROR   | Doc comment for parameter "$priority" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 20 | WARNING | Line exceeds 85 characters; contains 121 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 25 | WARNING | Line exceeds 85 characters; contains 88 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 31 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 31 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/ContentItemInterface.php
+--------------------------------------------------------------------------------
+FOUND 4 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+ 2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 7 | ERROR | Missing doc comment for interface ContentItemInterface
+   |       | (PEAR.Commenting.ClassComment.Missing)
+ 9 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 9 | ERROR | Missing @return tag in function comment
+   |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Attribute/ToolAnnotations.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  6 | ERROR | Missing doc comment for class ToolAnnotations
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 14 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Attribute/Parameter.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 10 | ERROR | Missing doc comment for class Parameter
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 12 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Attribute/Tool.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 10 | ERROR | Missing doc comment for class Tool
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 12 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Tool.php
+--------------------------------------------------------------------------------
+FOUND 33 ERRORS AND 19 WARNINGS AFFECTING 35 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  15 | ERROR   | Missing doc comment for class Tool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  22 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  22 | ERROR   | Doc comment for parameter "$config" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  32 | ERROR   | Missing doc comment for function _initializeMetadata()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  54 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  62 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  65 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  68 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  71 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  80 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  80 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  86 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  86 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  92 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  92 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  98 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  98 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 133 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 133 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 138 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 138 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 143 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 143 | ERROR   | Doc comment for parameter "$arguments" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 143 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 152 | WARNING | Line exceeds 85 characters; contains 97 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 155 | WARNING | Line exceeds 85 characters; contains 112 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 163 | ERROR   | Missing doc comment for function validateArguments()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 175 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 190 | ERROR   | Missing doc comment for function _validateType()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 207 | ERROR   | Tag @return cannot be grouped with parameter tags in a doc
+     |         | comment (Generic.Commenting.DocComment.NonParamGroup)
+ 213 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+ 213 | WARNING | Line exceeds 85 characters; contains 123 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 218 | ERROR   | Missing doc comment for function createImageContent()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 218 | WARNING | Line exceeds 85 characters; contains 146 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 220 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 223 | ERROR   | Missing doc comment for function createAudioContent()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 223 | WARNING | Line exceeds 85 characters; contains 146 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 225 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 228 | ERROR   | Missing doc comment for function createEmbeddedResource()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 228 | WARNING | Line exceeds 85 characters; contains 140 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 238 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 239 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 240 | ERROR   | Tag @return cannot be grouped with parameter tags in a doc
+     |         | comment (Generic.Commenting.DocComment.NonParamGroup)
+ 241 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 242 | WARNING | Line exceeds 85 characters; contains 108 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 244 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 244 | ERROR   | Doc comment for parameter "$argumentName" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 244 | ERROR   | Doc comment for parameter "$currentValue" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 244 | ERROR   | Doc comment for parameter "$allArguments" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 244 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 245 | WARNING | Line exceeds 85 characters; contains 120 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/ToolRegistry.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AND 1 WARNING AFFECTING 6 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 11 | ERROR   | Missing doc comment for class ToolRegistry
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR   | Missing doc comment for function createFromReflection()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 13 | WARNING | Line exceeds 85 characters; contains 99 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 25 | ERROR   | Missing doc comment for function getItemKey()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 33 | ERROR   | Missing short description in doc comment
+    |         | (Generic.Commenting.DocComment.MissingShort)
+ 36 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 36 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Registry/Registry.php
+--------------------------------------------------------------------------------
+FOUND 13 ERRORS AND 1 WARNING AFFECTING 8 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 11 | ERROR   | Missing doc comment for class Registry
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 15 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 15 | ERROR   | Doc comment for parameter "$directory" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 15 | ERROR   | Doc comment for parameter "$config" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 15 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 45 | ERROR   | Missing doc comment for function getItems()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 50 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 50 | ERROR   | Doc comment for parameter "$item" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 50 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 56 | ERROR   | Missing doc comment for function _getClassFromFile()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 73 | ERROR   | Missing doc comment for function createFromReflection()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 73 | WARNING | Line exceeds 85 characters; contains 106 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 74 | ERROR   | Missing doc comment for function getItemKey()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Message/JsonRpcMessage.php
+--------------------------------------------------------------------------------
+FOUND 34 ERRORS AND 10 WARNINGS AFFECTING 23 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   5 | ERROR   | Missing doc comment for class JsonRpcMessage
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  20 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  20 | ERROR   | Doc comment for parameter "$method" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  20 | ERROR   | Doc comment for parameter "$params" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  20 | ERROR   | Doc comment for parameter "$id" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  21 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  28 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  28 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  34 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  34 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  58 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  58 | ERROR   | Doc comment for parameter "$json" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  58 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  67 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  73 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  96 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  96 | ERROR   | Doc comment for parameter "$result" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  96 | ERROR   | Doc comment for parameter "$id" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  96 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 104 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 104 | ERROR   | Doc comment for parameter "$code" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 104 | ERROR   | Doc comment for parameter "$message" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 104 | ERROR   | Doc comment for parameter "$id" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 104 | ERROR   | Doc comment for parameter "$data" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 104 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 105 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 124 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 124 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 128 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 132 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 135 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 142 | ERROR   | Tag @return cannot be grouped with parameter tags in a doc
+     |         | comment (Generic.Commenting.DocComment.NonParamGroup)
+ 143 | ERROR   | Tag @throws cannot be grouped with parameter tags in a doc
+     |         | comment (Generic.Commenting.DocComment.NonParamGroup)
+ 143 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 145 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 145 | ERROR   | Doc comment for parameter "$json" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 145 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 151 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 169 | ERROR   | Tag @return cannot be grouped with parameter tags in a doc
+     |         | comment (Generic.Commenting.DocComment.NonParamGroup)
+ 171 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 171 | ERROR   | Doc comment for parameter "$messages" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 171 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 177 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Server.php
+--------------------------------------------------------------------------------
+FOUND 35 ERRORS AND 67 WARNINGS AFFECTING 86 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   9 | ERROR   | Missing doc comment for class Server
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  11 | ERROR   | Missing short description in doc comment
+     |         | (Generic.Commenting.DocComment.MissingShort)
+  39 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  39 | ERROR   | Doc comment for parameter "$name" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  39 | ERROR   | Doc comment for parameter "$version" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  52 | ERROR   | Tag @return cannot be grouped with parameter tags in a doc
+     |         | comment (Generic.Commenting.DocComment.NonParamGroup)
+  54 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  54 | ERROR   | Doc comment for parameter "$expectedToken" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  54 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  58 | WARNING | Line exceeds 85 characters; contains 126 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  64 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  64 | ERROR   | Doc comment for parameter "$capability" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  64 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  70 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  70 | ERROR   | Doc comment for parameter "$transport" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  70 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  76 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  76 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  84 | WARNING | Line exceeds 85 characters; contains 112 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  89 | WARNING | Line exceeds 85 characters; contains 114 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 101 | WARNING | Line exceeds 85 characters; contains 218 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 102 | WARNING | Line exceeds 85 characters; contains 136 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 103 | WARNING | Line exceeds 85 characters; contains 114 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 104 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 105 | WARNING | Line exceeds 85 characters; contains 148 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 106 | WARNING | Line exceeds 85 characters; contains 133 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 107 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 115 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 116 | WARNING | Line exceeds 85 characters; contains 123 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 125 | WARNING | Line exceeds 85 characters; contains 185 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 128 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 130 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 132 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 134 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 136 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 140 | WARNING | Line exceeds 85 characters; contains 122 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 141 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 160 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 161 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 162 | WARNING | Line exceeds 85 characters; contains 138 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 163 | WARNING | Line exceeds 85 characters; contains 112 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 165 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 167 | WARNING | Line exceeds 85 characters; contains 131 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 168 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 176 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 176 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 179 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 200 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 208 | ERROR   | Missing doc comment for function _handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 242 | ERROR   | Missing doc comment for function _handleInitialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 248 | WARNING | Line exceeds 85 characters; contains 142 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 251 | WARNING | Line exceeds 85 characters; contains 109 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 257 | WARNING | Line exceeds 85 characters; contains 151 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 265 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 266 | WARNING | Line exceeds 85 characters; contains 144 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 273 | WARNING | Line exceeds 85 characters; contains 125 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 277 | WARNING | Line exceeds 85 characters; contains 118 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 293 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 295 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 329 | ERROR   | Missing doc comment for function _handleShutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 343 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 346 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 352 | ERROR   | Missing doc comment for function _handleCapabilityMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 352 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 379 | ERROR   | Missing doc comment for function _getServerInstructions()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 383 | WARNING | Line exceeds 85 characters; contains 125 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 390 | ERROR   | Missing doc comment for function _handleSetLogLevel()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 394 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 397 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 403 | WARNING | Line exceeds 85 characters; contains 108 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 404 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 412 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 413 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 414 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 415 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 417 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 417 | ERROR   | Doc comment for parameter "$level" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 417 | ERROR   | Doc comment for parameter "$logContent" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 417 | ERROR   | Doc comment for parameter "$loggerName" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 417 | ERROR   | Doc comment for parameter "$structuredData" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 417 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 418 | WARNING | Line exceeds 85 characters; contains 129 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 435 | WARNING | Line exceeds 85 characters; contains 139 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 439 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 440 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 443 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 449 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 450 | WARNING | Line exceeds 85 characters; contains 105 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 456 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 457 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 458 | WARNING | Line exceeds 85 characters; contains 124 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 459 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 460 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 463 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 476 | WARNING | Line exceeds 85 characters; contains 97 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 479 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 484 | ERROR   | Missing doc comment for function _isValidLogLevel()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 489 | ERROR   | Missing doc comment for function _shouldSendToClient()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 498 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 499 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 500 | WARNING | Line exceeds 85 characters; contains 130 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Capability/ResourcesCapability.php
+--------------------------------------------------------------------------------
+FOUND 6 ERRORS AND 5 WARNINGS AFFECTING 7 LINES
+--------------------------------------------------------------------------------
+   3 | ERROR   | Missing short description in doc comment
+     |         | (Generic.Commenting.DocComment.MissingShort)
+   5 | ERROR   | Missing @category tag in file comment
+     |         | (PEAR.Commenting.FileComment.MissingCategoryTag)
+   5 | ERROR   | Missing @package tag in file comment
+     |         | (PEAR.Commenting.FileComment.MissingPackageTag)
+   5 | ERROR   | Missing @author tag in file comment
+     |         | (PEAR.Commenting.FileComment.MissingAuthorTag)
+   5 | ERROR   | Missing @license tag in file comment
+     |         | (PEAR.Commenting.FileComment.MissingLicenseTag)
+   5 | ERROR   | Missing @link tag in file comment
+     |         | (PEAR.Commenting.FileComment.MissingLinkTag)
+   7 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  45 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 100 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 157 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 220 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Capability/CapabilityInterface.php
+--------------------------------------------------------------------------------
+FOUND 9 ERRORS AFFECTING 9 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  8 | ERROR | Missing doc comment for interface CapabilityInterface
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 16 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 18 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 21 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 26 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 32 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 38 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Capability/ToolsCapability.php
+--------------------------------------------------------------------------------
+FOUND 21 ERRORS AND 26 WARNINGS AFFECTING 38 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   9 | ERROR   | Missing doc comment for class ToolsCapability
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  11 | ERROR   | Missing short description in doc comment
+     |         | (Generic.Commenting.DocComment.MissingShort)
+  18 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  18 | ERROR   | Doc comment for parameter "$tool" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  18 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  24 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  24 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  34 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  34 | ERROR   | Doc comment for parameter "$message" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  34 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  43 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  43 | ERROR   | Doc comment for parameter "$message" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  43 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  54 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  54 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  62 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  62 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  70 | ERROR   | Missing doc comment for function _handleList()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  90 | ERROR   | Missing doc comment for function _handleCall()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  94 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 109 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 110 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 113 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 124 | WARNING | Line exceeds 85 characters; contains 131 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 128 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 130 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 143 | ERROR   | Missing doc comment for function _handleComplete()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 146 | WARNING | Line exceeds 85 characters; contains 149 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 148 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 149 | WARNING | Line exceeds 85 characters; contains 154 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 156 | WARNING | Line exceeds 85 characters; contains 133 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 162 | WARNING | Line exceeds 85 characters; contains 125 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 163 | WARNING | Line exceeds 85 characters; contains 151 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 167 | WARNING | Line exceeds 85 characters; contains 157 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 172 | WARNING | Line exceeds 85 characters; contains 149 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 175 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 182 | WARNING | Line exceeds 85 characters; contains 135 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 185 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 186 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 187 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 189 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 190 | WARNING | Line exceeds 85 characters; contains 146 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 192 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 197 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 198 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 199 | WARNING | Line exceeds 85 characters; contains 114 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Transport/StdioTransport.php
+--------------------------------------------------------------------------------
+FOUND 16 ERRORS AND 14 WARNINGS AFFECTING 24 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   8 | ERROR   | Missing doc comment for class StdioTransport
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  14 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  22 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  22 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  45 | WARNING | Line exceeds 85 characters; contains 119 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  50 | WARNING | Line exceeds 85 characters; contains 115 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  53 | WARNING | Line exceeds 85 characters; contains 118 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  56 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  58 | WARNING | Line exceeds 85 characters; contains 103 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  59 | WARNING | Line exceeds 85 characters; contains 115 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  60 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  64 | WARNING | Line exceeds 85 characters; contains 108 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  65 | WARNING | Line exceeds 85 characters; contains 112 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  68 | WARNING | Line exceeds 85 characters; contains 114 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  72 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  73 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  74 | WARNING | Line exceeds 85 characters; contains 132 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  78 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  78 | ERROR   | Doc comment for parameter "$message" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  78 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  92 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 100 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 100 | ERROR   | Doc comment for parameter "$message" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 100 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 107 | ERROR   | Missing doc comment for function getInputStream()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 112 | ERROR   | Missing doc comment for function getOutputStream()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 117 | ERROR   | Missing doc comment for function getErrorStream()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 122 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 122 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Transport/AbstractTransport.php
+--------------------------------------------------------------------------------
+FOUND 9 ERRORS AFFECTING 7 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  8 | ERROR | Missing doc comment for class AbstractTransport
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 15 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 17 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 29 | ERROR | Doc comment for parameter "$data" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 31 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 50 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 50 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 50 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Transport/TransportInterface.php
+--------------------------------------------------------------------------------
+FOUND 8 ERRORS AND 1 WARNING AFFECTING 8 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for interface TransportInterface
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 11 | WARNING | Line exceeds 85 characters; contains 149 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 20 | ERROR   | Missing parameter comment
+    |         | (PEAR.Commenting.FunctionComment.MissingParamComment)
+ 21 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 24 | ERROR   | Doc comment for parameter "$message" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 27 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 30 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 30 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Exception/MethodNotSupportedException.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR | Missing @category tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingCategoryTag)
+  7 | ERROR | Missing @package tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingPackageTag)
+  7 | ERROR | Missing @author tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingAuthorTag)
+  7 | ERROR | Missing @license tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingLicenseTag)
+  7 | ERROR | Missing @link tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingLinkTag)
+ 10 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Exception/TransportException.php
+--------------------------------------------------------------------------------
+FOUND 6 ERRORS AFFECTING 2 LINES
+--------------------------------------------------------------------------------
+ 2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 7 | ERROR | Missing @category tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingCategoryTag)
+ 7 | ERROR | Missing @package tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingPackageTag)
+ 7 | ERROR | Missing @author tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingAuthorTag)
+ 7 | ERROR | Missing @license tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingLicenseTag)
+ 7 | ERROR | Missing @link tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingLinkTag)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/ResourceContents.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+ 2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 7 | ERROR | Missing doc comment for class ResourceContents
+   |       | (PEAR.Commenting.ClassComment.Missing)
+ 9 | ERROR | Missing doc comment for function __construct()
+   |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/TextResourceContents.php
+--------------------------------------------------------------------------------
+FOUND 8 ERRORS AFFECTING 4 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR | Missing doc comment for class TextResourceContents
+    |       | (PEAR.Commenting.ClassComment.Missing)
+  9 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  9 | ERROR | Doc comment for parameter "$uri" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  9 | ERROR | Doc comment for parameter "$text" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  9 | ERROR | Doc comment for parameter "$mimeType" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 18 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 18 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/Attribute/ResourceUri.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 10 | ERROR | Missing doc comment for class ResourceUri
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 12 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/Resource.php
+--------------------------------------------------------------------------------
+FOUND 14 ERRORS AND 3 WARNINGS AFFECTING 12 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  10 | ERROR   | You must use "/**" style comments for a class comment
+     |         | (PEAR.Commenting.ClassComment.WrongStyle)
+  21 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  37 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  40 | ERROR   | Missing doc comment for function _initializeMetadata()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  49 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  49 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  55 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  55 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  62 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  62 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  88 | ERROR   | Missing doc comment for function read()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  90 | ERROR   | Missing doc comment for function text()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  90 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  99 | ERROR   | Missing doc comment for function blob()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  99 | WARNING | Line exceeds 85 characters; contains 105 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 108 | ERROR   | Missing doc comment for function _resolveUri()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/BlobResourceContents.php
+--------------------------------------------------------------------------------
+FOUND 8 ERRORS AND 1 WARNING AFFECTING 5 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for class BlobResourceContents
+    |         | (PEAR.Commenting.ClassComment.Missing)
+  9 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  9 | ERROR   | Doc comment for parameter "$uri" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  9 | ERROR   | Doc comment for parameter "$blob" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  9 | ERROR   | Doc comment for parameter "$mimeType" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 18 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 18 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 22 | WARNING | Line exceeds 85 characters; contains 95 characters
+    |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/ResourceRegistry.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AND 3 WARNINGS AFFECTING 8 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 11 | ERROR   | Missing doc comment for class ResourceRegistry
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR   | Missing doc comment for function createFromReflection()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 13 | WARNING | Line exceeds 85 characters; contains 103 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 19 | WARNING | Line exceeds 85 characters; contains 87 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 20 | WARNING | Line exceeds 85 characters; contains 95 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 28 | ERROR   | Missing doc comment for function getItemKey()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 36 | ERROR   | Missing short description in doc comment
+    |         | (Generic.Commenting.DocComment.MissingShort)
+ 39 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 39 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerInitializationTest.php
+--------------------------------------------------------------------------------
+FOUND 40 ERRORS AND 38 WARNINGS AFFECTING 72 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | Missing doc comment for class ServerInitializationTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  16 | ERROR   | Missing doc comment for function setUp()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  24 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  24 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  29 | WARNING | Line exceeds 85 characters; contains 102 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  39 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  40 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  43 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  43 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  44 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  65 | WARNING | Line exceeds 85 characters; contains 123 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  66 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  67 | WARNING | Line exceeds 85 characters; contains 135 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  68 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  69 | WARNING | Line exceeds 85 characters; contains 139 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  74 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  74 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  80 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  83 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  87 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  91 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  93 | WARNING | Line exceeds 85 characters; contains 117 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  95 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  98 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 104 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 107 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 111 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 115 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 117 | WARNING | Line exceeds 85 characters; contains 117 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 119 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 122 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 130 | WARNING | Line exceeds 85 characters; contains 157 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 131 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 135 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 142 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 145 | ERROR   | Expected "foreach (...) {\n"; found "foreach(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 151 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 152 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 154 | WARNING | Line exceeds 85 characters; contains 125 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 158 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 158 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 163 | WARNING | Line exceeds 85 characters; contains 109 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 164 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 167 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 171 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 175 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 179 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 183 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 187 | WARNING | Line exceeds 85 characters; contains 109 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 188 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 191 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 195 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 199 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 203 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 207 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 215 | WARNING | Line exceeds 85 characters; contains 156 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 219 | WARNING | Line exceeds 85 characters; contains 126 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 222 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 222 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 247 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 251 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 252 | WARNING | Line exceeds 85 characters; contains 135 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 253 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 254 | WARNING | Line exceeds 85 characters; contains 139 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 255 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 258 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 258 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 262 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 268 | WARNING | Line exceeds 85 characters; contains 153 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 269 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 280 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 283 | WARNING | Line exceeds 85 characters; contains 115 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 284 | WARNING | Line exceeds 85 characters; contains 126 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 289 | WARNING | Line exceeds 85 characters; contains 136 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 294 | WARNING | Line exceeds 85 characters; contains 118 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 295 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 297 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ToolRegistryTest.php
+--------------------------------------------------------------------------------
+FOUND 19 ERRORS AFFECTING 13 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  12 | ERROR | Missing doc comment for class MockTool
+     |       | (PEAR.Commenting.ClassComment.Missing)
+  14 | ERROR | Missing doc comment for function doExecute()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  21 | ERROR | Missing doc comment for class OtherMockTool
+     |       | (PEAR.Commenting.ClassComment.Missing)
+  23 | ERROR | Missing doc comment for function doExecute()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  29 | ERROR | Missing doc comment for class ToolRegistryTest
+     |       | (PEAR.Commenting.ClassComment.Missing)
+  33 | ERROR | Missing doc comment for function setUp()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  38 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  38 | ERROR | Missing @return tag in function comment
+     |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+  50 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  50 | ERROR | Missing @return tag in function comment
+     |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+  65 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  65 | ERROR | Missing @return tag in function comment
+     |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+  79 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  79 | ERROR | Missing @return tag in function comment
+     |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 116 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 116 | ERROR | Missing @return tag in function comment
+     |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 123 | ERROR | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 123 | ERROR | Missing @return tag in function comment
+     |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ToolTest.php
+--------------------------------------------------------------------------------
+FOUND 29 ERRORS AND 6 WARNINGS AFFECTING 24 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | Missing doc comment for class TestTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  22 | ERROR   | Missing doc comment for class CalculatorTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  24 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  25 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  40 | ERROR   | Missing doc comment for class ToolTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  42 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  42 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  51 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  51 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  63 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  63 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  92 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  92 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 120 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 120 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 136 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 136 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 142 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 153 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 153 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 171 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 171 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 188 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 188 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 204 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 210 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 219 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 219 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 256 | ERROR   | Doc comment for parameter "$data" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 256 | ERROR   | Doc comment for parameter "$schema" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 258 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 276 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 289 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ExtendedToolTest.php
+--------------------------------------------------------------------------------
+FOUND 20 ERRORS AND 8 WARNINGS AFFECTING 22 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | Missing doc comment for class OptionalParamTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  15 | WARNING | Line exceeds 85 characters; contains 102 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  24 | ERROR   | Missing doc comment for class ArrayParamTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  26 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  27 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  28 | WARNING | Line exceeds 85 characters; contains 103 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  40 | ERROR   | Missing doc comment for class MultiOutputTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  42 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  43 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  53 | ERROR   | Missing doc comment for class ExtendedToolTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  55 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  55 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  84 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  84 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 113 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 113 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 130 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 130 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 136 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 146 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 146 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 152 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 162 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 162 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 168 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 169 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Util/MockTransport.php
+--------------------------------------------------------------------------------
+FOUND 23 ERRORS AND 5 WARNINGS AFFECTING 17 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  8 | ERROR   | Missing doc comment for class MockTransport
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 10 | WARNING | Line exceeds 85 characters; contains 91 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 11 | WARNING | Line exceeds 85 characters; contains 86 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 19 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 19 | ERROR   | Doc comment for parameter "$messagesBatch" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 19 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 25 | ERROR   | Missing short description in doc comment
+    |         | (Generic.Commenting.DocComment.MissingShort)
+ 28 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 28 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 37 | ERROR   | Missing short description in doc comment
+    |         | (Generic.Commenting.DocComment.MissingShort)
+ 40 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 40 | ERROR   | Doc comment for parameter "$message" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 40 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 44 | WARNING | Line exceeds 85 characters; contains 88 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 52 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 52 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 58 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 58 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 64 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 64 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 71 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 71 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 74 | WARNING | Line exceeds 85 characters; contains 90 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 75 | WARNING | Line exceeds 85 characters; contains 91 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 79 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 79 | ERROR   | Doc comment for parameter "$message" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 79 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Message/JsonRpcMessageTest.php
+--------------------------------------------------------------------------------
+FOUND 27 ERRORS AND 15 WARNINGS AFFECTING 34 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   8 | ERROR   | Missing doc comment for class JsonRpcMessageTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  10 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  10 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  21 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  21 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  32 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  32 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  35 | WARNING | Line exceeds 85 characters; contains 97 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  43 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  43 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  56 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  56 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  70 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  75 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  75 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  78 | WARNING | Line exceeds 85 characters; contains 133 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  91 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  95 | ERROR   | Missing doc comment for function
+     |         | testFromJsonArrayEmptyBatchRequest()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 103 | ERROR   | Missing doc comment for function
+     |         | testFromJsonArrayInvalidJson()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 106 | WARNING | Line exceeds 85 characters; contains 115 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 107 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 109 | WARNING | Line exceeds 85 characters; contains 103 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 111 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 118 | ERROR   | Missing doc comment for function testFromJsonArrayNotAnArray()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 120 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 123 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 127 | ERROR   | Missing doc comment for function
+     |         | testFromJsonArrayContainsInvalidMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 130 | WARNING | Line exceeds 85 characters; contains 102 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 134 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 139 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 139 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 162 | ERROR   | Missing doc comment for function
+     |         | testToJsonArrayEmptyBatchResponse()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 168 | ERROR   | Missing doc comment for function
+     |         | testToJsonArrayWithNonMessageThrowsException()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 172 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 177 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 177 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 189 | ERROR   | Missing doc comment for function testToResponseArrayForError()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 201 | ERROR   | Missing doc comment for function
+     |         | testToResponseArrayForRequestThrowsException()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 205 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 209 | ERROR   | Missing doc comment for function
+     |         | testToResponseArrayForNotificationThrowsException()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 213 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Capability/ResourcesCapabilityTest.php
+--------------------------------------------------------------------------------
+FOUND 15 ERRORS AND 16 WARNINGS AFFECTING 29 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  15 | ERROR   | You must use "/**" style comments for a class comment
+     |         | (PEAR.Commenting.ClassComment.WrongStyle)
+  18 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+  18 | WARNING | Line exceeds 85 characters; contains 124 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  23 | ERROR   | Missing doc comment for function read()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  25 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  26 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  31 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  32 | ERROR   | You must use "/**" style comments for a class comment
+     |         | (PEAR.Commenting.ClassComment.WrongStyle)
+  34 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  34 | WARNING | Line exceeds 85 characters; contains 124 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  39 | ERROR   | Missing doc comment for function read()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  45 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  49 | ERROR   | Missing doc comment for class ResourcesCapabilityTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  53 | ERROR   | Missing doc comment for function setUp()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  59 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  63 | ERROR   | Missing doc comment for function testGetCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  71 | ERROR   | Missing doc comment for function testHandleList()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  92 | ERROR   | Missing doc comment for function testHandleRead()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 113 | ERROR   | Missing doc comment for function
+     |         | testHandleReadWithParameters()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 132 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 133 | WARNING | Line exceeds 85 characters; contains 103 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 136 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 143 | ERROR   | Missing doc comment for function
+     |         | testHandleReadUnknownResource()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 153 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 154 | WARNING | Line exceeds 85 characters; contains 118 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 155 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 158 | ERROR   | Missing doc comment for function testHandleMissingUri()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 164 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 165 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 166 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Capability/ToolsCapabilityTest.php
+--------------------------------------------------------------------------------
+FOUND 23 ERRORS AND 37 WARNINGS AFFECTING 58 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  16 | ERROR   | You must use "/**" style comments for a class comment
+     |         | (PEAR.Commenting.ClassComment.WrongStyle)
+  18 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  19 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  27 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+  27 | WARNING | Line exceeds 85 characters; contains 120 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  31 | WARNING | Line exceeds 85 characters; contains 109 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  32 | WARNING | Line exceeds 85 characters; contains 118 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  34 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  39 | ERROR   | Missing doc comment for class FailingMockTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  41 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  48 | ERROR   | Missing doc comment for class ToolsCapabilityTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  51 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  53 | ERROR   | Missing doc comment for function setUp()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  60 | ERROR   | Missing doc comment for function testGetCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  65 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  66 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  69 | ERROR   | Missing doc comment for function testHandleList()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  75 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  79 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  82 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  88 | WARNING | Line exceeds 85 characters; contains 97 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  91 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  92 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  95 | ERROR   | Missing doc comment for function testHandleCall()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 105 | WARNING | Line exceeds 85 characters; contains 112 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 110 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 113 | ERROR   | Missing doc comment for function
+     |         | testHandleCallWithUnknownTool()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 123 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 128 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 131 | ERROR   | Missing doc comment for function
+     |         | testHandleCallWithFailingTool()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 142 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 147 | WARNING | Line exceeds 85 characters; contains 140 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 150 | ERROR   | Missing doc comment for function
+     |         | testHandleCallWithMissingRequiredArgument()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 152 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 154 | WARNING | Line exceeds 85 characters; contains 104 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 157 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 168 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 169 | WARNING | Line exceeds 85 characters; contains 119 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 172 | ERROR   | Missing doc comment for function
+     |         | testToolInitializationAndShutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 177 | WARNING | Line exceeds 85 characters; contains 130 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 179 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+ 179 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 184 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 188 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 192 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 202 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 205 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 209 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+ 223 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 224 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 228 | ERROR   | Missing doc comment for function
+     |         | testHandleCompleteDefaultSuggestions()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 231 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 236 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 249 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 252 | ERROR   | Missing doc comment for function
+     |         | testHandleCompleteToolNotFound()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 263 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 264 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 266 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 267 | WARNING | Line exceeds 85 characters; contains 130 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Transport/StdioTransportTest.php
+--------------------------------------------------------------------------------
+FOUND 37 ERRORS AND 9 WARNINGS AFFECTING 31 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   9 | ERROR   | Missing doc comment for class TestableStdioTransport
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  15 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  27 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  27 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  33 | ERROR   | Missing doc comment for function getOutputStream()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  38 | ERROR   | Missing doc comment for function getErrorStream()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  44 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  44 | ERROR   | Doc comment for parameter "$data" missing
+     |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+  44 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  48 | WARNING | Line exceeds 85 characters; contains 114 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  55 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  55 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  65 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  65 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  75 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  75 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  90 | ERROR   | Expected "if (...) {\n"; found "if (...) { "
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+  94 | WARNING | Line exceeds 85 characters; contains 123 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 102 | ERROR   | Missing doc comment for class StdioTransportTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+ 106 | ERROR   | Missing doc comment for function setUp()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 113 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 113 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 127 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 127 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 146 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 146 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 155 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 155 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 156 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 160 | WARNING | Line exceeds 85 characters; contains 109 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 165 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 165 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 170 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 173 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 173 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 174 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 191 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 191 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 198 | WARNING | Line exceeds 85 characters; contains 116 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 201 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 201 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 211 | WARNING | Line exceeds 85 characters; contains 157 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 215 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 215 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 221 | WARNING | Line exceeds 85 characters; contains 117 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerTest.php
+--------------------------------------------------------------------------------
+FOUND 43 ERRORS AND 55 WARNINGS AFFECTING 87 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  13 | ERROR   | Missing doc comment for class TestCapability
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  15 | ERROR   | Private member variable "expectedResponses" must be prefixed
+     |         | with an underscore
+     |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  16 | ERROR   | Private member variable "receivedMessages" must be prefixed
+     |         | with an underscore
+     |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  18 | ERROR   | Missing doc comment for function addExpectedResponse()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  18 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  23 | ERROR   | Missing doc comment for function getReceivedMessages()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  28 | ERROR   | Missing doc comment for function resetReceivedMessages()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  33 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  38 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  43 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  49 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  52 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  57 | ERROR   | Missing doc comment for class ServerTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  63 | ERROR   | Missing doc comment for function setUp()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  73 | ERROR   | Missing doc comment for function _queueInitializeRequest()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  73 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  89 | ERROR   | Missing doc comment for function _findResponseById()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  89 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  92 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  93 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 100 | WARNING | Line exceeds 85 characters; contains 130 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 101 | WARNING | Line exceeds 85 characters; contains 142 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 102 | ERROR   | Expected "} elseif (...) {\n"; found "}\n            // Case
+     |         | 2: $item is an array of response objects (a batch response)\n
+     |         |           // This is for when findResponseById is called on a
+     |         | known batch array, like findResponseById($batchResponseArray,
+     |         | ...)\n            // Or if $responsesToSearch contains a mix
+     |         | of single responses and batch arrays (though less common for
+     |         | $responsesToSearch itself)\n            elseif (...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 104 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 115 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 115 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 120 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 129 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 135 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 137 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 140 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 143 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 144 | WARNING | Line exceeds 85 characters; contains 88 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 147 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 147 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 157 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 158 | WARNING | Line exceeds 85 characters; contains 117 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 168 | WARNING | Line exceeds 85 characters; contains 123 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 171 | WARNING | Line exceeds 85 characters; contains 117 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 178 | WARNING | Line exceeds 85 characters; contains 125 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 182 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 182 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 187 | WARNING | Line exceeds 85 characters; contains 119 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 188 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 198 | WARNING | Line exceeds 85 characters; contains 125 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 199 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 202 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 206 | ERROR   | Missing doc comment for function _setEnvVar()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 211 | ERROR   | Missing doc comment for function _clearEnvVar()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 216 | ERROR   | Missing doc comment for function tearDown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 222 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 222 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 232 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 234 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 236 | WARNING | Line exceeds 85 characters; contains 124 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 239 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 246 | WARNING | Line exceeds 85 characters; contains 108 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 250 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 251 | WARNING | Line exceeds 85 characters; contains 108 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 252 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 255 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 256 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 259 | WARNING | Line exceeds 85 characters; contains 123 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 260 | WARNING | Line exceeds 85 characters; contains 116 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 264 | WARNING | Line exceeds 85 characters; contains 166 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 266 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 267 | WARNING | Line exceeds 85 characters; contains 116 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 270 | WARNING | Line exceeds 85 characters; contains 139 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 271 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 277 | WARNING | Line exceeds 85 characters; contains 139 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 278 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 280 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 285 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 285 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 293 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 301 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 302 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 308 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 308 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 316 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 324 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 327 | WARNING | Line exceeds 85 characters; contains 130 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 328 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 336 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 336 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 344 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 352 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 356 | WARNING | Line exceeds 85 characters; contains 130 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 357 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 365 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 365 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 371 | WARNING | Line exceeds 85 characters; contains 142 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 375 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 383 | WARNING | Line exceeds 85 characters; contains 121 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 386 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 387 | WARNING | Line exceeds 85 characters; contains 118 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 388 | ERROR   | Expected "if (...) {\n"; found "if(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerErrorHandlingTest.php
+--------------------------------------------------------------------------------
+FOUND 34 ERRORS AND 10 WARNINGS AFFECTING 39 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | Missing doc comment for class ServerErrorHandlingTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  16 | ERROR   | Missing doc comment for function setUp()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  24 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  24 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  28 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  32 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  36 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  40 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  44 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  52 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  65 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  66 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  69 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+  69 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+  73 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  77 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  81 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  85 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  88 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  97 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 113 | ERROR   | Expected "foreach (...) {\n"; found "foreach(...) {\n"
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 114 | ERROR   | Expected "if (...) {\n"; found "if (...) { "
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 116 | ERROR   | Expected "if (...) {\n"; found "if (...) { "
+     |         | (PEAR.ControlStructures.ControlSignature.Found)
+ 121 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 127 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 130 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 130 | ERROR   | Missing @return tag in function comment
+     |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 136 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 136 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 139 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 142 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 146 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 150 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 154 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 160 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 160 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 163 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 166 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 170 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 174 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 178 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 189 | WARNING | Line exceeds 85 characters; contains 99 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 202 | WARNING | Line exceeds 85 characters; contains 127 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Resource/ResourceTest.php
+--------------------------------------------------------------------------------
+FOUND 15 ERRORS AND 1 WARNING AFFECTING 12 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 13 | ERROR   | Missing doc comment for class TestResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 15 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 22 | ERROR   | Missing doc comment for class DynamicResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 24 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 26 | WARNING | Line exceeds 85 characters; contains 90 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 30 | ERROR   | Missing doc comment for class ResourceTest
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 32 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 32 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 41 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 41 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 52 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 52 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 63 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 63 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 68 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Resource/ResourceRegistryTest.php
+--------------------------------------------------------------------------------
+FOUND 11 ERRORS AND 4 WARNINGS AFFECTING 13 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 12 | ERROR   | Missing doc comment for class MockResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 14 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 21 | ERROR   | Missing doc comment for class OtherMockResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 23 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 29 | ERROR   | Missing doc comment for class ResourceRegistryTest
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 33 | ERROR   | Missing doc comment for function setUp()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 38 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 38 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 50 | ERROR   | Doc comment is empty (Generic.Commenting.DocComment.Empty)
+ 50 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 67 | WARNING | Line exceeds 85 characters; contains 92 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 68 | WARNING | Line exceeds 85 characters; contains 191 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 69 | WARNING | Line exceeds 85 characters; contains 93 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 78 | WARNING | Line exceeds 85 characters; contains 86 characters
+    |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+Time: 537ms; Memory: 10MB

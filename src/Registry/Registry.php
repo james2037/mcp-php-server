@@ -10,7 +10,7 @@ use ReflectionClass;
 
 abstract class Registry
 {
-    private array $items = [];
+    private array $_items = [];
 
     public function discover(string $directory, array $config = []): void
     {
@@ -43,15 +43,15 @@ abstract class Registry
 
     protected function getItems(): array
     {
-        return $this->items;
+        return $this->_items;
     }
 
     public function register(object $item): void
     {
-        $this->items[$this->getItemKey($item)] = $item;
+        $this->_items[$this->getItemKey($item)] = $item;
     }
 
-    private function getClassFromFile(\SplFileInfo $file): string
+    private function _getClassFromFile(\SplFileInfo $file): string
     {
         $contents = file_get_contents($file->getRealPath());
         $namespace = '';

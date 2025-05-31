@@ -246,47 +246,46 @@ class ToolTest extends TestCase
     /**
      * Simple JSON Schema validator
      */
-    private function validateAgainstSchema($data, array $schema): bool
+    private function _validateAgainstSchema($data, array $schema): bool
     {
         if (isset($schema['type'])) {
             switch ($schema['type']) {
-                case 'object':
-                    if (!is_object($data) && !is_array($data)) {
-                        return false;
-                    }
-                    if (isset($schema['properties'])) {
-                        foreach ($schema['properties'] as $prop => $propSchema) {
-                            if (
-                                isset($schema['required'])
-                                && in_array($prop, $schema['required'])
-                                && !array_key_exists($prop, $data)
-                            ) {
-                                return false;
-                            }
-                            if (array_key_exists($prop, $data)) {
-                                if (!$this->validateAgainstSchema($data[$prop], $propSchema)) {
-                                    return false;
-                                }
-                            }
+            case 'object':
+                if (!is_object($data) && !is_array($data)) {
+                    return false;
+                }
+                if (isset($schema['properties'])) {
+                    foreach ($schema['properties'] as $prop => $propSchema) {
+                        if (isset($schema['required'])
+                            && in_array($prop, $schema['required'])
+                            && !array_key_exists($prop, $data)
+                        ) {
+                            return false;
                         }
-                    }
-                    return true;
-                case 'array':
-                    if (!is_array($data)) {
-                        return false;
-                    }
-                    if (isset($schema['items'])) {
-                        foreach ($data as $item) {
-                            if (!$this->validateAgainstSchema($item, $schema['items'])) {
+                        if (array_key_exists($prop, $data)) {
+                            if (!$this->_validateAgainstSchema($data[$prop], $propSchema)) {
                                 return false;
                             }
                         }
                     }
-                    return true;
-                case 'string':
-                    return is_string($data);
-                default:
-                    return true;
+                }
+                return true;
+            case 'array':
+                if (!is_array($data)) {
+                    return false;
+                }
+                if (isset($schema['items'])) {
+                    foreach ($data as $item) {
+                        if (!$this->_validateAgainstSchema($item, $schema['items'])) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            case 'string':
+                return is_string($data);
+            default:
+                return true;
             }
         }
         return true;

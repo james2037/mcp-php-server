@@ -10,37 +10,51 @@ use MCP\Server\Tests\Util\MockTransport;
 
 class ServerErrorHandlingTest extends TestCase
 {
-    private Server $server;
-    private MockTransport $transport;
+    private Server $_server;
+    private MockTransport $_transport;
 
     protected function setUp(): void
     {
-        $this->server = new Server('test-server', '1.0.0');
-        $this->transport = new MockTransport();
-        $this->server->connect($this->transport);
-        $this->transport->reset(); // Ensure clean transport for each test
+        $this->_server = new Server('test-server', '1.0.0');
+        $this->_transport = new MockTransport();
+        $this->_server->connect($this->_transport);
+        $this->_transport->reset(); // Ensure clean transport for each test
     }
 
     public function testHandlesCapabilityInitializationFailure(): void
     {
         $failingCap = new class implements CapabilityInterface {
-            public function getCapabilities(): array { return ['failing_cap' => new \stdClass()]; }
-            public function canHandleMessage(JsonRpcMessage $message): bool { return false; }
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage { return null; }
-            public function initialize(): void { throw new \RuntimeException('Initialization failed'); }
-            public function shutdown(): void {}
+            public function getCapabilities(): array
+            {
+                return ['failing_cap' => new \stdClass()];
+            }
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return false;
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                return null;
+            }
+            public function initialize(): void
+            {
+                throw new \RuntimeException('Initialization failed');
+            }
+            public function shutdown(): void
+            {
+            }
         };
-        $this->server->addCapability($failingCap);
+        $this->_server->addCapability($failingCap);
 
         $initMessage = new JsonRpcMessage(
             'initialize',
             ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']],
             'init_fail_1'
         );
-        $this->transport->queueIncomingMessages([$initMessage]);
-        $this->server->run();
+        $this->_transport->queueIncomingMessages([$initMessage]);
+        $this->_server->run();
 
-        $sentMessages = $this->transport->getAllSentMessages();
+        $sentMessages = $this->_transport->getAllSentMessages();
         $this->assertCount(1, $sentMessages);
         $response = $sentMessages[0];
         $this->assertNotNull($response);
@@ -54,13 +68,27 @@ class ServerErrorHandlingTest extends TestCase
     public function testHandlesShutdownFailure(): void
     {
         $failingCap = new class implements CapabilityInterface {
-            public function getCapabilities(): array { return ['failing_shutdown_cap' => new \stdClass()]; }
-            public function canHandleMessage(JsonRpcMessage $message): bool { return false; }
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage { return null; }
-            public function initialize(): void {}
-            public function shutdown(): void { throw new \RuntimeException('Shutdown failed'); }
+            public function getCapabilities(): array
+            {
+                return ['failing_shutdown_cap' => new \stdClass()];
+            }
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return false;
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                return null;
+            }
+            public function initialize(): void
+            {
+            }
+            public function shutdown(): void
+            {
+                throw new \RuntimeException('Shutdown failed');
+            }
         };
-        $this->server->addCapability($failingCap);
+        $this->_server->addCapability($failingCap);
 
         $initMessage = new JsonRpcMessage(
             'initialize',
@@ -69,11 +97,11 @@ class ServerErrorHandlingTest extends TestCase
         );
         $shutdownMessage = new JsonRpcMessage('shutdown', [], 'shutdown_fail_1');
 
-        $this->transport->queueIncomingMessages([$initMessage]);
-        $this->transport->queueIncomingMessages([$shutdownMessage]);
-        $this->server->run();
+        $this->_transport->queueIncomingMessages([$initMessage]);
+        $this->_transport->queueIncomingMessages([$shutdownMessage]);
+        $this->_server->run();
 
-        $sentMessages = $this->transport->getAllSentMessages();
+        $sentMessages = $this->_transport->getAllSentMessages();
         // Expect 2 responses: successful init, then error for shutdown
         $this->assertCount(2, $sentMessages);
 
@@ -81,8 +109,10 @@ class ServerErrorHandlingTest extends TestCase
         $shutdownResponse = null;
 
         foreach($sentMessages as $msg) {
-            if ($msg->id === 'init_shutdown_fail_1') $initResponse = $msg;
-            if ($msg->id === 'shutdown_fail_1') $shutdownResponse = $msg;
+            if ($msg->id === 'init_shutdown_fail_1') { $initResponse = $msg;
+            }
+            if ($msg->id === 'shutdown_fail_1') { $shutdownResponse = $msg;
+            }
         }
 
         $this->assertNotNull($initResponse);
@@ -100,24 +130,56 @@ class ServerErrorHandlingTest extends TestCase
         $shutdownOrder = []; // Passed by reference
 
         $cap1 = new class ($shutdownOrder, 'cap1') implements CapabilityInterface {
-            public function __construct(private array &$orderRef, private string $nameRef) {}
-            public function initialize(): void {}
-            public function shutdown(): void { $this->orderRef[] = $this->nameRef; }
-            public function getCapabilities(): array { return ['cap1_feature' => new \stdClass()];}
-            public function canHandleMessage(JsonRpcMessage $message): bool {return false;}
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage {return null;}
+            public function __construct(private array &$orderRef, private string $nameRef)
+            {
+            }
+            public function initialize(): void
+            {
+            }
+            public function shutdown(): void
+            {
+                $this->orderRef[] = $this->nameRef;
+            }
+            public function getCapabilities(): array
+            {
+                return ['cap1_feature' => new \stdClass()];
+            }
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return false;
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                return null;
+            }
         };
         $cap2 = new class ($shutdownOrder, 'cap2') implements CapabilityInterface {
-            public function __construct(private array &$orderRef, private string $nameRef) {}
-            public function initialize(): void {}
-            public function shutdown(): void { $this->orderRef[] = $this->nameRef; }
-            public function getCapabilities(): array { return ['cap2_feature' => new \stdClass()];}
-            public function canHandleMessage(JsonRpcMessage $message): bool {return false;}
-            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage {return null;}
+            public function __construct(private array &$orderRef, private string $nameRef)
+            {
+            }
+            public function initialize(): void
+            {
+            }
+            public function shutdown(): void
+            {
+                $this->orderRef[] = $this->nameRef;
+            }
+            public function getCapabilities(): array
+            {
+                return ['cap2_feature' => new \stdClass()];
+            }
+            public function canHandleMessage(JsonRpcMessage $message): bool
+            {
+                return false;
+            }
+            public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
+            {
+                return null;
+            }
         };
 
-        $this->server->addCapability($cap1);
-        $this->server->addCapability($cap2);
+        $this->_server->addCapability($cap1);
+        $this->_server->addCapability($cap2);
 
         $initMessage = new JsonRpcMessage(
             'initialize',
@@ -126,11 +188,11 @@ class ServerErrorHandlingTest extends TestCase
         );
         $shutdownMessage = new JsonRpcMessage('shutdown', [], 'shutdown_order_1');
 
-        $this->transport->queueIncomingMessages([$initMessage]);
-        $this->transport->queueIncomingMessages([$shutdownMessage]);
-        $this->server->run();
+        $this->_transport->queueIncomingMessages([$initMessage]);
+        $this->_transport->queueIncomingMessages([$shutdownMessage]);
+        $this->_server->run();
 
-        $sentMessages = $this->transport->getAllSentMessages();
+        $sentMessages = $this->_transport->getAllSentMessages();
         $this->assertCount(2, $sentMessages); // Init response, Shutdown response
 
         // Check shutdown order matches registration order

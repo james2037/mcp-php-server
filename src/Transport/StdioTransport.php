@@ -7,20 +7,20 @@ use MCP\Server\Exception\TransportException;
 
 class StdioTransport extends AbstractTransport
 {
-    private $stdin;
-    private $stdout;
-    private $stderr;
+    private $_stdin;
+    private $_stdout;
+    private $_stderr;
 
     public function __construct()
     {
-        $this->stdin = $this->getInputStream();
-        $this->stdout = $this->getOutputStream();
-        $this->stderr = $this->getErrorStream();
+        $this->_stdin = $this->getInputStream();
+        $this->_stdout = $this->getOutputStream();
+        $this->_stderr = $this->getErrorStream();
     }
 
     public function receive(): ?array
     {
-        $line = fgets($this->stdin);
+        $line = fgets($this->_stdin);
 
         if ($line === false) {
             // Stream closed
@@ -44,8 +44,9 @@ class StdioTransport extends AbstractTransport
             }
 
             // Check for batch request: a non-empty numerically indexed array
-            if (is_array($decodedInput) &&
-                (count($decodedInput) === 0 || array_keys($decodedInput) === range(0, count($decodedInput) - 1))) {
+            if (is_array($decodedInput)
+                && (count($decodedInput) === 0 || array_keys($decodedInput) === range(0, count($decodedInput) - 1))
+            ) {
                 if (empty($decodedInput)) {
                     // Empty array received, spec implies it's invalid for batch, but we should return empty messages.
                     return [];
@@ -85,18 +86,18 @@ class StdioTransport extends AbstractTransport
             throw new TransportException("Message contains newlines");
         }
 
-        $written = fwrite($this->stdout, $json . "\n");  // Now using the stored stream
+        $written = fwrite($this->_stdout, $json . "\n");  // Now using the stored stream
         if ($written === false || $written !== strlen($json) + 1) {
             throw new TransportException("Failed to write complete message");
         }
 
-        fflush($this->stdout);
+        fflush($this->_stdout);
     }
 
     public function log(string $message): void
     {
-        fwrite($this->stderr, $message . "\n");  // Now using the stored stream
-        fflush($this->stderr);
+        fwrite($this->_stderr, $message . "\n");  // Now using the stored stream
+        fflush($this->_stderr);
     }
 
     protected function getInputStream()
@@ -116,6 +117,6 @@ class StdioTransport extends AbstractTransport
 
     public function isClosed(): bool
     {
-        return feof($this->stdin);
+        return feof($this->_stdin);
     }
 }
