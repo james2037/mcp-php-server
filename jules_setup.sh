@@ -17,14 +17,17 @@ sudo apt-get install --reinstall -y python3-apt
 
 # Add PHP PPA
 echo "Adding PHP PPA (ppa:ondrej/php)..."
-if [ -f /usr/bin/python3.10 ] && /usr/bin/python3.10 -c "import apt_pkg" &>/dev/null; then
+if [ -f /usr/bin/python3.12 ] && /usr/bin/python3.12 -c "import apt_pkg" &>/dev/null; then
+    echo "Attempting to use /usr/bin/python3.12 for add-apt-repository..."
+    sudo /usr/bin/python3.12 /usr/bin/add-apt-repository ppa:ondrej/php -y
+elif [ -f /usr/bin/python3.10 ] && /usr/bin/python3.10 -c "import apt_pkg" &>/dev/null; then
     echo "Attempting to use /usr/bin/python3.10 for add-apt-repository..."
     sudo /usr/bin/python3.10 /usr/bin/add-apt-repository ppa:ondrej/php -y
 elif [ -f /usr/bin/python3.8 ] && /usr/bin/python3.8 -c "import apt_pkg" &>/dev/null; then
     echo "Attempting to use /usr/bin/python3.8 for add-apt-repository..."
     sudo /usr/bin/python3.8 /usr/bin/add-apt-repository ppa:ondrej/php -y
 else
-    echo "WARNING: Specific Python version with apt_pkg not found or apt_pkg import failed. Falling back to default add-apt-repository."
+    echo "WARNING: Specific Python version (3.12, 3.10, 3.8) with apt_pkg not found or apt_pkg import failed. Falling back to default add-apt-repository."
     echo "If this fails, the Python environment for add-apt-repository might be misconfigured."
     sudo add-apt-repository ppa:ondrej/php -y
 fi
