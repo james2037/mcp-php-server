@@ -52,33 +52,4 @@ echo "Composer installed."
 echo "Installing project dependencies with Composer..."
 composer install --no-interaction --no-ansi
 echo "Composer dependencies installed."
-
-# Run linters and tests
-echo "Running linters and tests..."
-
-echo "Running PHP CodeSniffer (phpcs)..."
-if [ -f vendor/bin/phpcs ]; then
-    vendor/bin/phpcs
-else
-    echo "PHP CodeSniffer not found at vendor/bin/phpcs. Skipping."
-fi
-
-echo "Running PHPStan..."
-if [ -f vendor/bin/phpstan ]; then
-    if [ -f phpstan.neon ] || [ -f phpstan.neon.dist ]; then
-        vendor/bin/phpstan analyse --memory-limit=2G
-    else
-        vendor/bin/phpstan analyse src tests --level=5 --memory-limit=2G
-    fi
-else
-    echo "PHPStan not found at vendor/bin/phpstan. Skipping."
-fi
-
-echo "Running PHPUnit tests..."
-if [ -f vendor/bin/phpunit ]; then
-    vendor/bin/phpunit
-else
-    echo "PHPUnit not found at vendor/bin/phpunit. Skipping."
-fi
-
 echo "VM Setup Script completed successfully."
