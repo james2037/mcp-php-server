@@ -1,4 +1,4 @@
-  0/58 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 58/58 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+  0/58 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 20/58 [▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░]  34%[1G[2K 40/58 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░]  68%[1G[2K 58/58 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
 
  ------ --------------------------------------------------
   Line   src/Capability/ResourcesCapability.php
@@ -33,19 +33,6 @@
   192    Strict comparison using === between (int<min, -1>|int<1, max>|string)
          and 0 will always evaluate to false.
  ------ -----------------------------------------------------------------------
-
- ------ --------------------------------------------------------------------------
-  Line   tests/Capability/ToolsCapabilityTest.php
- ------ --------------------------------------------------------------------------
-  90     Access to an undefined property
-         MCP\Server\Tests\Capability\ToolsCapabilityTest::$_capability.
-         💡 Learn more:
-            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property
-  131    Access to an undefined property
-         MCP\Server\Tests\Capability\ToolsCapabilityTest::$_capability.
-         💡 Learn more:
-            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property
- ------ --------------------------------------------------------------------------
 
  ------ --------------------------------------------------------------------
   Line   tests/Resource/ResourceTest.php
@@ -97,5 +84,4 @@
             https://phpstan.org/blog/solving-phpstan-access-to-undefined-property
  ------ -----------------------------------------------------------------------------
 
- [ERROR] Found 18 errors
-
+ [ERROR] Found 16 errors

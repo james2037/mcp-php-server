@@ -26,6 +26,15 @@
 --------------------------------------------------------------------------------
 
 
+[1mFILE: /app/tests/Resource/ResourceRegistryTest.php[0m
+--------------------------------------------------------------------------------
+[1mFOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE[0m
+--------------------------------------------------------------------------------
+ 50 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 191 characters[0m
+    |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
 [1mFILE: /app/tests/ServerTest.php[0m
 --------------------------------------------------------------------------------
 [1mFOUND 0 ERRORS AND 19 WARNINGS AFFECTING 19 LINES[0m
@@ -92,15 +101,6 @@
 --------------------------------------------------------------------------------
 
 
-[1mFILE: /app/tests/Resource/ResourceRegistryTest.php[0m
---------------------------------------------------------------------------------
-[1mFOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE[0m
---------------------------------------------------------------------------------
- 50 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 191 characters[0m
-    |         | (Generic.Files.LineLength.TooLong)
---------------------------------------------------------------------------------
-
-
 [1mFILE: /app/tests/ServerInitializationTest.php[0m
 --------------------------------------------------------------------------------
 [1mFOUND 1 ERROR AND 12 WARNINGS AFFECTING 13 LINES[0m
@@ -134,20 +134,11 @@
 --------------------------------------------------------------------------------
 
 
-[1mFILE: /app/tests/Message/JsonRpcMessageTest.php[0m
+[1mFILE: /app/tests/Capability/ResourcesCapabilityParameterizedResource.php[0m
 --------------------------------------------------------------------------------
 [1mFOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE[0m
 --------------------------------------------------------------------------------
- 72 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 133 characters[0m
-    |         | (Generic.Files.LineLength.TooLong)
---------------------------------------------------------------------------------
-
-
-[1mFILE: /app/tests/Capability/ResourcesCapabilityMockResource.php[0m
---------------------------------------------------------------------------------
-[1mFOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE[0m
---------------------------------------------------------------------------------
- 14 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 124 characters[0m
+ 13 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 124 characters[0m
     |         | (Generic.Files.LineLength.TooLong)
 --------------------------------------------------------------------------------
 
@@ -165,11 +156,11 @@
 --------------------------------------------------------------------------------
 
 
-[1mFILE: /app/tests/Capability/ResourcesCapabilityParameterizedResource.php[0m
+[1mFILE: /app/tests/Capability/ResourcesCapabilityMockResource.php[0m
 --------------------------------------------------------------------------------
 [1mFOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE[0m
 --------------------------------------------------------------------------------
- 13 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 124 characters[0m
+ 14 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 124 characters[0m
     |         | (Generic.Files.LineLength.TooLong)
 --------------------------------------------------------------------------------
 
@@ -181,6 +172,15 @@
  19 | [33mWARNING[0m | [1mProperty name "$_capability" should not be prefixed with an[0m
     |         | [1munderscore to indicate visibility[0m
     |         | (PSR2.Classes.PropertyDeclaration.Underscore)
+--------------------------------------------------------------------------------
+
+
+[1mFILE: /app/tests/Message/JsonRpcMessageTest.php[0m
+--------------------------------------------------------------------------------
+[1mFOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE[0m
+--------------------------------------------------------------------------------
+ 72 | [33mWARNING[0m | [1mLine exceeds 120 characters; contains 133 characters[0m
+    |         | (Generic.Files.LineLength.TooLong)
 --------------------------------------------------------------------------------
 
 
@@ -198,5 +198,5 @@
      |         | (Generic.Files.LineLength.TooLong)
 --------------------------------------------------------------------------------
 
-Time: 603ms; Memory: 10MB
+Time: 780ms; Memory: 10MB
 

@@ -6,3 +6,16 @@ composer.lock
 
 #PHPUnit Cache
 .phpunit.cache
+
+# Test outputs
+test_outputs/
+
+# Log files
+phpcs.log
+phpcs_final_report.txt
+phpcs_initial_report.txt
+phpcs_output_after_composer_install.txt
+phpcs_output_after_fixes.txt
+phpcs_output_after_removing_empty_docs.txt
+phpcs_updated_report.txt
+phpstan.log

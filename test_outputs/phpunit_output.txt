@@ -1,0 +1,18 @@
+PHPUnit 10.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.1.32
+Configuration: /app/phpunit.xml.dist
+
+...............................................[2025-05-31 16:50:10] [INFO] Client log level set to: debug
+[2025-05-31 16:50:10] [DEBUG] test-logger: test client log message | Data: {"extra":"data"}
+.....[2025-05-31 16:50:10] [INFO] Server.Authorization: Client successfully authorized via MCP_AUTHORIZATION_TOKEN.
+.[2025-05-31 16:50:10] [ERROR] Server.Authorization: Client failed to provide MCP_AUTHORIZATION_TOKEN during initialization.
+.[2025-05-31 16:50:10] [ERROR] Server.Authorization: Client provided an invalid MCP_AUTHORIZATION_TOKEN during initialization.
+.[2025-05-31 16:50:10] [INFO] Client log level set to: debug
+Failed to send log notification to client: Message is not a response or error, cannot convert to response array.
+.......... 65 / 87 ( 74%)
+......................                                            87 / 87 (100%)
+
+Time: 00:00.041, Memory: 10.00 MB
+
+OK (87 tests, 387 assertions)
