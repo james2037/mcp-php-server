@@ -89,11 +89,23 @@ class ServerTest extends TestCase
     private function findResponseById(array $responsesToSearch, string $idToFind): ?array
     {
         $idToFindStr = (string)$idToFind;
-        foreach ($responsesToSearch as $item) {
-            if (is_array($item) && array_key_exists('id', $item)) {
-                $currentIdStr = (string)$item['id'];
-                if (strcmp($currentIdStr, $idToFindStr) === 0) {
+        foreach ($responsesToSearch as $item) { // $item is typically a decoded JSON line
+            // Case 1: $item is a single response object e.g. {'jsonrpc': ..., 'id': ...}
+            if (is_array($item) && isset($item['jsonrpc']) && isset($item['id'])) {
+                if ((string)$item['id'] === $idToFindStr) {
                     return $item;
+                }
+            }
+            // Case 2: $item is an array of response objects (a batch response)
+            // This is for when findResponseById is called on a known batch array, like findResponseById($batchResponseArray, ...)
+            // Or if $responsesToSearch contains a mix of single responses and batch arrays (though less common for $responsesToSearch itself)
+            elseif (is_array($item)) {
+                foreach ($item as $subItem) {
+                    if (is_array($subItem) && isset($subItem['jsonrpc']) && isset($subItem['id'])) {
+                        if ((string)$subItem['id'] === $idToFindStr) {
+                            return $subItem;
+                        }
+                    }
                 }
             }
         }
@@ -109,7 +121,7 @@ class ServerTest extends TestCase
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
-        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $actualResponses = $rawOutput;
 
         $initResponse = $this->findResponseById($actualResponses, $initId);
 
@@ -148,7 +160,7 @@ class ServerTest extends TestCase
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
-        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $actualResponses = $rawOutput;
 
         $initResponse = $this->findResponseById($actualResponses, $initId);
         $this->assertNotNull($initResponse, "Init response missing in capability test run. Raw: ".json_encode($rawOutput));
@@ -177,7 +189,7 @@ class ServerTest extends TestCase
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
-        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $actualResponses = $rawOutput;
 
         $errorResponse = $this->findResponseById($actualResponses, $unknownId);
         $this->assertNotNull($errorResponse, "Error response for unknown method not found. Got: " . json_encode($rawOutput));
@@ -229,7 +241,7 @@ class ServerTest extends TestCase
         $this->assertNotEmpty($rawOutput, "No output from server.");
         $this->assertIsArray($rawOutput[0], "Expected batch output from server not found or not an array.");
 
-        $serverResponses = $rawOutput[0];
+        $serverResponses = $rawOutput;
 
         // The server responds to a batch request with a batch response (single JSON array line)
         // This batch response itself is one of the items in $serverResponses, along with init and shutdown.
@@ -240,17 +252,12 @@ class ServerTest extends TestCase
         $this->assertNotNull($initResp, "Init response missing in batch test. Output: " . json_encode($serverResponses));
 
         $batchResponseArray = null;
-        if (isset($serverResponses[1]) && is_array($serverResponses[1])) {
-            // Check if this array actually contains responses from the batch
-            $firstIdInPotentialBatch = $serverResponses[1][0]['id'] ?? null;
-            $secondIdInPotentialBatch = $serverResponses[1][1]['id'] ?? null;
-            if ($firstIdInPotentialBatch === $batchId1 || $firstIdInPotentialBatch === $batchId2 ||
-                $secondIdInPotentialBatch === $batchId1 || $secondIdInPotentialBatch === $batchId2) {
-                $batchResponseArray = $serverResponses[1];
-            }
+        // Ensure serverResponses[1] exists, is an array, and is not a single JSON-RPC response object (i.e., it's a batch)
+        if (isset($serverResponses[1]) && is_array($serverResponses[1]) && !isset($serverResponses[1]['jsonrpc'])) {
+            $batchResponseArray = $serverResponses[1];
         }
 
-        $this->assertNotNull($batchResponseArray, "Batch response array not found as serverResponses[1]. Output: " . json_encode($serverResponses));
+        $this->assertNotNull($batchResponseArray, "Batch response array not found as serverResponses[1] or is not a batch. Output: " . json_encode($serverResponses));
 
         if($batchResponseArray) {
             $this->assertCount(2, $batchResponseArray, "Batch response should contain 2 items (1 result, 1 error)");
@@ -283,7 +290,7 @@ class ServerTest extends TestCase
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
-        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $actualResponses = $rawOutput;
 
         $initResponse = $this->findResponseById($actualResponses, $initId);
         $this->assertNotNull($initResponse, "Initialize response not found. Raw: " . json_encode($rawOutput));
@@ -307,7 +314,7 @@ class ServerTest extends TestCase
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertNotEmpty($rawOutput, "No raw output from server.");
-        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $actualResponses = $rawOutput;
         $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
 
         $errorResponse = $this->findResponseById($actualResponses, $initId);
@@ -334,7 +341,7 @@ class ServerTest extends TestCase
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertNotEmpty($rawOutput, "No raw output from server.");
-        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $actualResponses = $rawOutput;
         $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
 
 
@@ -364,7 +371,7 @@ class ServerTest extends TestCase
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertNotEmpty($rawOutput, "No raw output from server.");
-        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $actualResponses = $rawOutput;
         $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
 
 
