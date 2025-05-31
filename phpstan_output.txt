@@ -1,9 +1,9 @@
-  0/41 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 20/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░]  48%[1G[2K 40/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░]  97%[1G[2K 41/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+  0/58 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 58/58 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
 
  ------ --------------------------------------------------
   Line   src/Capability/ResourcesCapability.php
  ------ --------------------------------------------------
-  180    Call to an undefined method
+  181    Call to an undefined method
          MCP\Server\Resource\ResourceContents::toArray().
  ------ --------------------------------------------------
 
@@ -25,33 +25,45 @@
  ------ -----------------------------------------------------------------------
   Line   src/Server.php
  ------ -----------------------------------------------------------------------
-  125    Class MCP\Server\Exception\InvalidRequestException not found.
+  21     PHPDoc tag @var above a class has no effect.
+  180    Class MCP\Server\Exception\InvalidRequestException not found.
          💡 Learn more at https://phpstan.org/user-guide/discovering-symbols
-  127    Class MCP\Server\Exception\InvalidParamsException not found.
+  182    Class MCP\Server\Exception\InvalidParamsException not found.
          💡 Learn more at https://phpstan.org/user-guide/discovering-symbols
-  136    Strict comparison using === between (int<min, -1>|int<1, max>|string)
+  192    Strict comparison using === between (int<min, -1>|int<1, max>|string)
          and 0 will always evaluate to false.
-  456    Strict comparison using !== between null and null will always
-         evaluate to false.
  ------ -----------------------------------------------------------------------
+
+ ------ --------------------------------------------------------------------------
+  Line   tests/Capability/ToolsCapabilityTest.php
+ ------ --------------------------------------------------------------------------
+  90     Access to an undefined property
+         MCP\Server\Tests\Capability\ToolsCapabilityTest::$_capability.
+         💡 Learn more:
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property
+  131    Access to an undefined property
+         MCP\Server\Tests\Capability\ToolsCapabilityTest::$_capability.
+         💡 Learn more:
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property
+ ------ --------------------------------------------------------------------------
 
  ------ --------------------------------------------------------------------
   Line   tests/Resource/ResourceTest.php
  ------ --------------------------------------------------------------------
-  63     Attribute class MCP\Server\Resource\Attribute\ResourceUri does not
+  47     Attribute class MCP\Server\Resource\Attribute\ResourceUri does not
          have the method target.
  ------ --------------------------------------------------------------------
 
  ------ -----------------------------------------------------------------------------
   Line   tests/ServerErrorHandlingTest.php
  ------ -----------------------------------------------------------------------------
-  103    Property
-         class@anonymous/tests/ServerErrorHandlingTest.php:102::$orderRef is
+  135    Property
+         class@anonymous/tests/ServerErrorHandlingTest.php:134::$orderRef is
          never read, only written.
          💡 See:
             https://phpstan.org/developing-extensions/always-read-written-properties
-  111    Property
-         class@anonymous/tests/ServerErrorHandlingTest.php:110::$orderRef is
+  159    Property
+         class@anonymous/tests/ServerErrorHandlingTest.php:158::$orderRef is
          never read, only written.
          💡 See:
             https://phpstan.org/developing-extensions/always-read-written-properties
@@ -65,33 +77,25 @@
          is never read, only written.
          💡 See:
             https://phpstan.org/developing-extensions/always-read-written-properties
-  86     Property
-         class@anonymous/tests/ServerInitializationTest.php:85::$handledByRef
+  102    Property
+         class@anonymous/tests/ServerInitializationTest.php:101::$handledByRef
          is never read, only written.
          💡 See:
             https://phpstan.org/developing-extensions/always-read-written-properties
-  130    Property
-         class@anonymous/tests/ServerInitializationTest.php:129::$orderRef is
+  162    Property
+         class@anonymous/tests/ServerInitializationTest.php:161::$orderRef is
          never read, only written.
          💡 See:
             https://phpstan.org/developing-extensions/always-read-written-properties
-  138    Property
-         class@anonymous/tests/ServerInitializationTest.php:137::$orderRef is
+  186    Property
+         class@anonymous/tests/ServerInitializationTest.php:185::$orderRef is
          never read, only written.
          💡 See:
             https://phpstan.org/developing-extensions/always-read-written-properties
-  227    Access to an undefined property object::$id.
+  291    Access to an undefined property object::$id.
          💡 Learn more:
             https://phpstan.org/blog/solving-phpstan-access-to-undefined-property
  ------ -----------------------------------------------------------------------------
-
- ------ ---------------------------------------------------------------------
-  Line   tests/Tool/ToolRegistryTest.php
- ------ ---------------------------------------------------------------------
-  16     Call to an undefined method MCP\Server\Tests\Tool\MockTool::text().
-  25     Call to an undefined method
-         MCP\Server\Tests\Tool\OtherMockTool::text().
- ------ ---------------------------------------------------------------------
 
  [ERROR] Found 18 errors
 

@@ -7,48 +7,7 @@ use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use PHPUnit\Framework\TestCase;
 
-#[ToolAttribute('greeter', 'A friendly greeter')]
-class OptionalParamTool extends Tool
-{
-    protected function doExecute(
-        #[ParameterAttribute('name', type: 'string', description: 'Name to greet')]
-        #[ParameterAttribute('title', type: 'string', description: 'Optional title', required: false)]
-        array $arguments
-    ): array {
-        $title = $arguments['title'] ?? 'friend';
-        return [$this->createTextContent("Hello {$title} {$arguments['name']}")];
-    }
-}
-
-#[ToolAttribute('array-tool', 'Tests array parameters')]
-class ArrayParamTool extends Tool
-{
-    protected function doExecute(
-        #[ParameterAttribute('numbers', type: 'array', description: 'List of numbers')]
-        #[ParameterAttribute('enabled', type: 'boolean', description: 'Whether processing is enabled')]
-        array $arguments
-    ): array {
-        if (!$arguments['enabled']) {
-            return [$this->createTextContent('Processing disabled')];
-        }
-        $sum = array_sum($arguments['numbers']);
-        return [$this->createTextContent("Sum: $sum")];
-    }
-}
-
-#[ToolAttribute('multi-output', 'Tests multiple output types')]
-class MultiOutputTool extends Tool
-{
-    protected function doExecute(
-        #[ParameterAttribute('format', type: 'string', description: 'Output format (text/image)')]
-        array $arguments
-    ): array {
-        if ($arguments['format'] === 'text') {
-            return [$this->createTextContent('Hello world')];
-        }
-        return [$this->createImageContent('fake-image-data', 'image/png')];
-    }
-}
+// OptionalParamTool, ArrayParamTool, and MultiOutputTool are now in separate files.
 
 class ExtendedToolTest extends TestCase
 {

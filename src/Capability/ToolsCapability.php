@@ -13,11 +13,11 @@ class ToolsCapability implements CapabilityInterface
      *
      * @var array<string, Tool>
      */
-    private array $_tools = [];
+    private array $tools = [];
 
     public function addTool(Tool $tool): void
     {
-        $this->_tools[$tool->getName()] = $tool;
+        $this->tools[$tool->getName()] = $tool;
     }
 
     public function getCapabilities(): array
@@ -40,31 +40,31 @@ class ToolsCapability implements CapabilityInterface
     public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
     {
         return match ($message->method) {
-            'tools/list' => $this->_handleList($message),
-            'tools/call' => $this->_handleCall($message),
-            'completion/complete' => $this->_handleComplete($message),
+            'tools/list' => $this->handleList($message),
+            'tools/call' => $this->handleCall($message),
+            'completion/complete' => $this->handleComplete($message),
             default => throw new MethodNotSupportedException($message->method)
         };
     }
 
     public function initialize(): void
     {
-        foreach ($this->_tools as $tool) {
+        foreach ($this->tools as $tool) {
             $tool->initialize();
         }
     }
 
     public function shutdown(): void
     {
-        foreach ($this->_tools as $tool) {
+        foreach ($this->tools as $tool) {
             $tool->shutdown();
         }
     }
 
-    private function _handleList(JsonRpcMessage $message): JsonRpcMessage
+    private function handleList(JsonRpcMessage $message): JsonRpcMessage
     {
         $tools = [];
-        foreach ($this->_tools as $tool) {
+        foreach ($this->tools as $tool) {
             $toolData = [
                 'name' => $tool->getName(),
                 'description' => $tool->getDescription(),
@@ -81,7 +81,7 @@ class ToolsCapability implements CapabilityInterface
         return JsonRpcMessage::result(['tools' => $tools], $message->id);
     }
 
-    private function _handleCall(JsonRpcMessage $message): JsonRpcMessage
+    private function handleCall(JsonRpcMessage $message): JsonRpcMessage
     {
         $params = $message->params;
         $toolName = $params['name'] ?? null;
@@ -93,7 +93,7 @@ class ToolsCapability implements CapabilityInterface
                 'text' => "Invalid or missing tool name.",
             ]];
             $isError = true;
-        } elseif (!isset($this->_tools[$toolName])) {
+        } elseif (!isset($this->tools[$toolName])) {
             $contentItemsArray = [[
                 'type' => 'text',
                 'text' => "Tool not found: " . $toolName,
@@ -108,7 +108,7 @@ class ToolsCapability implements CapabilityInterface
             ]];
             $isError = true;
         } else {
-            $tool = $this->_tools[$toolName];
+            $tool = $this->tools[$toolName];
             try {
                 // $tool->execute() returns an array of content item arrays
                 $contentItemsArray = $tool->execute($toolArguments);
@@ -134,7 +134,7 @@ class ToolsCapability implements CapabilityInterface
         return JsonRpcMessage::result($callToolResultData, $message->id);
     }
 
-    private function _handleComplete(JsonRpcMessage $message): JsonRpcMessage
+    private function handleComplete(JsonRpcMessage $message): JsonRpcMessage
     {
         if (!isset($message->params['ref']) || !is_array($message->params['ref'])) {
             return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref" parameter for completion/complete', $message->id);
@@ -170,7 +170,7 @@ class ToolsCapability implements CapabilityInterface
         $currentValue = $argumentParams['value'] ?? '';
 
 
-        $tool = $this->_tools[$toolName] ?? null;
+        $tool = $this->tools[$toolName] ?? null;
 
         if (!$tool instanceof Tool) {
             return JsonRpcMessage::error(JsonRpcMessage::METHOD_NOT_FOUND, "Tool not found for completion: {$toolName}", $message->id);

@@ -108,10 +108,12 @@ class ServerErrorHandlingTest extends TestCase
         $initResponse = null;
         $shutdownResponse = null;
 
-        foreach($sentMessages as $msg) {
-            if ($msg->id === 'init_shutdown_fail_1') { $initResponse = $msg;
+        foreach ($sentMessages as $msg) {
+            if ($msg->id === 'init_shutdown_fail_1') {
+                $initResponse = $msg;
             }
-            if ($msg->id === 'shutdown_fail_1') { $shutdownResponse = $msg;
+            if ($msg->id === 'shutdown_fail_1') {
+                $shutdownResponse = $msg;
             }
         }
 

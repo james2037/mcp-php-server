@@ -1,0 +1,253 @@
+
+FILE: /app/src/Tool/Content/TextContent.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 2 WARNINGS AFFECTING 2 LINES
+--------------------------------------------------------------------------------
+ 16 | WARNING | Property name "$_text" should not be prefixed with an
+    |         | underscore to indicate visibility
+ 17 | WARNING | Property name "$_annotations" should not be prefixed with an
+    |         | underscore to indicate visibility
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/ImageContent.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 3 WARNINGS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+ 16 | WARNING | Property name "$_data" should not be prefixed with an
+    |         | underscore to indicate visibility
+ 17 | WARNING | Property name "$_mimeType" should not be prefixed with an
+    |         | underscore to indicate visibility
+ 18 | WARNING | Property name "$_annotations" should not be prefixed with an
+    |         | underscore to indicate visibility
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/EmbeddedResource.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 2 WARNINGS AFFECTING 2 LINES
+--------------------------------------------------------------------------------
+ 19 | WARNING | Property name "$_resource" should not be prefixed with an
+    |         | underscore to indicate visibility
+ 20 | WARNING | Property name "$_annotations" should not be prefixed with an
+    |         | underscore to indicate visibility
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Transport/StdioTransport.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 3 WARNINGS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+ 17 | WARNING | Property name "$_stdin" should not be prefixed with an
+    |         | underscore to indicate visibility
+ 18 | WARNING | Property name "$_stdout" should not be prefixed with an
+    |         | underscore to indicate visibility
+ 19 | WARNING | Property name "$_stderr" should not be prefixed with an
+    |         | underscore to indicate visibility
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Capability/ToolsCapability.php
+----------------------------------------------------------------------
+FOUND 0 ERRORS AND 10 WARNINGS AFFECTING 10 LINES
+----------------------------------------------------------------------
+ 118 | WARNING | Line exceeds 120 characters; contains 131 characters
+ 140 | WARNING | Line exceeds 120 characters; contains 149 characters
+ 143 | WARNING | Line exceeds 120 characters; contains 154 characters
+ 150 | WARNING | Line exceeds 120 characters; contains 133 characters
+ 156 | WARNING | Line exceeds 120 characters; contains 125 characters
+ 157 | WARNING | Line exceeds 120 characters; contains 151 characters
+ 161 | WARNING | Line exceeds 120 characters; contains 157 characters
+ 166 | WARNING | Line exceeds 120 characters; contains 149 characters
+ 176 | WARNING | Line exceeds 120 characters; contains 135 characters
+ 184 | WARNING | Line exceeds 120 characters; contains 146 characters
+----------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ToolRegistryTest.php
+--------------------------------------------------------------------------------
+FOUND 2 ERRORS AND 1 WARNING AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+ 21 | ERROR   | Each class must be in a file by itself
+ 29 | ERROR   | Each class must be in a file by itself
+ 31 | WARNING | Property name "$_registry" should not be prefixed with an
+    |         | underscore to indicate visibility
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ExtendedToolTest.php
+----------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+----------------------------------------------------------------------
+ 24 | ERROR | Each class must be in a file by itself
+ 40 | ERROR | Each class must be in a file by itself
+ 53 | ERROR | Each class must be in a file by itself
+----------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ToolTest.php
+----------------------------------------------------------------------
+FOUND 2 ERRORS AFFECTING 2 LINES
+----------------------------------------------------------------------
+ 22 | ERROR | Each class must be in a file by itself
+ 40 | ERROR | Each class must be in a file by itself
+----------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerTest.php
+--------------------------------------------------------------------------------
+FOUND 2 ERRORS AND 20 WARNINGS AFFECTING 22 LINES
+--------------------------------------------------------------------------------
+   1 | WARNING | A file should declare new symbols (classes, functions,
+     |         | constants, etc.) and cause no other side effects, or it should
+     |         | execute logic with side effects, but should not do both. The
+     |         | first symbol is defined on line 13 and the first side effect
+     |         | is on line 5.
+  57 | ERROR   | Each class must be in a file by itself
+  98 | ERROR   | Expected 1 space after closing brace; newline found
+ 100 | WARNING | Line exceeds 120 characters; contains 130 characters
+ 101 | WARNING | Line exceeds 120 characters; contains 142 characters
+ 155 | WARNING | Line exceeds 120 characters; contains 121 characters
+ 166 | WARNING | Line exceeds 120 characters; contains 125 characters
+ 176 | WARNING | Line exceeds 120 characters; contains 125 characters
+ 185 | WARNING | Line exceeds 120 characters; contains 121 characters
+ 195 | WARNING | Line exceeds 120 characters; contains 125 characters
+ 232 | WARNING | Line exceeds 120 characters; contains 123 characters
+ 252 | WARNING | Line exceeds 120 characters; contains 121 characters
+ 255 | WARNING | Line exceeds 120 characters; contains 123 characters
+ 260 | WARNING | Line exceeds 120 characters; contains 166 characters
+ 266 | WARNING | Line exceeds 120 characters; contains 140 characters
+ 273 | WARNING | Line exceeds 120 characters; contains 140 characters
+ 318 | WARNING | Line exceeds 120 characters; contains 121 characters
+ 321 | WARNING | Line exceeds 120 characters; contains 130 characters
+ 345 | WARNING | Line exceeds 120 characters; contains 121 characters
+ 349 | WARNING | Line exceeds 120 characters; contains 130 characters
+ 363 | WARNING | Line exceeds 120 characters; contains 142 characters
+ 375 | WARNING | Line exceeds 120 characters; contains 121 characters
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Transport/StdioTransportTest.php
+--------------------------------------------------------------------------------
+FOUND 1 ERROR AND 6 WARNINGS AFFECTING 7 LINES
+--------------------------------------------------------------------------------
+  11 | WARNING | Property name "$_input" should not be prefixed with an
+     |         | underscore to indicate visibility
+  12 | WARNING | Property name "$_output" should not be prefixed with an
+     |         | underscore to indicate visibility
+  13 | WARNING | Property name "$_error" should not be prefixed with an
+     |         | underscore to indicate visibility
+  89 | WARNING | Line exceeds 120 characters; contains 123 characters
+  97 | ERROR   | Each class must be in a file by itself
+  99 | WARNING | Property name "$_transport" should not be prefixed with an
+     |         | underscore to indicate visibility
+ 198 | WARNING | Line exceeds 120 characters; contains 157 characters
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Resource/ResourceTest.php
+----------------------------------------------------------------------
+FOUND 2 ERRORS AFFECTING 2 LINES
+----------------------------------------------------------------------
+ 22 | ERROR | Each class must be in a file by itself
+ 30 | ERROR | Each class must be in a file by itself
+----------------------------------------------------------------------
+
+
+FILE: /app/tests/Resource/ResourceRegistryTest.php
+--------------------------------------------------------------------------------
+FOUND 2 ERRORS AND 2 WARNINGS AFFECTING 4 LINES
+--------------------------------------------------------------------------------
+ 21 | ERROR   | Each class must be in a file by itself
+ 29 | ERROR   | Each class must be in a file by itself
+ 31 | WARNING | Property name "$_registry" should not be prefixed with an
+    |         | underscore to indicate visibility
+ 66 | WARNING | Line exceeds 120 characters; contains 191 characters
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerInitializationTest.php
+--------------------------------------------------------------------------------
+FOUND 1 ERROR AND 14 WARNINGS AFFECTING 15 LINES
+--------------------------------------------------------------------------------
+  13 | WARNING | Property name "$_server" should not be prefixed with an
+     |         | underscore to indicate visibility
+  14 | WARNING | Property name "$_transport" should not be prefixed with an
+     |         | underscore to indicate visibility
+  63 | WARNING | Line exceeds 120 characters; contains 123 characters
+  65 | WARNING | Line exceeds 120 characters; contains 135 characters
+  67 | WARNING | Line exceeds 120 characters; contains 139 characters
+ 108 | ERROR   | Closing brace must not be followed by any comment or statement
+     |         | on the same line
+ 129 | WARNING | Line exceeds 120 characters; contains 161 characters
+ 153 | WARNING | Line exceeds 120 characters; contains 125 characters
+ 213 | WARNING | Line exceeds 120 characters; contains 160 characters
+ 217 | WARNING | Line exceeds 120 characters; contains 126 characters
+ 249 | WARNING | Line exceeds 120 characters; contains 135 characters
+ 251 | WARNING | Line exceeds 120 characters; contains 139 characters
+ 264 | WARNING | Line exceeds 120 characters; contains 157 characters
+ 280 | WARNING | Line exceeds 120 characters; contains 126 characters
+ 285 | WARNING | Line exceeds 120 characters; contains 136 characters
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Util/MockTransport.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 2 WARNINGS AFFECTING 2 LINES
+--------------------------------------------------------------------------------
+ 10 | WARNING | Property name "$_incomingMessages" should not be prefixed with
+    |         | an underscore to indicate visibility
+ 11 | WARNING | Property name "$_sentMessages" should not be prefixed with an
+    |         | underscore to indicate visibility
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Message/JsonRpcMessageTest.php
+----------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+----------------------------------------------------------------------
+ 72 | WARNING | Line exceeds 120 characters; contains 133 characters
+----------------------------------------------------------------------
+
+
+FILE: /app/tests/Capability/ToolsCapabilityTest.php
+--------------------------------------------------------------------------------
+FOUND 2 ERRORS AND 5 WARNINGS AFFECTING 7 LINES
+--------------------------------------------------------------------------------
+  39 | ERROR   | Each class must be in a file by itself
+  48 | ERROR   | Each class must be in a file by itself
+  50 | WARNING | Property name "$_capability" should not be prefixed with an
+     |         | underscore to indicate visibility
+  51 | WARNING | Property name "$_mockToolInstance" should not be prefixed with
+     |         | an underscore to indicate visibility
+ 147 | WARNING | Line exceeds 120 characters; contains 140 characters
+ 177 | WARNING | Line exceeds 120 characters; contains 130 characters
+ 273 | WARNING | Line exceeds 120 characters; contains 130 characters
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Capability/ResourcesCapabilityTest.php
+--------------------------------------------------------------------------------
+FOUND 2 ERRORS AND 3 WARNINGS AFFECTING 5 LINES
+--------------------------------------------------------------------------------
+ 18 | WARNING | Line exceeds 120 characters; contains 124 characters
+ 32 | ERROR   | Each class must be in a file by itself
+ 34 | WARNING | Line exceeds 120 characters; contains 124 characters
+ 49 | ERROR   | Each class must be in a file by itself
+ 51 | WARNING | Property name "$_capability" should not be prefixed with an
+    |         | underscore to indicate visibility
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerErrorHandlingTest.php
+--------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 3 WARNINGS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  13 | WARNING | Property name "$_server" should not be prefixed with an
+     |         | underscore to indicate visibility
+  14 | WARNING | Property name "$_transport" should not be prefixed with an
+     |         | underscore to indicate visibility
+ 201 | WARNING | Line exceeds 120 characters; contains 127 characters
+--------------------------------------------------------------------------------
+
+Time: 621ms; Memory: 10MB

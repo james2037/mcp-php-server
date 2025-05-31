@@ -3,6 +3,7 @@
 /**
  * @phpcs:ignore PEAR.Commenting.FileComment.MissingVersion
  */
+
 /**
  * This file defines the ResourcesCapability class, which manages access to resources.
  *
@@ -46,7 +47,7 @@ class ResourcesCapability implements CapabilityInterface
      *
      * @var array<string, Resource>
      */
-    private array $_resources = [];
+    private array $resources = [];
 
     /**
      * Adds a resource to be managed by this capability.
@@ -57,7 +58,7 @@ class ResourcesCapability implements CapabilityInterface
      */
     public function addResource(Resource $resource): void
     {
-        $this->_resources[$resource->getUri()] = $resource;
+        $this->resources[$resource->getUri()] = $resource;
     }
 
     /**
@@ -102,8 +103,8 @@ class ResourcesCapability implements CapabilityInterface
     public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
     {
         return match ($message->method) {
-            'resources/list' => $this->_handleList($message),
-            'resources/read' => $this->_handleRead($message),
+            'resources/list' => $this->handleList($message),
+            'resources/read' => $this->handleRead($message),
             default => throw new MethodNotSupportedException($message->method)
         };
     }
@@ -135,10 +136,10 @@ class ResourcesCapability implements CapabilityInterface
      *
      * @return JsonRpcMessage A response message containing the list of resources.
      */
-    private function _handleList(JsonRpcMessage $message): JsonRpcMessage
+    private function handleList(JsonRpcMessage $message): JsonRpcMessage
     {
         $resourceList = [];
-        foreach ($this->_resources as $resource) {
+        foreach ($this->resources as $resource) {
             // The Resource class now has a toArray() method
             // that includes all necessary fields
             $resourceList[] = $resource->toArray();
@@ -156,7 +157,7 @@ class ResourcesCapability implements CapabilityInterface
      *
      * @return JsonRpcMessage A response message with the resource contents or an error.
      */
-    private function _handleRead(JsonRpcMessage $message): JsonRpcMessage
+    private function handleRead(JsonRpcMessage $message): JsonRpcMessage
     {
         $uri = $message->params['uri'] ?? null;
         if (!$uri) {
@@ -168,9 +169,9 @@ class ResourcesCapability implements CapabilityInterface
         }
 
         // Find matching resource and extract parameters
-        foreach ($this->_resources as $resource) {
+        foreach ($this->resources as $resource) {
             $template = $resource->getUri();
-            $parameters = $this->_matchUriTemplate($template, $uri);
+            $parameters = $this->matchUriTemplate($template, $uri);
             if ($parameters !== null) {
                 try {
                     $resourceContent = $resource->read($parameters);
@@ -219,7 +220,7 @@ class ResourcesCapability implements CapabilityInterface
      *
      * @return array|null An associative array of parameters if matched, null otherwise.
      */
-    private function _matchUriTemplate(string $template, string $uri): ?array
+    private function matchUriTemplate(string $template, string $uri): ?array
     {
         // Convert template to regex pattern
         $pattern = preg_quote($template, '/');

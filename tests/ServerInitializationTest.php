@@ -10,25 +10,25 @@ use MCP\Server\Tests\Util\MockTransport;
 
 class ServerInitializationTest extends TestCase
 {
-    private Server $_server;
-    private MockTransport $_transport;
+    private Server $server;
+    private MockTransport $transport;
 
     protected function setUp(): void
     {
-        $this->_server = new Server('test-server', '1.0.0');
-        $this->_transport = new MockTransport();
-        $this->_server->connect($this->_transport);
-        $this->_transport->reset(); // Ensure clean transport for each test
+        $this->server = new Server('test-server', '1.0.0');
+        $this->transport = new MockTransport();
+        $this->server->connect($this->transport);
+        $this->transport->reset(); // Ensure clean transport for each test
     }
 
     public function testRejectsMessageBeforeInitialization(): void
     {
         $testMethodMessage = new JsonRpcMessage('test.method', [], '1');
-        $this->_transport->queueIncomingMessages([$testMethodMessage]);
+        $this->transport->queueIncomingMessages([$testMethodMessage]);
         // Server will consume the message, try to process, fail, and then transport will be "closed".
-        $this->_server->run();
+        $this->server->run();
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         $this->assertCount(1, $sentMessages);
         $response = $sentMessages[0];
         $this->assertNotNull($response);
@@ -50,10 +50,10 @@ class ServerInitializationTest extends TestCase
             ],
             'init_1'
         );
-        $this->_transport->queueIncomingMessages([$initMessage]);
-        $this->_server->run();
+        $this->transport->queueIncomingMessages([$initMessage]);
+        $this->server->run();
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         $this->assertCount(1, $sentMessages);
         $response = $sentMessages[0];
         $this->assertNotNull($response);
@@ -73,7 +73,7 @@ class ServerInitializationTest extends TestCase
     {
         $handledBy = null; // Variable to track who handled the message
 
-        $cap1 = new class($handledBy) implements CapabilityInterface {
+        $cap1 = new class ($handledBy) implements CapabilityInterface {
             public function __construct(private &$handledByRef)
             {
             }
@@ -87,7 +87,8 @@ class ServerInitializationTest extends TestCase
             }
             public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
             {
-                $this->handledByRef = 'cap1'; return JsonRpcMessage::result(['handled_by' => 'cap1'], $message->id);
+                $this->handledByRef = 'cap1';
+                return JsonRpcMessage::result(['handled_by' => 'cap1'], $message->id);
             }
             public function initialize(): void
             {
@@ -97,7 +98,7 @@ class ServerInitializationTest extends TestCase
             }
         };
 
-        $cap2 = new class($handledBy) implements CapabilityInterface {
+        $cap2 = new class ($handledBy) implements CapabilityInterface {
             public function __construct(private &$handledByRef)
             {
             }
@@ -111,7 +112,8 @@ class ServerInitializationTest extends TestCase
             }
             public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
             {
-                $this->handledByRef = 'cap2'; return JsonRpcMessage::result(['handled_by' => 'cap2'], $message->id);
+                $this->handledByRef = 'cap2';
+                return JsonRpcMessage::result(['handled_by' => 'cap2'], $message->id);
             }
             public function initialize(): void
             {
@@ -121,25 +123,25 @@ class ServerInitializationTest extends TestCase
             }
         };
 
-        $this->_server->addCapability($cap1);
-        $this->_server->addCapability($cap2); // cap2 added second
+        $this->server->addCapability($cap1);
+        $this->server->addCapability($cap2); // cap2 added second
 
-        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name'=>'c', 'version'=>'1']], 'init_conflict');
+        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']], 'init_conflict');
         $conflictMessage = new JsonRpcMessage('conflict.method', [], 'conflict_call_1');
 
-        $this->_transport->queueIncomingMessages([$initMessage]);
-        $this->_transport->queueIncomingMessages([$conflictMessage]);
+        $this->transport->queueIncomingMessages([$initMessage]);
+        $this->transport->queueIncomingMessages([$conflictMessage]);
         // Add a shutdown message to ensure clean exit for other tests if run() is used more broadly
         $shutdownMessage = new JsonRpcMessage('shutdown', [], 'shutdown_conflict');
-        $this->_transport->queueIncomingMessages([$shutdownMessage]);
+        $this->transport->queueIncomingMessages([$shutdownMessage]);
 
-        $this->_server->run();
+        $this->server->run();
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         $this->assertCount(3, $sentMessages); // Init, conflict_method_response, shutdown_response
 
         $conflictResponse = null;
-        foreach($sentMessages as $msg) {
+        foreach ($sentMessages as $msg) {
             if ($msg->id === 'conflict_call_1') {
                 $conflictResponse = $msg;
                 break;
@@ -205,12 +207,12 @@ class ServerInitializationTest extends TestCase
             }
         };
 
-        $this->_server->addCapability($cap1);
-        $this->_server->addCapability($cap2);
+        $this->server->addCapability($cap1);
+        $this->server->addCapability($cap2);
 
-        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name'=>'c', 'version'=>'1']], 'init_order_1');
-        $this->_transport->queueIncomingMessages([$initMessage]);
-        $this->_server->run();
+        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']], 'init_order_1');
+        $this->transport->queueIncomingMessages([$initMessage]);
+        $this->server->run();
 
         $this->assertEquals(['cap1', 'cap2'], $initOrder, "Capabilities should be initialized in the order they were added.");
     }
@@ -229,10 +231,10 @@ class ServerInitializationTest extends TestCase
             ],
             'init_unsupported_1'
         );
-        $this->_transport->queueIncomingMessages([$initMessage]);
-        $this->_server->run();
+        $this->transport->queueIncomingMessages([$initMessage]);
+        $this->server->run();
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         $this->assertCount(1, $sentMessages);
         $response = $sentMessages[0];
         $this->assertNotNull($response);
@@ -254,26 +256,26 @@ class ServerInitializationTest extends TestCase
     {
         // Reset server and transport for this specific test to ensure clean state
         // This is important because clientSetLogLevel is stateful on the Server instance
-        $this->_server = new Server('test-server-log', '1.0.0');
-        $this->_transport = new MockTransport(); // Fresh transport
-        $this->_server->connect($this->_transport);
+        $this->server = new Server('test-server-log', '1.0.0');
+        $this->transport = new MockTransport(); // Fresh transport
+        $this->server->connect($this->transport);
         // No capabilities needed for this specific server feature test
 
-        $initMsg = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name'=>'c', 'version'=>'1']], 'init_log_test');
+        $initMsg = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']], 'init_log_test');
         $setLevelMsg = new JsonRpcMessage('logging/setLevel', ['level' => 'debug'], 'set_level_log_test');
 
         // Queue messages in separate "receive" batches
-        $this->_transport->queueIncomingMessages([$initMsg]);
-        $this->_transport->queueIncomingMessages([$setLevelMsg]);
+        $this->transport->queueIncomingMessages([$initMsg]);
+        $this->transport->queueIncomingMessages([$setLevelMsg]);
 
         // Server processes init, then setLevel. isClosed will be true after these.
-        $this->_server->run();
+        $this->server->run();
 
         // Server::logMessage sends immediately if conditions met.
         // So, we trigger a log *after* setLevel has been processed.
-        $this->_server->logMessage('debug', 'test client log message', 'test-logger', ['extra' => 'data']);
+        $this->server->logMessage('debug', 'test client log message', 'test-logger', ['extra' => 'data']);
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         // Expected: 1. init_response, 2. setLevel_internal_log, 3. setLevel_response, 4. explicit_log_notification
         $this->assertCount(4, $sentMessages, "Should have 4 messages: init_resp, setLevel_log, setLevel_resp, explicit_log.");
 

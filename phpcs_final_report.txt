@@ -198,5 +198,4 @@
      |         | (Generic.Files.LineLength.TooLong)
 --------------------------------------------------------------------------------
 
-Time: 603ms; Memory: 10MB
-
+Time: 741ms; Memory: 10MB

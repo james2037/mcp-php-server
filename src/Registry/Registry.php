@@ -10,7 +10,7 @@ use ReflectionClass;
 
 abstract class Registry
 {
-    private array $_items = [];
+    private array $items = [];
 
     public function discover(string $directory, array $config = []): void
     {
@@ -23,10 +23,12 @@ abstract class Registry
                 continue;
             }
 
+            // Ensure the file is included before trying to get class info
+            // This was include_once, which is fine.
             include_once $file->getPathname();
-            $className = $this->getClassFromFile($file);
+            $className = $this->getClassFromFile($file); // Use $this->
 
-            if (!class_exists($className)) {
+            if (!$className || !class_exists($className)) { // Check if $className is valid
                 continue;
             }
 
@@ -43,17 +45,24 @@ abstract class Registry
 
     protected function getItems(): array
     {
-        return $this->_items;
+        return $this->items;
     }
 
     public function register(object $item): void
     {
-        $this->_items[$this->getItemKey($item)] = $item;
+        $this->items[$this->getItemKey($item)] = $item;
     }
 
-    private function _getClassFromFile(\SplFileInfo $file): string
+    // Changed from private to protected to allow potential child class access if needed,
+    // or keep as private if strictly internal. For now, private is fine as per original.
+    // Renamed from _getClassFromFile
+    private function getClassFromFile(\SplFileInfo $file): string
     {
         $contents = file_get_contents($file->getRealPath());
+        if ($contents === false) {
+            return ''; // Or throw exception
+        }
+
         $namespace = '';
         $class = '';
 
@@ -63,6 +72,10 @@ abstract class Registry
 
         if (preg_match('/class\s+([^\s{]+)/', $contents, $matches)) {
             $class = $matches[1];
+        }
+
+        if (empty($class)) {
+            return ''; // Or throw exception if class name is mandatory
         }
 
         return $namespace ? $namespace . '\\' . $class : $class;

@@ -9,23 +9,7 @@ use MCP\Server\Resource\BlobResourceContents;
 use MCP\Server\Resource\Attribute\ResourceUri;
 use PHPUnit\Framework\TestCase;
 
-#[ResourceUri('test://static')]
-class TestResource extends Resource
-{
-    public function read(array $parameters = []): ResourceContents
-    {
-        return $this->text('Static content', null, $parameters);
-    }
-}
-
-#[ResourceUri('test://users/{userId}/profile')]
-class DynamicResource extends Resource
-{
-    public function read(array $parameters = []): ResourceContents
-    {
-        return $this->text("Profile for user {$parameters['userId']}", null, $parameters);
-    }
-}
+// TestResource and DynamicResource are now in separate files.
 
 class ResourceTest extends TestCase
 {
@@ -59,7 +43,7 @@ class ResourceTest extends TestCase
 
     public function testBlobContentCreation(): void
     {
-        $resource = new class("test_blob_resource_anon") extends Resource {
+        $resource = new class ("test_blob_resource_anon") extends Resource {
             #[ResourceUri('test://image')]
             public function read(array $parameters = []): ResourceContents
             {

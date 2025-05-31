@@ -6,60 +6,29 @@ use MCP\Server\Capability\ToolsCapability;
 use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
-use MCP\Server\Tool\Attribute\ToolAnnotations; // Added
+use MCP\Server\Tool\Attribute\ToolAnnotations;
 use MCP\Server\Tool\Tool;
-use MCP\Server\Tool\Content; // Added
+use MCP\Server\Tool\Content;
 use PHPUnit\Framework\TestCase;
-
-#[ToolAnnotations(title: 'Mock Test Tool', readOnlyHint: true)] // Added annotation
-#[ToolAttribute('test', 'Test Tool')]
-class MockTool extends Tool
-{
-    protected function doExecute(
-        #[ParameterAttribute('data', type: 'string', description: 'Input data')] // Added description
-        array $arguments
-    ): array { // Return type hint for clarity, still array of ContentItemInterface
-        // Use the helper method from Tool.php
-        return [$this->createTextContent('Result: ' . $arguments['data'])];
-    }
-
-    // Override for completion test
-    public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allArguments = []): array
-    {
-        if ($argumentName === 'data') {
-            $allValues = ['apple', 'apricot', 'banana', 'blueberry'];
-            $filteredValues = array_filter($allValues, fn($v) => str_starts_with($v, (string)$currentValue));
-            return ['values' => array_values($filteredValues), 'total' => count($filteredValues), 'hasMore' => false];
-        }
-        return parent::getCompletionSuggestions($argumentName, $currentValue, $allArguments);
-    }
-}
-
-#[ToolAttribute('failing', 'Failing Tool')]
-class FailingMockTool extends Tool
-{
-    protected function doExecute(array $arguments): array
-    {
-        throw new \RuntimeException('Tool execution failed');
-    }
-    // No change to return type needed here as it throws before returning
-}
+// MockTool and FailingMockTool are now in separate files.
+use MCP\Server\Tests\Capability\MockTool;
+use MCP\Server\Tests\Capability\FailingMockTool;
 
 class ToolsCapabilityTest extends TestCase
 {
-    private ToolsCapability $_capability;
-    private MockTool $_mockToolInstance; // To access its methods if needed, or just for setup
+    private ToolsCapability $capability;
+    private MockTool $mockToolInstance; // To access its methods if needed, or just for setup
 
     protected function setUp(): void
     {
-        $this->_capability = new ToolsCapability();
-        $this->_mockToolInstance = new MockTool();
-        $this->_capability->addTool($this->_mockToolInstance);
+        $this->capability = new ToolsCapability();
+        $this->mockToolInstance = new MockTool();
+        $this->capability->addTool($this->mockToolInstance);
     }
 
     public function testGetCapabilities(): void
     {
-        $caps = $this->_capability->getCapabilities();
+        $caps = $this->capability->getCapabilities();
         $this->assertArrayHasKey('tools', $caps);
         $this->assertArrayHasKey('listChanged', $caps['tools']);
         // As per current ToolsCapability, no other capabilities are announced by default
@@ -69,7 +38,7 @@ class ToolsCapabilityTest extends TestCase
     public function testHandleList(): void
     {
         $request = new JsonRpcMessage('tools/list', [], '1');
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error, "tools/list should not produce an error directly.");
@@ -99,7 +68,7 @@ class ToolsCapabilityTest extends TestCase
             ['name' => 'test', 'arguments' => ['data' => 'test input']],
             '1'
         );
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error, "tools/call with valid tool should not produce a top-level error.");
@@ -117,7 +86,8 @@ class ToolsCapabilityTest extends TestCase
             ['name' => 'unknown', 'arguments' => []],
             '1'
         );
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error); // Error is within the result for tools/call
@@ -130,13 +100,14 @@ class ToolsCapabilityTest extends TestCase
 
     public function testHandleCallWithFailingTool(): void
     {
-        $this->_capability->addTool(new FailingMockTool());
+        $this->capability->addTool(new FailingMockTool());
         $request = new JsonRpcMessage(
             'tools/call',
             ['name' => 'failing', 'arguments' => []],
             '1'
         );
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error); // Error is within the result for tools/call
@@ -157,7 +128,7 @@ class ToolsCapabilityTest extends TestCase
             ['name' => 'test', 'arguments' => ['unexpected_arg' => 'value']], // 'data' is missing
             '1'
         );
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
@@ -209,12 +180,14 @@ class ToolsCapabilityTest extends TestCase
     public function testHandleCompleteSuggestions(): void
     {
         $request = new JsonRpcMessage(
-            'completion/complete', [
+            'completion/complete',
+            [
             'ref' => ['type' => 'ref/prompt', 'name' => 'test'],
             'argument' => ['name' => 'data', 'value' => 'ap']
-            ], 'comp1'
+            ],
+            'comp1'
         );
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
@@ -233,15 +206,17 @@ class ToolsCapabilityTest extends TestCase
                 return [$this->createTextContent('done')];
             }
         };
-        $this->_capability->addTool($basicTool); // Add to the existing capability instance
+        $this->capability->addTool($basicTool); // Add to the existing capability instance
 
         $request = new JsonRpcMessage(
-            'completion/complete', [
+            'completion/complete',
+            [
             'ref' => ['type' => 'ref/prompt', 'name' => 'basic'],
             'argument' => ['name' => 'some_arg', 'value' => 'any']
-            ], 'comp2'
+            ],
+            'comp2'
         );
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
@@ -252,12 +227,14 @@ class ToolsCapabilityTest extends TestCase
     public function testHandleCompleteToolNotFound(): void
     {
         $request = new JsonRpcMessage(
-            'completion/complete', [
+            'completion/complete',
+            [
             'ref' => ['type' => 'ref/prompt', 'name' => 'unknownToolForCompletion'],
             'argument' => ['name' => 'arg', 'value' => 'val']
-            ], 'comp3'
+            ],
+            'comp3'
         );
-        $response = $this->_capability->handleMessage($request);
+        $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error); // The $response object itself should have its error property set

@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace MCP\Server\Resource;
 
 use MCP\Server\Resource\Attribute\ResourceUri;
-use MCP\Server\Tool\Content\Annotations; // Added
+use MCP\Server\Tool\Content\Annotations;
+
+// Added
 
 abstract class Resource
 {
-    private ?ResourceUri $_metadata = null;
+    private ?ResourceUri $metadata = null;
     protected array $config = [];
 
     // New properties to match the Resource schema for listing
@@ -34,26 +36,26 @@ abstract class Resource
             $this->config = $config;
         }
 
-        $this->_initializeMetadata(); // Reads ResourceUri for URI template and description
+        $this->initializeMetadata(); // Reads ResourceUri for URI template and description
     }
 
-    private function _initializeMetadata(): void
+    private function initializeMetadata(): void
     {
         $reflection = new \ReflectionClass($this);
         $attrs = $reflection->getAttributes(ResourceUri::class);
         if (count($attrs) > 0) {
-            $this->_metadata = $attrs[0]->newInstance();
+            $this->metadata = $attrs[0]->newInstance();
         }
     }
 
     public function getUri(): string
     {
-        return $this->_metadata?->uri ?? static::class;
+        return $this->metadata?->uri ?? static::class;
     }
 
     public function getDescription(): ?string
     {
-        return $this->_metadata?->description;
+        return $this->metadata?->description;
     }
 
     // toArray method to represent the resource for listings
@@ -87,7 +89,7 @@ abstract class Resource
     protected function text(string $text, ?string $mimeType = null, array $parameters = []): TextResourceContents
     {
         return new TextResourceContents(
-            $this->_resolveUri($this->getUri(), $parameters),
+            $this->resolveUri($this->getUri(), $parameters),
             $text,
             $mimeType
         );
@@ -96,13 +98,13 @@ abstract class Resource
     protected function blob(string $data, string $mimeType, array $parameters = []): BlobResourceContents
     {
         return new BlobResourceContents(
-            $this->_resolveUri($this->getUri(), $parameters),
+            $this->resolveUri($this->getUri(), $parameters),
             $data,
             $mimeType
         );
     }
 
-    private function _resolveUri(string $template, array $parameters): string
+    private function resolveUri(string $template, array $parameters): string
     {
         $uri = $template;
         foreach ($parameters as $key => $value) {
