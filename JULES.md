@@ -42,6 +42,10 @@ vendor/bin/phpunit
 ```
 *(Note: This will use the `phpunit.xml.dist` configuration.)*
 
+### Unit Testing Obligation
+
+**Crucially, any new feature development, bug fix, or refactoring work you perform *must* be accompanied by new or updated unit tests.** Ensure that your tests thoroughly cover the changes made and that all tests pass before considering a task complete. This is non-negotiable for maintaining code quality and stability.
+
 ## Pre-Commit Check
 
 Before committing any code changes, always run the full test suite to ensure everything is passing:
