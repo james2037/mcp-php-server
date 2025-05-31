@@ -14,7 +14,10 @@ class ResourceRegistry extends Registry
     {
         $resourceAttr = $reflection->getAttributes(ResourceUri::class)[0] ?? null;
         if ($resourceAttr !== null) {
-            $resource = new ($reflection->getName())($config);
+            // Derive the name from the short class name
+            $resourceName = $reflection->getShortName();
+            // Instantiate with name first, then nulls for optional params, then config
+            $resource = new ($reflection->getName())($resourceName, null, null, null, $config);
             if ($resource instanceof Resource) {
                 return $resource;
             }

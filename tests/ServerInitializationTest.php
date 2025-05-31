@@ -62,9 +62,9 @@ class ServerInitializationTest extends TestCase
         $this->assertArrayHasKey('result', $responseArray);
         $this->assertEquals('2025-03-26', $responseArray['result']['protocolVersion']); // Server responds with its version
         $this->assertArrayHasKey('logging', $responseArray['result']['capabilities']);
-        $this->assertEquals(new \stdClass(), $responseArray['result']['capabilities']['logging']);
+        $this->assertEquals([], $responseArray['result']['capabilities']['logging']); // Empty JSON object {} decodes to empty array []
         $this->assertArrayHasKey('completions', $responseArray['result']['capabilities']);
-        $this->assertEquals(new \stdClass(), $responseArray['result']['capabilities']['completions']);
+        $this->assertEquals([], $responseArray['result']['capabilities']['completions']); // Empty JSON object {} decodes to empty array []
         $this->assertArrayHasKey('instructions', $responseArray['result']);
         $this->assertIsString($responseArray['result']['instructions']);
     }
@@ -182,9 +182,9 @@ class ServerInitializationTest extends TestCase
         // Server announces its own capabilities, not client's.
         // Check for default 'logging' and 'completions'.
         $this->assertArrayHasKey('logging', $responseArray['result']['capabilities']);
-        $this->assertEquals(new \stdClass(), $responseArray['result']['capabilities']['logging']);
+        $this->assertEquals([], $responseArray['result']['capabilities']['logging']); // Empty JSON object {} decodes to empty array []
         $this->assertArrayHasKey('completions', $responseArray['result']['capabilities']);
-        $this->assertEquals(new \stdClass(), $responseArray['result']['capabilities']['completions']);
+        $this->assertEquals([], $responseArray['result']['capabilities']['completions']); // Empty JSON object {} decodes to empty array []
         $this->assertArrayNotHasKey('unsupported_feature', $responseArray['result']['capabilities']);
     }
 
@@ -212,17 +212,18 @@ class ServerInitializationTest extends TestCase
         $this->server->logMessage('debug', 'test client log message', 'test-logger', ['extra' => 'data']);
 
         $sentMessages = $this->transport->getAllSentMessages();
-        // Expected: 1. init response, 2. setLevel response, 3. log notification
-        $this->assertCount(3, $sentMessages, "Should have init response, setLevel response, and one log notification.");
+        // Expected: 1. init_response, 2. setLevel_internal_log, 3. setLevel_response, 4. explicit_log_notification
+        $this->assertCount(4, $sentMessages, "Should have 4 messages: init_resp, setLevel_log, setLevel_resp, explicit_log.");
 
         $logNotification = null;
+        // Find the explicit log notification which has 'test-logger'
         foreach ($sentMessages as $msg) {
-            if ($msg->method === 'notifications/message') {
+            if ($msg->method === 'notifications/message' && isset($msg->params['logger']) && $msg->params['logger'] === 'test-logger') {
                 $logNotification = $msg;
                 break;
             }
         }
-        $this->assertNotNull($logNotification, "Log notification not found.");
+        $this->assertNotNull($logNotification, "Explicitly triggered log notification with 'test-logger' not found.");
         $this->assertNull($logNotification->id, "Log notification should not have an ID.");
         $this->assertEquals('debug', $logNotification->params['level']);
         $this->assertEquals('test client log message', $logNotification->params['message']);

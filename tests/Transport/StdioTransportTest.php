@@ -41,12 +41,11 @@ class TestableStdioTransport extends StdioTransport
     // Helper methods for testing
     public function writeToInput(string $data): void
     {
-        // Clear the stream first
-        ftruncate($this->input, 0);
-        fseek($this->input, 0);
-        // Write new data
+        // Append new data to the input stream
+        // StdioTransport::receive() reads line by line, so ensure input stream pointer is at the end for writing.
+        fseek($this->input, 0, SEEK_END); // Move to the end before writing
         fwrite($this->input, $data . "\n");
-        // Reset position to start for reading
+        // Reset position to start for reading by receive()
         fseek($this->input, 0);
     }
 

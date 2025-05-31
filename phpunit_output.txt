@@ -3,205 +3,36 @@ PHPUnit 10.5.46 by Sebastian Bergmann and contributors.
 Runtime:       PHP 8.1.32
 Configuration: /app/phpunit.xml.dist
 
-.......E...F...F.....F.F.F.......EEEEEE.EF.F..F[2025-05-31 04:57:49] [INFO] Client log level set to: debug
-Failed to send log notification to client: Call to undefined method MCP\Server\Message\JsonRpcMessage::notification()
-[2025-05-31 04:57:49] [DEBUG] test-logger: test client log message | Data: {"extra":"data"}
-Failed to send log notification to client: Call to undefined method MCP\Server\Message\JsonRpcMessage::notification()
-FFFFFFFFFFFE...... 65 / 87 ( 74%)
-......F...............                                            87 / 87 (100%)
+.................................................FFF...F......... 65 / 87 ( 74%)
+......................                                            87 / 87 (100%)
 
-Time: 00:00.043, Memory: 10.00 MB
+Time: 00:00.066, Memory: 10.00 MB
 
-There were 9 errors:
+There were 4 failures:
 
-1) MCP\Server\Tests\Capability\ToolsCapabilityTest::testHandleList
-TypeError: PHPUnit\Framework\Assert::assertArrayHasKey(): Argument #2 ($array) must be of type ArrayAccess|array, stdClass given, called in /app/tests/Capability/ToolsCapabilityTest.php on line 88
-
-/app/tests/Capability/ToolsCapabilityTest.php:88
-
-2) MCP\Server\Tests\Resource\ResourceRegistryTest::testRegister
-ArgumentCountError: Too few arguments to function MCP\Server\Resource\Resource::__construct(), 0 passed in /app/tests/Resource/ResourceRegistryTest.php on line 40 and at least 1 expected
-
-/app/src/Resource/Resource.php:21
-/app/tests/Resource/ResourceRegistryTest.php:40
-
-3) MCP\Server\Tests\Resource\ResourceRegistryTest::testDiscoverResources
-TypeError: MCP\Server\Resource\Resource::__construct(): Argument #1 ($name) must be of type string, array given, called in /app/src/Resource/ResourceRegistry.php on line 17
-
-/app/src/Resource/Resource.php:21
-/app/src/Resource/ResourceRegistry.php:17
-/app/src/Registry/Registry.php:38
-/app/tests/Resource/ResourceRegistryTest.php:73
-
-4) MCP\Server\Tests\Resource\ResourceTest::testResourceMetadata
-ArgumentCountError: Too few arguments to function MCP\Server\Resource\Resource::__construct(), 0 passed in /app/tests/Resource/ResourceTest.php on line 34 and at least 1 expected
-
-/app/src/Resource/Resource.php:21
-/app/tests/Resource/ResourceTest.php:34
-
-5) MCP\Server\Tests\Resource\ResourceTest::testTextContentCreation
-ArgumentCountError: Too few arguments to function MCP\Server\Resource\Resource::__construct(), 0 passed in /app/tests/Resource/ResourceTest.php on line 42 and at least 1 expected
-
-/app/src/Resource/Resource.php:21
-/app/tests/Resource/ResourceTest.php:42
-
-6) MCP\Server\Tests\Resource\ResourceTest::testParameterizedResource
-ArgumentCountError: Too few arguments to function MCP\Server\Resource\Resource::__construct(), 0 passed in /app/tests/Resource/ResourceTest.php on line 52 and at least 1 expected
-
-/app/src/Resource/Resource.php:21
-/app/tests/Resource/ResourceTest.php:52
-
-7) MCP\Server\Tests\Resource\ResourceTest::testBlobContentCreation
-ArgumentCountError: Too few arguments to function MCP\Server\Resource\Resource::__construct(), 0 passed in /app/tests/Resource/ResourceTest.php on line 62 and at least 1 expected
-
-/app/src/Resource/Resource.php:21
-/app/tests/Resource/ResourceTest.php:62
-
-8) MCP\Server\Tests\ServerErrorHandlingTest::testHandlesShutdownFailure
-RuntimeException: Shutdown failed
-
-/app/tests/ServerErrorHandlingTest.php:61
-/app/src/Server.php:178
-/app/src/Server.php:167
-/app/tests/ServerErrorHandlingTest.php:74
-
-9) MCP\Server\Tests\Tool\ExtendedToolTest::testMultipleOutputTypes
-Error: Call to undefined method MCP\Server\Tests\Tool\MultiOutputTool::text()
-
-/app/tests/Tool/ExtendedToolTest.php:47
-/app/src/Tool/Tool.php:139
-/app/tests/Tool/ExtendedToolTest.php:116
-
---
-
-There were 20 failures:
-
-1) MCP\Server\Tests\Capability\ToolsCapabilityTest::testHandleCallWithMissingRequiredArgument
-Failed asserting that 'Error executing tool 'test': Unknown argument: unexpected_arg' [Encoding ignored](length: 61) contains "undefined array key "data"" [Encoding ignored](length: 26).
-
-/app/tests/Capability/ToolsCapabilityTest.php:166
-
-2) MCP\Server\Tests\Capability\ToolsCapabilityTest::testHandleCompleteToolNotFound
-Failed asserting that Array &0 [
-    'code' => -32601,
-    'message' => 'Tool not found for completion: unknownToolForCompletion',
-] is null.
-
-/app/tests/Capability/ToolsCapabilityTest.php:242
-
-3) MCP\Server\Tests\Message\JsonRpcMessageTest::testFromJsonArrayValidBatchRequest
-null does not match expected type "object".
-
-/app/tests/Message/JsonRpcMessageTest.php:85
-
-4) MCP\Server\Tests\Message\JsonRpcMessageTest::testFromJsonArrayInvalidJson
-Failed asserting that exception of type "JsonException" matches expected exception "RuntimeException". Message was: "Syntax error" at
-/app/src/Message/JsonRpcMessage.php:140
-/app/tests/Message/JsonRpcMessageTest.php:109
-.
-
-5) MCP\Server\Tests\Message\JsonRpcMessageTest::testFromJsonArrayContainsInvalidMessage
-Failed asserting that exception message 'Missing method' contains 'Invalid JSON-RPC 2.0 message: Missing method'.
-
-6) MCP\Server\Tests\ServerErrorHandlingTest::testShutdownOrder
-Capabilities should be shutdown in the order they were added.
-Failed asserting that two arrays are equal.
---- Expected
-+++ Actual
-@@ @@
- Array (
-     0 => 'cap1'
-     1 => 'cap2'
-+    2 => 'cap1'
-+    3 => 'cap2'
- )
-
-/app/tests/ServerErrorHandlingTest.php:137
-
-7) MCP\Server\Tests\ServerInitializationTest::testInitializeResponseDetails
-[] does not match expected type "object".
-
-/app/tests/ServerInitializationTest.php:65
-
-8) MCP\Server\Tests\ServerInitializationTest::testInitializationWithUnsupportedCapabilities
-[] does not match expected type "object".
-
-/app/tests/ServerInitializationTest.php:185
-
-9) MCP\Server\Tests\ServerInitializationTest::testLoggingSetLevelAndNotificationViaMockTransport
-Should have init response, setLevel response, and one log notification.
-Failed asserting that actual size 2 matches expected size 3.
-
-/app/tests/ServerInitializationTest.php:216
-
-10) MCP\Server\Tests\ServerTest::testInitialization
-Initialize response not found in output. Got: [[{"jsonrpc":"2.0","id":"shutdown_id","result":[]}]]
+1) MCP\Server\Tests\ServerTest::testCapabilityHandling
+Test method response not found. Raw: [[{"jsonrpc":"2.0","id":"init_id_683a9f92f21d4","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}],[{"jsonrpc":"2.0","id":"cap_test_id","result":{"success":true}}],[{"jsonrpc":"2.0","id":"shutdown_cap_handling_683a9f92f21e3","result":[]}]]
 Failed asserting that null is not null.
 
-/app/tests/ServerTest.php:100
-/app/tests/ServerTest.php:106
+/app/tests/ServerTest.php:157
 
-11) MCP\Server\Tests\ServerTest::testCapabilityHandling
-Initialize response not found in output. Got: [[{"jsonrpc":"2.0","id":"shutdown_id","result":[]}]]
+2) MCP\Server\Tests\ServerTest::testMethodNotFound
+Error response for unknown method not found. Got: [[{"jsonrpc":"2.0","id":"init_id_683a9f92f4050","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}],[{"jsonrpc":"2.0","id":"unknown_id_683a9f92f4057","error":{"code":-32601,"message":"Method not found: unknown.method"}}],[{"jsonrpc":"2.0","id":"shutdown_method_not_found_683a9f92f4058","result":[]}]]
 Failed asserting that null is not null.
 
-/app/tests/ServerTest.php:100
-/app/tests/ServerTest.php:127
+/app/tests/ServerTest.php:183
 
-12) MCP\Server\Tests\ServerTest::testMethodNotFound
-Initialize response not found in output. Got: [[{"jsonrpc":"2.0","id":"shutdown_id","result":[]}]]
+3) MCP\Server\Tests\ServerTest::testBatchRequestProcessing
+Batch response array not found as serverResponses[1]. Output: [{"jsonrpc":"2.0","id":"init_id_683a9f930000c","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}]
 Failed asserting that null is not null.
 
-/app/tests/ServerTest.php:100
-/app/tests/ServerTest.php:166
+/app/tests/ServerTest.php:253
 
-13) MCP\Server\Tests\ServerTest::testBatchRequestProcessing
-Initialize response not found in output. Got: [[{"jsonrpc":"2.0","id":"shutdown_id","result":[]}]]
+4) MCP\Server\Tests\ServerTest::testSetLogLevelRequest
+SetLevel response not found. Got: [{"jsonrpc":"2.0","id":"init_id_683a9f93008e9","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}]
 Failed asserting that null is not null.
 
-/app/tests/ServerTest.php:100
-/app/tests/ServerTest.php:215
+/app/tests/ServerTest.php:372
 
-14) MCP\Server\Tests\ServerTest::testAuthorizationRequiredAndSuccessful
-Initialize response not found in output. Got: [[{"jsonrpc":"2.0","id":"shutdown_id","result":[]}]]
-Failed asserting that null is not null.
-
-/app/tests/ServerTest.php:100
-/app/tests/ServerTest.php:261
-
-15) MCP\Server\Tests\ServerTest::testAuthorizationRequiredTokenMissing
-Should have init error and shutdown response. Got: [[{"jsonrpc":"2.0","id":"shutdown_auth_missing","result":[]}]]
-Failed asserting that actual size 1 matches expected size 2.
-
-/app/tests/ServerTest.php:290
-
-16) MCP\Server\Tests\ServerTest::testAuthorizationRequiredTokenInvalid
-Should have init error and shutdown response. Got: [[{"jsonrpc":"2.0","id":"shutdown_auth_invalid","result":[]}]]
-Failed asserting that actual size 1 matches expected size 2.
-
-/app/tests/ServerTest.php:315
-
-17) MCP\Server\Tests\ServerTest::testSetLogLevelRequest
-Initialize response not found in output. Got: [[{"jsonrpc":"2.0","id":"shutdown_id","result":[]}]]
-Failed asserting that null is not null.
-
-/app/tests/ServerTest.php:100
-/app/tests/ServerTest.php:328
-
-18) MCP\Server\Tests\Tool\ExtendedToolTest::testOptionalParameters
-Failed asserting that null matches expected 'Hello friend Alice'.
-
-/app/tests/Tool/ExtendedToolTest.php:71
-
-19) MCP\Server\Tests\Tool\ExtendedToolTest::testArrayParameters
-Failed asserting that null matches expected 'Sum: 15'.
-
-/app/tests/Tool/ExtendedToolTest.php:99
-
-20) MCP\Server\Tests\Tool\ToolTest::testValidExecution
-Failed asserting that actual size 0 matches expected size 1.
-
-/app/tests/Tool/ToolTest.php:101
-
-ERRORS!
-Tests: 87, Assertions: 300, Errors: 9, Failures: 20, Warnings: 4.
+FAILURES!
+Tests: 87, Assertions: 371, Failures: 4.

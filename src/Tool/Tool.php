@@ -207,14 +207,14 @@ abstract class Tool
         return new Content\TextContent($text, $annotations);
     }
 
-    protected final function createImageContent(string $base64Data, string $mimeType, ?Content\Annotations $annotations = null): Content\ImageContent
+    protected final function createImageContent(string $rawData, string $mimeType, ?Content\Annotations $annotations = null): Content\ImageContent
     {
-        return new Content\ImageContent($base64Data, $mimeType, $annotations);
+        return new Content\ImageContent(base64_encode($rawData), $mimeType, $annotations);
     }
 
-    protected final function createAudioContent(string $base64Data, string $mimeType, ?Content\Annotations $annotations = null): Content\AudioContent
+    protected final function createAudioContent(string $rawData, string $mimeType, ?Content\Annotations $annotations = null): Content\AudioContent
     {
-        return new Content\AudioContent($base64Data, $mimeType, $annotations);
+        return new Content\AudioContent(base64_encode($rawData), $mimeType, $annotations);
     }
 
     protected final function createEmbeddedResource(array $resourceData, ?Content\Annotations $annotations = null): Content\EmbeddedResource

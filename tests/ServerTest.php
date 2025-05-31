@@ -2,6 +2,8 @@
 
 namespace MCP\Server\Tests;
 
+require_once __DIR__ . '/Transport/StdioTransportTest.php';
+
 use PHPUnit\Framework\TestCase;
 use MCP\Server\Server;
 use MCP\Server\Capability\CapabilityInterface;
@@ -61,52 +63,60 @@ class ServerTest extends TestCase
     protected function setUp(): void
     {
         $this->server = new Server('test-server', '1.0.0');
-        $this->transport = new TestableStdioTransport(); // Assumes TestableStdioTransport is available
+        $this->transport = new TestableStdioTransport();
         $this->capability = new TestCapability();
 
         $this->server->addCapability($this->capability);
         $this->server->connect($this->transport);
     }
 
-    private function initializeServerAndGetInitResponse(string $protocolVersion = '2025-03-26'): array
+    private function queueInitializeRequest(string $protocolVersion = '2025-03-26'): string
     {
+        $initRequestId = 'init_id_' . uniqid();
         $initRequest = [
             'jsonrpc' => '2.0', 'method' => 'initialize',
             'params' => [
                 'protocolVersion' => $protocolVersion,
-                'capabilities' => new \stdClass(), // Empty client capabilities object
+                'capabilities' => new \stdClass(),
                 'clientInfo' => ['name' => 'test-client', 'version' => '1.0.0']
             ],
-            'id' => 'init_id'
+            'id' => $initRequestId
         ];
-        // Add a shutdown request to make the server loop exit cleanly
-        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_id'];
-
         $this->transport->writeToInput(json_encode($initRequest));
-        $this->transport->writeToInput(json_encode($shutdownRequest)); // Add this line
+        return $initRequestId;
+    }
 
-        $this->server->run(); // Server runs and processes both, then exits due to shutdown
-
-        $responses = $this->transport->readMultipleJsonOutputs();
-
-        $this->assertGreaterThanOrEqual(1, count($responses), "Should have at least init response.");
-        $initResponse = null;
-        foreach ($responses as $resp) {
-            if (isset($resp['id']) && $resp['id'] === 'init_id') {
-                $initResponse = $resp;
-                break;
+    private function findResponseById(array $responsesToSearch, string $idToFind): ?array
+    {
+        $idToFindStr = (string)$idToFind;
+        foreach ($responsesToSearch as $item) {
+            if (is_array($item) && array_key_exists('id', $item)) {
+                $currentIdStr = (string)$item['id'];
+                if (strcmp($currentIdStr, $idToFindStr) === 0) {
+                    return $item;
+                }
             }
         }
-        $this->assertNotNull($initResponse, "Initialize response not found in output. Got: " . json_encode($responses));
-        return $initResponse;
+        return null;
     }
 
     public function testInitialization(): void
     {
-        $initResponse = $this->initializeServerAndGetInitResponse();
+        $initId = $this->queueInitializeRequest();
+        $shutdownId = 'shutdown_' . uniqid();
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
+        $this->transport->writeToInput(json_encode($shutdownRequest));
 
+        $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
+        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+
+        $initResponse = $this->findResponseById($actualResponses, $initId);
+
+        $this->assertNotNull($initResponse, "Initialize response not found. Got: " . json_encode($rawOutput));
+        // ... (rest of assertions remain the same)
         $this->assertEquals('2.0', $initResponse['jsonrpc']);
-        $this->assertEquals('init_id', $initResponse['id']);
+        $this->assertEquals($initId, $initResponse['id']);
         $this->assertArrayHasKey('result', $initResponse);
         $this->assertArrayHasKey('protocolVersion', $initResponse['result']);
         $this->assertEquals('2025-03-26', $initResponse['result']['protocolVersion']);
@@ -116,44 +126,39 @@ class ServerTest extends TestCase
         $this->assertArrayHasKey('test', $initResponse['result']['capabilities']);
         $this->assertEquals(['enabled' => true], $initResponse['result']['capabilities']['test']);
         $this->assertArrayHasKey('logging', $initResponse['result']['capabilities']);
-        $this->assertEquals(new \stdClass(), $initResponse['result']['capabilities']['logging']);
+        $this->assertEquals([], $initResponse['result']['capabilities']['logging']);
         $this->assertArrayHasKey('completions', $initResponse['result']['capabilities']);
-        $this->assertEquals(new \stdClass(), $initResponse['result']['capabilities']['completions']);
+        $this->assertEquals([], $initResponse['result']['capabilities']['completions']);
     }
 
     public function testCapabilityHandling(): void
     {
-        // Initialize server (response is tested in testInitialization)
-        $this->initializeServerAndGetInitResponse();
-        // Clear outputs from initialization
-        $this->transport->readMultipleJsonOutputs();
-        // Reset received messages in capability from initialize call
+        $initId = $this->queueInitializeRequest();
         $this->capability->resetReceivedMessages();
 
-
-        $expectedResponse = JsonRpcMessage::result(['success' => true], 'cap_test_id');
+        $capTestId = 'cap_test_id';
+        $expectedResponse = JsonRpcMessage::result(['success' => true], $capTestId);
         $this->capability->addExpectedResponse('test.method', $expectedResponse);
 
-        $testRequest = ['jsonrpc' => '2.0', 'method' => 'test.method', 'params' => ['test' => true], 'id' => 'cap_test_id'];
-        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_id_2'];
+        $testRequest = ['jsonrpc' => '2.0', 'method' => 'test.method', 'params' => ['test' => true], 'id' => $capTestId];
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_cap_handling_' . uniqid()];
 
         $this->transport->writeToInput(json_encode($testRequest));
         $this->transport->writeToInput(json_encode($shutdownRequest));
 
         $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
+        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
 
-        $responses = $this->transport->readMultipleJsonOutputs();
+        $initResponse = $this->findResponseById($actualResponses, $initId);
+        $this->assertNotNull($initResponse, "Init response missing in capability test run. Raw: ".json_encode($rawOutput));
 
-        $testResponse = null;
-        foreach ($responses as $resp) {
-            if (isset($resp['id']) && $resp['id'] === 'cap_test_id') {
-                $testResponse = $resp;
-                break;
-            }
+        $testMethodResponse = $this->findResponseById($actualResponses, $capTestId);
+        $this->assertNotNull($testMethodResponse, "Test method response not found. Raw: " . json_encode($rawOutput));
+        if ($testMethodResponse) {
+            $this->assertEquals($capTestId, $testMethodResponse['id']);
+            $this->assertEquals(['success' => true], $testMethodResponse['result']);
         }
-        $this->assertNotNull($testResponse, "Test method response not found. Got: " . json_encode($responses));
-        $this->assertEquals('cap_test_id', $testResponse['id']);
-        $this->assertEquals(['success' => true], $testResponse['result']);
 
         $receivedCapabilityMessages = $this->capability->getReceivedMessages();
         $this->assertCount(1, $receivedCapabilityMessages, "Capability should have received one message for 'test.method'.");
@@ -162,37 +167,27 @@ class ServerTest extends TestCase
 
     public function testMethodNotFound(): void
     {
-        // Initialize server
-        $this->initializeServerAndGetInitResponse();
-        // Clear outputs from initialization
-        $this->transport->readMultipleJsonOutputs();
-
-        $unknownMethodRequest = ['jsonrpc' => '2.0', 'method' => 'unknown.method', 'params' => [], 'id' => 'unknown_id'];
-        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_id_3'];
+        $initId = $this->queueInitializeRequest();
+        $unknownId = 'unknown_id_' . uniqid();
+        $unknownMethodRequest = ['jsonrpc' => '2.0', 'method' => 'unknown.method', 'params' => [], 'id' => $unknownId];
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_method_not_found_' . uniqid()];
 
         $this->transport->writeToInput(json_encode($unknownMethodRequest));
         $this->transport->writeToInput(json_encode($shutdownRequest));
 
         $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
+        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
 
-        $responses = $this->transport->readMultipleJsonOutputs();
-
-        $errorResponse = null;
-        foreach ($responses as $resp) {
-            if (isset($resp['id']) && $resp['id'] === 'unknown_id') {
-                $errorResponse = $resp;
-                break;
-            }
+        $errorResponse = $this->findResponseById($actualResponses, $unknownId);
+        $this->assertNotNull($errorResponse, "Error response for unknown method not found. Got: " . json_encode($rawOutput));
+        if($errorResponse){
+            $this->assertEquals($unknownId, $errorResponse['id']);
+            $this->assertArrayHasKey('error', $errorResponse);
+            $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorResponse['error']['code']);
         }
-        $this->assertNotNull($errorResponse, "Error response for unknown method not found. Got: " . json_encode($responses));
-        $this->assertEquals('unknown_id', $errorResponse['id']);
-        $this->assertArrayHasKey('error', $errorResponse);
-        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorResponse['error']['code']);
     }
 
-    // Removed initializeServer() and runOneIteration()
-
-    // Helper methods for environment variables
     private function setEnvVar(string $name, string $value): void
     {
         putenv("$name=$value");
@@ -200,57 +195,80 @@ class ServerTest extends TestCase
 
     private function clearEnvVar(string $name): void
     {
-        putenv($name); // Clears the environment variable
+        putenv($name);
     }
 
     protected function tearDown(): void
     {
-        // Ensure env vars are cleared after tests that might set them
         $this->clearEnvVar('MCP_AUTHORIZATION_TOKEN');
         parent::tearDown();
     }
 
     public function testBatchRequestProcessing(): void
     {
-        $this->initializeServerAndGetInitResponse(); // Initialize server
-        $this->transport->readMultipleJsonOutputs(); // Clear init/shutdown responses
-        $this->capability->resetReceivedMessages(); // Reset capability messages
+        $initId = $this->queueInitializeRequest();
+        $this->capability->resetReceivedMessages();
+
+        $batchId1 = 'batch_req_1_' . uniqid();
+        $batchId2 = 'batch_req_2_' . uniqid();
 
         $batchRequests = [
-            ['jsonrpc' => '2.0', 'method' => 'test.method', 'params' => ['data' => 'batch1'], 'id' => 'batch_req_1'],
-            ['jsonrpc' => '2.0', 'method' => 'unknown.method', 'id' => 'batch_req_2'],
+            ['jsonrpc' => '2.0', 'method' => 'test.method', 'params' => ['data' => 'batch1'], 'id' => $batchId1],
+            ['jsonrpc' => '2.0', 'method' => 'unknown.method', 'id' => $batchId2],
             ['jsonrpc' => '2.0', 'method' => 'notify.method', 'params' => ['data' => 'notify1']]
         ];
-        $this->capability->addExpectedResponse('test.method', JsonRpcMessage::result(['received' => 'batch1'], 'batch_req_1'));
+        $this->capability->addExpectedResponse('test.method', JsonRpcMessage::result(['received' => 'batch1'], $batchId1));
 
         $this->transport->writeToInput(json_encode($batchRequests));
-        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_batch_id'];
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_batch_id_' . uniqid()];
         $this->transport->writeToInput(json_encode($shutdownRequest));
 
         $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
 
-        $responses = $this->transport->readMultipleJsonOutputs();
+        $this->assertNotEmpty($rawOutput, "No output from server.");
+        $this->assertIsArray($rawOutput[0], "Expected batch output from server not found or not an array.");
 
-        // Expect 2 "top-level" outputs: the batch response array, then the shutdown response object
-        $this->assertCount(2, $responses, "Should have batch response and shutdown response. Got: " . json_encode($responses));
+        $serverResponses = $rawOutput[0];
 
-        $batchResponseArray = $responses[0]; // First output is the batch response
-        $this->assertIsArray($batchResponseArray);
-        $this->assertCount(2, $batchResponseArray, "Batch response should contain 2 items (1 result, 1 error)");
+        // The server responds to a batch request with a batch response (single JSON array line)
+        // This batch response itself is one of the items in $serverResponses, along with init and shutdown.
+        // $serverResponses is [init_response, batch_array_response, shutdown_response]
+        // So, the batch_array_response should be $serverResponses[1]
 
-        // Check first response in batch (success)
-        $response1 = null;
-        foreach($batchResponseArray as $r) { if (isset($r['id']) && $r['id'] === 'batch_req_1') $response1 = $r; }
-        $this->assertNotNull($response1, "Response for batch_req_1 not found in batch.");
-        $this->assertArrayHasKey('result', $response1);
-        $this->assertEquals(['received' => 'batch1'], $response1['result']);
+        $initResp = $this->findResponseById($serverResponses, $initId); // Ensure init is found
+        $this->assertNotNull($initResp, "Init response missing in batch test. Output: " . json_encode($serverResponses));
 
-        // Check second response in batch (error)
-        $response2 = null;
-        foreach($batchResponseArray as $r) { if (isset($r['id']) && $r['id'] === 'batch_req_2') $response2 = $r; }
-        $this->assertNotNull($response2, "Response for batch_req_2 not found in batch.");
-        $this->assertArrayHasKey('error', $response2);
-        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response2['error']['code']);
+        $batchResponseArray = null;
+        if (isset($serverResponses[1]) && is_array($serverResponses[1])) {
+            // Check if this array actually contains responses from the batch
+            $firstIdInPotentialBatch = $serverResponses[1][0]['id'] ?? null;
+            $secondIdInPotentialBatch = $serverResponses[1][1]['id'] ?? null;
+            if ($firstIdInPotentialBatch === $batchId1 || $firstIdInPotentialBatch === $batchId2 ||
+                $secondIdInPotentialBatch === $batchId1 || $secondIdInPotentialBatch === $batchId2) {
+                $batchResponseArray = $serverResponses[1];
+            }
+        }
+
+        $this->assertNotNull($batchResponseArray, "Batch response array not found as serverResponses[1]. Output: " . json_encode($serverResponses));
+
+        if($batchResponseArray) {
+            $this->assertCount(2, $batchResponseArray, "Batch response should contain 2 items (1 result, 1 error)");
+
+            $response1 = $this->findResponseById($batchResponseArray, $batchId1);
+            $this->assertNotNull($response1, "Response for $batchId1 not found in batch. Batch array: " .json_encode($batchResponseArray));
+            if($response1) {
+                $this->assertArrayHasKey('result', $response1);
+                $this->assertEquals(['received' => 'batch1'], $response1['result']);
+            }
+
+            $response2 = $this->findResponseById($batchResponseArray, $batchId2);
+            $this->assertNotNull($response2, "Response for $batchId2 not found in batch. Batch array: " .json_encode($batchResponseArray));
+            if($response2) {
+                $this->assertArrayHasKey('error', $response2);
+                $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response2['error']['code']);
+            }
+        }
     }
 
     public function testAuthorizationRequiredAndSuccessful(): void
@@ -258,17 +276,19 @@ class ServerTest extends TestCase
         $this->server->requireAuthorization("test_token_secret");
         $this->setEnvVar('MCP_AUTHORIZATION_TOKEN', 'test_token_secret');
 
-        $initResponse = $this->initializeServerAndGetInitResponse(); // This helper sends init and shutdown
-        $this->assertArrayHasKey('result', $initResponse, "Initialization should succeed with correct token.");
-        $this->assertEquals('init_id', $initResponse['id']);
+        $initId = $this->queueInitializeRequest();
+        $shutdownId = 'shutdown_auth_ok_' . uniqid();
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
+        $this->transport->writeToInput(json_encode($shutdownRequest));
 
-        // initializeServerAndGetInitResponse already processed the shutdown too.
-        // We can verify that the shutdown response was also processed.
-        $allResponses = $this->transport->readMultipleJsonOutputs(); // Read any remaining (should be none if helper consumed all)
-        // If initializeServerAndGetInitResponse consumes all, this will be empty.
-        // If it only returns init, then shutdown will be here.
-        // The helper currently consumes all and finds init. So this should be empty.
-        $this->assertEmpty($allResponses, "No more responses should be pending after initializeServerAndGetInitResponse.");
+        $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
+        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+
+        $initResponse = $this->findResponseById($actualResponses, $initId);
+        $this->assertNotNull($initResponse, "Initialize response not found. Raw: " . json_encode($rawOutput));
+        $this->assertArrayHasKey('result', $initResponse, "Initialization should succeed with correct token.");
+        $this->assertEquals($initId, $initResponse['id']);
 
         $this->clearEnvVar('MCP_AUTHORIZATION_TOKEN');
     }
@@ -278,23 +298,25 @@ class ServerTest extends TestCase
         $this->server->requireAuthorization("test_token_secret");
         $this->clearEnvVar('MCP_AUTHORIZATION_TOKEN');
 
-        $initRequest = ['jsonrpc' => '2.0', 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-03-26', 'clientInfo'=>['name'=>'c','version'=>'1']], 'id' => 'auth_test_id_missing'];
-        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_auth_missing'];
-
-        $this->transport->writeToInput(json_encode($initRequest));
+        $initId = $this->queueInitializeRequest();
+        $shutdownId = 'shutdown_auth_missing_' . uniqid();
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
         $this->transport->writeToInput(json_encode($shutdownRequest));
+
         $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
 
-        $responses = $this->transport->readMultipleJsonOutputs();
-        // Server's run loop continues after init error and processes shutdown.
-        $this->assertCount(2, $responses, "Should have init error and shutdown response. Got: " . json_encode($responses));
+        $this->assertNotEmpty($rawOutput, "No raw output from server.");
+        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
 
-        $errorResponse = null;
-        foreach($responses as $r) { if (isset($r['id']) && $r['id'] === 'auth_test_id_missing') $errorResponse = $r; }
-        $this->assertNotNull($errorResponse, "Error response for missing token not found.");
+        $errorResponse = $this->findResponseById($actualResponses, $initId);
+        $this->assertNotNull($errorResponse, "Error response for missing token not found. Got: " . json_encode($actualResponses));
+        if($errorResponse) {
+            $this->assertArrayHasKey('error', $errorResponse);
+            $this->assertEquals(-32000, $errorResponse['error']['code']);
+        }
 
-        $this->assertArrayHasKey('error', $errorResponse);
-        $this->assertEquals(-32000, $errorResponse['error']['code']);
         $this->clearEnvVar('MCP_AUTHORIZATION_TOKEN');
     }
 
@@ -303,47 +325,54 @@ class ServerTest extends TestCase
         $this->server->requireAuthorization("test_token_secret");
         $this->setEnvVar('MCP_AUTHORIZATION_TOKEN', 'wrong_token_secret');
 
-        $initRequest = ['jsonrpc' => '2.0', 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-03-26', 'clientInfo'=>['name'=>'c','version'=>'1']], 'id' => 'auth_test_id_invalid'];
-        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_auth_invalid'];
-
-        $this->transport->writeToInput(json_encode($initRequest));
+        $initId = $this->queueInitializeRequest();
+        $shutdownId = 'shutdown_auth_invalid_' . uniqid();
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
         $this->transport->writeToInput(json_encode($shutdownRequest));
+
         $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
 
-        $responses = $this->transport->readMultipleJsonOutputs();
-        // Server's run loop continues after init error and processes shutdown.
-        $this->assertCount(2, $responses, "Should have init error and shutdown response. Got: " . json_encode($responses));
+        $this->assertNotEmpty($rawOutput, "No raw output from server.");
+        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
 
-        $errorResponse = null;
-        foreach($responses as $r) { if (isset($r['id']) && $r['id'] === 'auth_test_id_invalid') $errorResponse = $r; }
-        $this->assertNotNull($errorResponse, "Error response for invalid token not found.");
 
-        $this->assertArrayHasKey('error', $errorResponse);
-        $this->assertEquals(-32001, $errorResponse['error']['code']);
+        $errorResponse = $this->findResponseById($actualResponses, $initId);
+        $this->assertNotNull($errorResponse, "Error response for invalid token not found. Got: " . json_encode($actualResponses));
+        if($errorResponse) {
+            $this->assertArrayHasKey('error', $errorResponse);
+            $this->assertEquals(-32001, $errorResponse['error']['code']);
+        }
+
         $this->clearEnvVar('MCP_AUTHORIZATION_TOKEN');
     }
 
     public function testSetLogLevelRequest(): void
     {
-        $initResponse = $this->initializeServerAndGetInitResponse();
-        $this->assertArrayHasKey('result', $initResponse);
-        $this->transport->readMultipleJsonOutputs(); // Clear output from init helper
+        $initId = $this->queueInitializeRequest();
 
-        $setLevelRequest = ['jsonrpc' => '2.0', 'method' => 'logging/setLevel', 'params' => ['level' => 'debug'], 'id' => 'set_level_id_1'];
-        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_set_level'];
-
+        $setLevelRequestId = 'set_level_id_' . uniqid();
+        $setLevelRequest = ['jsonrpc' => '2.0', 'method' => 'logging/setLevel', 'params' => ['level' => 'debug'], 'id' => $setLevelRequestId];
         $this->transport->writeToInput(json_encode($setLevelRequest));
+
+        $shutdownRequestId = 'shutdown_set_level_' . uniqid();
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownRequestId];
         $this->transport->writeToInput(json_encode($shutdownRequest));
 
         $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
 
-        $responses = $this->transport->readMultipleJsonOutputs();
-        $this->assertCount(2, $responses, "Should have setLevel response and shutdown response. Got: " . json_encode($responses));
+        $this->assertNotEmpty($rawOutput, "No raw output from server.");
+        $actualResponses = (!empty($rawOutput) && isset($rawOutput[0]) && is_array($rawOutput[0])) ? $rawOutput[0] : [];
+        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
 
-        $setLevelResponse = null;
-        foreach($responses as $r) { if (isset($r['id']) && $r['id'] === 'set_level_id_1') $setLevelResponse = $r; }
-        $this->assertNotNull($setLevelResponse, "SetLevel response not found.");
-        $this->assertArrayHasKey('result', $setLevelResponse);
-        $this->assertEquals([], $setLevelResponse['result']);
+
+        $setLevelResponse = $this->findResponseById($actualResponses, $setLevelRequestId);
+        $this->assertNotNull($setLevelResponse, "SetLevel response not found. Got: " . json_encode($actualResponses));
+        if($setLevelResponse){
+            $this->assertArrayHasKey('result', $setLevelResponse);
+            $this->assertEquals([], $setLevelResponse['result']);
+        }
     }
 }

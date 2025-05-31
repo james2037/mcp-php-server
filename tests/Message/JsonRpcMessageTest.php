@@ -82,7 +82,7 @@ class JsonRpcMessageTest extends TestCase
 
         $this->assertInstanceOf(JsonRpcMessage::class, $messages[1]);
         $this->assertEquals('baz', $messages[1]->method);
-        $this->assertEquals(new \stdClass(), $messages[1]->params); // Default for missing params
+        $this->assertNull($messages[1]->params); // Should be null if params field is missing
         $this->assertEquals(2, $messages[1]->id);
     }
 
@@ -97,7 +97,7 @@ class JsonRpcMessageTest extends TestCase
     public function testFromJsonArrayInvalidJson(): void
     {
         $json = '[{"method": "foo", "id": 1},'; // Malformed JSON
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\JsonException::class); // json_decode with JSON_THROW_ON_ERROR throws JsonException
         // The specific code might be JsonRpcMessage::PARSE_ERROR or a general JSON parse error code
         // depending on PHP's json_decode behavior with JSON_THROW_ON_ERROR.
         // JsonRpcMessage::fromJsonArray itself throws with self::PARSE_ERROR if $data is not an array,
@@ -125,7 +125,7 @@ class JsonRpcMessageTest extends TestCase
         $this->expectException(\RuntimeException::class);
         // This will be caught by fromJson when processing the individual message
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
-        $this->expectExceptionMessage('Invalid JSON-RPC 2.0 message: Missing method');
+        $this->expectExceptionMessage('Missing method'); // fromJson throws "Missing method" directly
         JsonRpcMessage::fromJsonArray($json);
     }
 

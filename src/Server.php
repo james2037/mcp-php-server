@@ -16,6 +16,7 @@ class Server
     private array $capabilities = [];
     private bool $initialized = false;
     private bool $shuttingDown = false;
+    private bool $capabilitiesAlreadyShutdown = false; // New flag
     private ?TransportInterface $transport = null;
     private ?string $clientSetLogLevel = null;
 
@@ -169,14 +170,33 @@ class Server
 
     public function shutdown(): void
     {
-        if (!$this->initialized) {
+        // If server was never initialized, and we are not already in a shutdown sequence
+        // (e.g. initiated by handleShutdown), then there's likely nothing to do.
+        if (!$this->initialized && !$this->shuttingDown) {
+            $this->shuttingDown = true; // Mark state
             return;
         }
 
-        $this->shuttingDown = true;
-        foreach ($this->capabilities as $capability) {
-            $capability->shutdown();
+        // If capabilities were already handled by handleShutdown, don't do it again.
+        if ($this->capabilitiesAlreadyShutdown) {
+            $this->shuttingDown = true; // Ensure state is consistent
+            return;
         }
+
+        $this->shuttingDown = true; // Mark state
+        foreach ($this->capabilities as $capability) {
+            try {
+                $capability->shutdown();
+            } catch (\Throwable $e) {
+                $capabilityClass = get_class($capability);
+                $this->logMessage(
+                    'error',
+                    "Error during shutdown of capability '{$capabilityClass}': " . $e->getMessage(),
+                    'Server.shutdown'
+                );
+            }
+        }
+        $this->capabilitiesAlreadyShutdown = true; // Mark them as processed now
     }
 
     private function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
@@ -303,16 +323,21 @@ class Server
     private function handleShutdown(JsonRpcMessage $message): JsonRpcMessage
     {
         try {
+            // Attempt to shut down all capabilities
             foreach ($this->capabilities as $capability) {
                 $capability->shutdown();
             }
-
             $this->shuttingDown = true;
+            $this->capabilitiesAlreadyShutdown = true; // Mark as done by handler
             return JsonRpcMessage::result([], $message->id);
         } catch (\Throwable $e) {
+            // If any capability fails to shut down, report this as an error
+            // for the shutdown command.
+            $this->shuttingDown = true; // Still ensure server stops
+            $this->capabilitiesAlreadyShutdown = true; // Mark as attempted by handler
             return JsonRpcMessage::error(
                 JsonRpcMessage::INTERNAL_ERROR,
-                $e->getMessage(),
+                $e->getMessage(), // Use the exception message from the failed capability
                 $message->id
             );
         }
@@ -440,7 +465,7 @@ class Server
 
             try {
                 // Ensure JsonRpcMessage can be created with named params
-                $notification = JsonRpcMessage::notification('notifications/message', $params);
+                $notification = new JsonRpcMessage('notifications/message', $params);
                 $this->transport->send([$notification]); // Send as an array of one notification
             } catch (\Throwable $e) {
                 // Log error locally if sending notification fails

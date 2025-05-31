@@ -76,7 +76,8 @@ class ToolsCapabilityTest extends TestCase
         $this->assertIsArray($response->result['tools']);
         $this->assertCount(1, $response->result['tools']);
 
-        $toolData = $response->result['tools'][0];
+        $toolData = $response->result['tools'][0]; // Confirmed to be an array by error_log
+
         $this->assertEquals('test', $toolData['name']);
         $this->assertEquals('Test Tool', $toolData['description']); // From ToolAttribute
         $this->assertArrayHasKey('annotations', $toolData);
@@ -84,9 +85,11 @@ class ToolsCapabilityTest extends TestCase
         $this->assertTrue($toolData['annotations']['readOnlyHint']);
 
         $this->assertArrayHasKey('inputSchema', $toolData);
+        // inputSchema['properties'] is an object (stdClass) as created by Tool::getInputSchema()
+        // So access to its sub-properties should be object access.
         $this->assertArrayHasKey('properties', $toolData['inputSchema']);
-        $this->assertArrayHasKey('data', $toolData['inputSchema']['properties']);
-        $this->assertEquals('Input data', $toolData['inputSchema']['properties']['data']['description']);
+        $this->assertObjectHasProperty('data', $toolData['inputSchema']['properties']);
+        $this->assertEquals('Input data', $toolData['inputSchema']['properties']->data->description);
     }
 
     public function testHandleCall(): void
@@ -162,8 +165,8 @@ class ToolsCapabilityTest extends TestCase
         $this->assertIsArray($response->result['content']);
         $this->assertCount(1, $response->result['content']);
         $this->assertEquals('text', $response->result['content'][0]['type']);
-        // Error message reflects PHP error due to missing key, caught by ToolsCapability
-        $this->assertStringContainsStringIgnoringCase("undefined array key \"data\"", $response->result['content'][0]['text']);
+        // Tool::validateArguments should throw InvalidArgumentException for unknown arguments
+        $this->assertStringContainsString("Unknown argument: unexpected_arg", $response->result['content'][0]['text']);
     }
 
     public function testToolInitializationAndShutdown(): void
@@ -239,11 +242,10 @@ class ToolsCapabilityTest extends TestCase
         $response = $this->capability->handleMessage($request);
 
         $this->assertNotNull($response);
-        $this->assertNull($response->error); // Error is in the result for completion/complete if tool not found by handleComplete
-        $this->assertArrayHasKey('error', $response->result); // This refers to the JsonRpcMessage's error field for protocol errors
-                                                              // For tool-level errors, handleComplete returns an error *result*.
-                                                              // The current handleComplete structure returns a JsonRpcMessage::error directly.
-        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response->result['error']['code']);
-        $this->assertStringContainsString('Tool not found for completion: unknownToolForCompletion', $response->result['error']['message']);
+        $this->assertNotNull($response->error); // The $response object itself should have its error property set
+        $this->assertNull($response->result);   // For an error response, result should be null
+
+        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response->error['code']);
+        $this->assertStringContainsString('Tool not found for completion: unknownToolForCompletion', $response->error['message']);
     }
 }

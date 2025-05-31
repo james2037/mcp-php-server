@@ -31,7 +31,7 @@ class ResourceTest extends TestCase
 {
     public function testResourceMetadata(): void
     {
-        $resource = new TestResource();
+        $resource = new TestResource("test_static_resource");
 
         $this->assertEquals('test://static', $resource->getUri());
         $this->assertNull($resource->getDescription()); // No description provided
@@ -39,7 +39,7 @@ class ResourceTest extends TestCase
 
     public function testTextContentCreation(): void
     {
-        $resource = new TestResource();
+        $resource = new TestResource("test_static_resource_content");
         $result = $resource->read();
 
         $this->assertInstanceOf(TextResourceContents::class, $result);
@@ -49,7 +49,7 @@ class ResourceTest extends TestCase
 
     public function testParameterizedResource(): void
     {
-        $resource = new DynamicResource();
+        $resource = new DynamicResource("test_dynamic_resource_param");
         $result = $resource->read(['userId' => '123']);
 
         $this->assertInstanceOf(TextResourceContents::class, $result);
@@ -59,7 +59,7 @@ class ResourceTest extends TestCase
 
     public function testBlobContentCreation(): void
     {
-        $resource = new class extends Resource {
+        $resource = new class("test_blob_resource_anon") extends Resource {
             #[ResourceUri('test://image')]
             public function read(array $parameters = []): ResourceContents
             {
