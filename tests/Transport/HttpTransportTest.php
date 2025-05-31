@@ -425,9 +425,8 @@ class HttpTransportTest extends TestCase
     public function testSendSseEventWithMultiLineData()
     {
         // This test depends on how JsonRpcMessage::toJson actually formats newlines
-        // and how prepareSseData handles them. The current prepareSseData replaces "
-" with "
-data: ".
+        // and how prepareSseData handles them. The current prepareSseData replaces 
+        // "" with "data: ".
         $this->mockRequest->method('getMethod')->willReturn('POST');
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'text/event-stream'],
