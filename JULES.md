@@ -44,7 +44,7 @@ vendor/bin/phpunit
 
 ### Unit Testing Obligation
 
-**Crucially, any new feature development, bug fix, or refactoring work you perform *must* be accompanied by new or updated unit tests.** Ensure that your tests thoroughly cover the changes made and that all tests pass before considering a task complete. This is non-negotiable for maintaining code quality and stability.
+**Crucially, any new feature development, bug fix, or refactoring work you perform *must* be accompanied by new or updated unit tests.** Ensure that your tests thoroughly cover the changes made and that all tests pass before considering a task complete. This is a non-negotiable aspect of maintaining code quality and stability, unless an exception is explicitly discussed and agreed upon with the developer for specific cases where a unit test may not be practical or beneficial. In such scenarios, you should seek confirmation before proceeding without a test.
 
 ## Pre-Commit Check
 
