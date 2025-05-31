@@ -14,7 +14,7 @@ class TestTool extends Tool
         #[ParameterAttribute('name', type: 'string', description: 'Name to greet')]
         array $arguments
     ): array {
-        return [['type' => 'text', 'text' => 'Hello ' . $arguments['name']]];
+        return [$this->createTextContent('Hello ' . $arguments['name'])];
     }
 }
 
@@ -33,7 +33,7 @@ class CalculatorTool extends Tool
             default => throw new \InvalidArgumentException('Invalid operation')
         };
 
-        return [['type' => 'text', 'text' => (string)$result]];
+        return [$this->createTextContent((string)$result)];
     }
 }
 

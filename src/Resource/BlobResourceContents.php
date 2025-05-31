@@ -13,4 +13,14 @@ class BlobResourceContents extends ResourceContents
     ) {
         parent::__construct($uri, $mimeType);
     }
+
+    public function toArray(): array
+    {
+        $data = ['uri' => $this->uri, 'blob' => $this->blob];
+        // $this->mimeType is guaranteed by constructor, but check doesn't hurt for consistency
+        if ($this->mimeType !== null) {
+            $data['mimeType'] = $this->mimeType;
+        }
+        return $data;
+    }
 }

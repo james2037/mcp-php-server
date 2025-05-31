@@ -1,0 +1,38 @@
+PHPUnit 10.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.1.32
+Configuration: /app/phpunit.xml.dist
+
+.................................................FFF...F......... 65 / 87 ( 74%)
+......................                                            87 / 87 (100%)
+
+Time: 00:00.066, Memory: 10.00 MB
+
+There were 4 failures:
+
+1) MCP\Server\Tests\ServerTest::testCapabilityHandling
+Test method response not found. Raw: [[{"jsonrpc":"2.0","id":"init_id_683a9f92f21d4","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}],[{"jsonrpc":"2.0","id":"cap_test_id","result":{"success":true}}],[{"jsonrpc":"2.0","id":"shutdown_cap_handling_683a9f92f21e3","result":[]}]]
+Failed asserting that null is not null.
+
+/app/tests/ServerTest.php:157
+
+2) MCP\Server\Tests\ServerTest::testMethodNotFound
+Error response for unknown method not found. Got: [[{"jsonrpc":"2.0","id":"init_id_683a9f92f4050","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}],[{"jsonrpc":"2.0","id":"unknown_id_683a9f92f4057","error":{"code":-32601,"message":"Method not found: unknown.method"}}],[{"jsonrpc":"2.0","id":"shutdown_method_not_found_683a9f92f4058","result":[]}]]
+Failed asserting that null is not null.
+
+/app/tests/ServerTest.php:183
+
+3) MCP\Server\Tests\ServerTest::testBatchRequestProcessing
+Batch response array not found as serverResponses[1]. Output: [{"jsonrpc":"2.0","id":"init_id_683a9f930000c","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}]
+Failed asserting that null is not null.
+
+/app/tests/ServerTest.php:253
+
+4) MCP\Server\Tests\ServerTest::testSetLogLevelRequest
+SetLevel response not found. Got: [{"jsonrpc":"2.0","id":"init_id_683a9f93008e9","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":[],"completions":[]},"serverInfo":{"name":"test-server","version":"1.0.0"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"}}]
+Failed asserting that null is not null.
+
+/app/tests/ServerTest.php:372
+
+FAILURES!
+Tests: 87, Assertions: 371, Failures: 4.

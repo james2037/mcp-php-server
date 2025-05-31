@@ -16,7 +16,7 @@ class OptionalParamTool extends Tool
         array $arguments
     ): array {
         $title = $arguments['title'] ?? 'friend';
-        return [['type' => 'text', 'text' => "Hello {$title} {$arguments['name']}"]];
+        return [$this->createTextContent("Hello {$title} {$arguments['name']}")];
     }
 }
 
@@ -29,10 +29,10 @@ class ArrayParamTool extends Tool
         array $arguments
     ): array {
         if (!$arguments['enabled']) {
-            return [['type' => 'text', 'text' => 'Processing disabled']];
+            return [$this->createTextContent('Processing disabled')];
         }
         $sum = array_sum($arguments['numbers']);
-        return [['type' => 'text', 'text' => "Sum: $sum"]];
+        return [$this->createTextContent("Sum: $sum")];
     }
 }
 
@@ -44,9 +44,9 @@ class MultiOutputTool extends Tool
         array $arguments
     ): array {
         if ($arguments['format'] === 'text') {
-            return $this->text('Hello world');
+            return [$this->createTextContent('Hello world')];
         }
-        return $this->image('fake-image-data', 'image/png');
+        return [$this->createImageContent('fake-image-data', 'image/png')];
     }
 }
 

@@ -1,0 +1,140 @@
+  0/41 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 41/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+ ------ --------------------------------------------------
+  Line   src/Capability/ResourcesCapability.php
+ ------ --------------------------------------------------
+  178    Call to an undefined method
+         MCP\Server\Resource\ResourceContents::toArray().
+ ------ --------------------------------------------------
+
+ ------ --------------------------------------------------------------------
+  Line   src/Capability/ToolsCapability.php
+ ------ --------------------------------------------------------------------
+  189    Negated boolean expression is always false.
+         💡 Because the type is coming from a PHPDoc, you can turn off this
+            check by setting treatPhpDocTypesAsCertain: false in your
+            phpstan.neon.
+  189    Offset 'values' on array{values: array<string>, total?: int,
+         hasMore?: bool} in isset() always exists and is not nullable.
+  189    Result of || is always false.
+         💡 Because the type is coming from a PHPDoc, you can turn off this
+            check by setting treatPhpDocTypesAsCertain: false in your
+            phpstan.neon.
+ ------ --------------------------------------------------------------------
+
+ ------ -----------------------------------------------------------------------
+  Line   src/Server.php
+ ------ -----------------------------------------------------------------------
+  124    Class MCP\Server\Exception\InvalidRequestException not found.
+         💡 Learn more at https://phpstan.org/user-guide/discovering-symbols
+  126    Class MCP\Server\Exception\InvalidParamsException not found.
+         💡 Learn more at https://phpstan.org/user-guide/discovering-symbols
+  135    Strict comparison using === between (int<min, -1>|int<1, max>|string)
+         and 0 will always evaluate to false.
+  431    Strict comparison using !== between null and null will always
+         evaluate to false.
+  443    Call to an undefined static method
+         MCP\Server\Message\JsonRpcMessage::notification().
+ ------ -----------------------------------------------------------------------
+
+ ------ -----------------------------------------------------------------------
+  Line   tests/Resource/ResourceRegistryTest.php
+ ------ -----------------------------------------------------------------------
+  40     Class MCP\Server\Tests\Resource\MockResource constructor invoked with
+         0 parameters, 1-5 required.
+ ------ -----------------------------------------------------------------------
+
+ ------ -----------------------------------------------------------------------
+  Line   tests/Resource/ResourceTest.php
+ ------ -----------------------------------------------------------------------
+  34     Class MCP\Server\Tests\Resource\TestResource constructor invoked with
+         0 parameters, 1-5 required.
+  42     Class MCP\Server\Tests\Resource\TestResource constructor invoked with
+         0 parameters, 1-5 required.
+  52     Class MCP\Server\Tests\Resource\DynamicResource constructor invoked
+         with 0 parameters, 1-5 required.
+  62     Class class@anonymous/tests/Resource/ResourceTest.php:62 constructor
+         invoked with 0 parameters, 1-5 required.
+  63     Attribute class MCP\Server\Resource\Attribute\ResourceUri does not
+         have the method target.
+ ------ -----------------------------------------------------------------------
+
+ ------ -----------------------------------------------------------------------------
+  Line   tests/ServerErrorHandlingTest.php
+ ------ -----------------------------------------------------------------------------
+  103    Property
+         class@anonymous/tests/ServerErrorHandlingTest.php:102::$orderRef is
+         never read, only written.
+         💡 See:
+            https://phpstan.org/developing-extensions/always-read-written-properties
+  111    Property
+         class@anonymous/tests/ServerErrorHandlingTest.php:110::$orderRef is
+         never read, only written.
+         💡 See:
+            https://phpstan.org/developing-extensions/always-read-written-properties
+ ------ -----------------------------------------------------------------------------
+
+ ------ -----------------------------------------------------------------------------
+  Line   tests/ServerInitializationTest.php
+ ------ -----------------------------------------------------------------------------
+  77     Property
+         class@anonymous/tests/ServerInitializationTest.php:76::$handledByRef
+         is never read, only written.
+         💡 See:
+            https://phpstan.org/developing-extensions/always-read-written-properties
+  86     Property
+         class@anonymous/tests/ServerInitializationTest.php:85::$handledByRef
+         is never read, only written.
+         💡 See:
+            https://phpstan.org/developing-extensions/always-read-written-properties
+  130    Property
+         class@anonymous/tests/ServerInitializationTest.php:129::$orderRef is
+         never read, only written.
+         💡 See:
+            https://phpstan.org/developing-extensions/always-read-written-properties
+  138    Property
+         class@anonymous/tests/ServerInitializationTest.php:137::$orderRef is
+         never read, only written.
+         💡 See:
+            https://phpstan.org/developing-extensions/always-read-written-properties
+ ------ -----------------------------------------------------------------------------
+
+ ------ --------------------------------------------------------------------
+  Line   tests/Tool/ExtendedToolTest.php
+ ------ --------------------------------------------------------------------
+  19     Method MCP\Server\Tests\Tool\OptionalParamTool::doExecute() should
+         return array<MCP\Server\Tool\Content\ContentItemInterface> but
+         returns array<int, array<string, string>>.
+  32     Method MCP\Server\Tests\Tool\ArrayParamTool::doExecute() should
+         return array<MCP\Server\Tool\Content\ContentItemInterface> but
+         returns array<int, array<string, string>>.
+  35     Method MCP\Server\Tests\Tool\ArrayParamTool::doExecute() should
+         return array<MCP\Server\Tool\Content\ContentItemInterface> but
+         returns array<int, array<string, string>>.
+  47     Call to an undefined method
+         MCP\Server\Tests\Tool\MultiOutputTool::text().
+  49     Call to an undefined method
+         MCP\Server\Tests\Tool\MultiOutputTool::image().
+ ------ --------------------------------------------------------------------
+
+ ------ ---------------------------------------------------------------------
+  Line   tests/Tool/ToolRegistryTest.php
+ ------ ---------------------------------------------------------------------
+  16     Call to an undefined method MCP\Server\Tests\Tool\MockTool::text().
+  25     Call to an undefined method
+         MCP\Server\Tests\Tool\OtherMockTool::text().
+ ------ ---------------------------------------------------------------------
+
+ ------ ------------------------------------------------------------------
+  Line   tests/Tool/ToolTest.php
+ ------ ------------------------------------------------------------------
+  17     Method MCP\Server\Tests\Tool\TestTool::doExecute() should return
+         array<MCP\Server\Tool\Content\ContentItemInterface> but returns
+         array<int, array<string, string>>.
+  36     Method MCP\Server\Tests\Tool\CalculatorTool::doExecute() should
+         return array<MCP\Server\Tool\Content\ContentItemInterface> but
+         returns array<int, array<string, string>>.
+ ------ ------------------------------------------------------------------
+
+ [ERROR] Found 30 errors
+

@@ -37,7 +37,7 @@ class ResourceRegistryTest extends TestCase
 
     public function testRegister(): void
     {
-        $resource = new MockResource();
+        $resource = new MockResource("mock_resource_name_test_register");
         $this->registry->register($resource);
 
         $resources = $this->registry->getResources();
@@ -62,6 +62,11 @@ class ResourceRegistryTest extends TestCase
             
             #[ResourceUri('test://discovered')]
             class DiscoveredResource extends Resource {
+                // Ensure constructor matches parent or is defined if custom logic is needed
+                public function __construct(string \$name, ?string \$mimeType = null, ?int \$size = null, ?\MCP\Server\Tool\Content\Annotations \$annotations = null, ?array \$config = null) {
+                    parent::__construct(\$name, \$mimeType, \$size, \$annotations, \$config);
+                }
+
                 public function read(array \$parameters = []): ResourceContents {
                     return \$this->text('discovered');
                 }
@@ -76,7 +81,10 @@ class ResourceRegistryTest extends TestCase
             $this->assertCount(1, $resources);
             $this->assertArrayHasKey('test://discovered', $resources);
         } finally {
-            unlink($tempDir . '/DiscoveredResource.php');
+            // Ensure DiscoveredResource.php is deleted even if the test fails
+            if (file_exists($tempDir . '/DiscoveredResource.php')) {
+                unlink($tempDir . '/DiscoveredResource.php');
+            }
             rmdir($tempDir);
         }
     }

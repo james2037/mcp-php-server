@@ -1,0 +1,2589 @@
+
+FILE: /app/src/Registry/Registry.php
+--------------------------------------------------------------------------------
+FOUND 10 ERRORS AND 1 WARNING AFFECTING 9 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 11 | ERROR   | Missing doc comment for class Registry
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR   | Private member variable "items" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 15 | ERROR   | Missing doc comment for function discover()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 44 | ERROR   | Missing doc comment for function getItems()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 49 | ERROR   | Missing doc comment for function register()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 54 | ERROR   | Missing doc comment for function getClassFromFile()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 54 | ERROR   | Private method name "Registry::getClassFromFile" must be
+    |         | prefixed with an underscore
+    |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 71 | ERROR   | Missing doc comment for function createFromReflection()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 71 | WARNING | Line exceeds 85 characters; contains 106 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 72 | ERROR   | Missing doc comment for function getItemKey()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/ResourceRegistry.php
+--------------------------------------------------------------------------------
+FOUND 5 ERRORS AND 1 WARNING AFFECTING 5 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 11 | ERROR   | Missing doc comment for class ResourceRegistry
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR   | Missing doc comment for function createFromReflection()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 13 | WARNING | Line exceeds 85 characters; contains 103 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 25 | ERROR   | Missing doc comment for function getItemKey()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 33 | ERROR   | Missing short description in doc comment
+    |         | (Generic.Commenting.DocComment.MissingShort)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/Resource.php
+--------------------------------------------------------------------------------
+FOUND 14 ERRORS AND 3 WARNINGS AFFECTING 13 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  10 | ERROR   | You must use "/**" style comments for a class comment
+     |         | (PEAR.Commenting.ClassComment.WrongStyle)
+  12 | ERROR   | Private member variable "metadata" must be prefixed with an
+     |         | underscore
+     |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  21 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  37 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  40 | ERROR   | Missing doc comment for function initializeMetadata()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  40 | ERROR   | Private method name "Resource::initializeMetadata" must be
+     |         | prefixed with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+  49 | ERROR   | Missing doc comment for function getUri()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  54 | ERROR   | Missing doc comment for function getDescription()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  60 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+  85 | ERROR   | Missing doc comment for function read()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  87 | ERROR   | Missing doc comment for function text()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  87 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  96 | ERROR   | Missing doc comment for function blob()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  96 | WARNING | Line exceeds 85 characters; contains 105 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 105 | ERROR   | Missing doc comment for function resolveUri()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 105 | ERROR   | Private method name "Resource::resolveUri" must be prefixed
+     |         | with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/ResourceContents.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+ 2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 7 | ERROR | Missing doc comment for class ResourceContents
+   |       | (PEAR.Commenting.ClassComment.Missing)
+ 9 | ERROR | Missing doc comment for function __construct()
+   |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/BlobResourceContents.php
+--------------------------------------------------------------------------------
+FOUND 4 ERRORS AND 1 WARNING AFFECTING 5 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for class BlobResourceContents
+    |         | (PEAR.Commenting.ClassComment.Missing)
+  9 | ERROR   | Missing doc comment for function __construct()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 17 | ERROR   | Missing doc comment for function toArray()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 20 | WARNING | Line exceeds 85 characters; contains 95 characters
+    |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/Attribute/ResourceUri.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 10 | ERROR | Missing doc comment for class ResourceUri
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 12 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Resource/TextResourceContents.php
+--------------------------------------------------------------------------------
+FOUND 4 ERRORS AFFECTING 4 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR | Missing doc comment for class TextResourceContents
+    |       | (PEAR.Commenting.ClassComment.Missing)
+  9 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+ 17 | ERROR | Missing doc comment for function toArray()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Capability/ToolsCapability.php
+--------------------------------------------------------------------------------
+FOUND 16 ERRORS AND 26 WARNINGS AFFECTING 39 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   9 | ERROR   | Missing doc comment for class ToolsCapability
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  11 | ERROR   | Missing short description in doc comment
+     |         | (Generic.Commenting.DocComment.MissingShort)
+  16 | ERROR   | Private member variable "tools" must be prefixed with an
+     |         | underscore
+     |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  18 | ERROR   | Missing doc comment for function addTool()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  23 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  32 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  40 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  50 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  57 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  64 | ERROR   | Missing doc comment for function handleList()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  64 | ERROR   | Private method name "ToolsCapability::handleList" must be
+     |         | prefixed with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+  84 | ERROR   | Missing doc comment for function handleCall()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  84 | ERROR   | Private method name "ToolsCapability::handleCall" must be
+     |         | prefixed with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+  88 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 103 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 104 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 107 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 118 | WARNING | Line exceeds 85 characters; contains 131 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 122 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 124 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 137 | ERROR   | Missing doc comment for function handleComplete()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 137 | ERROR   | Private method name "ToolsCapability::handleComplete" must be
+     |         | prefixed with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 140 | WARNING | Line exceeds 85 characters; contains 149 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 142 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 143 | WARNING | Line exceeds 85 characters; contains 154 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 150 | WARNING | Line exceeds 85 characters; contains 133 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 156 | WARNING | Line exceeds 85 characters; contains 125 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 157 | WARNING | Line exceeds 85 characters; contains 151 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 161 | WARNING | Line exceeds 85 characters; contains 157 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 166 | WARNING | Line exceeds 85 characters; contains 149 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 169 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 176 | WARNING | Line exceeds 85 characters; contains 135 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 179 | WARNING | Line exceeds 85 characters; contains 110 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 180 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 181 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 183 | WARNING | Line exceeds 85 characters; contains 92 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 184 | WARNING | Line exceeds 85 characters; contains 146 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 186 | WARNING | Line exceeds 85 characters; contains 107 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 191 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 192 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 193 | WARNING | Line exceeds 85 characters; contains 114 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Capability/CapabilityInterface.php
+--------------------------------------------------------------------------------
+FOUND 9 ERRORS AFFECTING 9 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  8 | ERROR | Missing doc comment for interface CapabilityInterface
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 16 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 18 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 21 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 26 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 32 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 38 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Capability/ResourcesCapability.php
+--------------------------------------------------------------------------------
+FOUND 16 ERRORS AND 8 WARNINGS AFFECTING 21 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | Missing doc comment for class ResourcesCapability
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | Missing short description in doc comment
+     |         | (Generic.Commenting.DocComment.MissingShort)
+  18 | ERROR   | Private member variable "resources" must be prefixed with an
+     |         | underscore
+     |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  20 | ERROR   | Missing doc comment for function addResource()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  25 | ERROR   | Missing doc comment for function getCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  35 | ERROR   | Missing doc comment for function canHandleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  43 | ERROR   | Missing doc comment for function handleMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  52 | ERROR   | Missing doc comment for function initialize()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  55 | ERROR   | Missing doc comment for function shutdown()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  59 | ERROR   | Missing doc comment for function handleList()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  59 | ERROR   | Private method name "ResourcesCapability::handleList" must be
+     |         | prefixed with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+  63 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  70 | ERROR   | Missing doc comment for function handleRead()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  70 | ERROR   | Private method name "ResourcesCapability::handleRead" must be
+     |         | prefixed with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+  88 | WARNING | Line exceeds 85 characters; contains 97 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  89 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  91 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  92 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  93 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  95 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 117 | ERROR   | Missing doc comment for function matchUriTemplate()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 117 | ERROR   | Private method name "ResourcesCapability::matchUriTemplate"
+     |         | must be prefixed with an underscore
+     |         | (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 126 | WARNING | Line exceeds 85 characters; contains 95 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Message/JsonRpcMessage.php
+--------------------------------------------------------------------------------
+FOUND 13 ERRORS AND 10 WARNINGS AFFECTING 20 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+   5 | ERROR   | [ ] Missing doc comment for class JsonRpcMessage
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  20 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  20 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  27 | ERROR   | [ ] Missing doc comment for function isRequest()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  32 | ERROR   | [ ] Missing doc comment for function toJson()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  55 | ERROR   | [ ] Missing doc comment for function fromJson()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  63 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  69 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  92 | ERROR   | [ ] Missing doc comment for function result()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  99 | ERROR   | [ ] Missing doc comment for function error()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  99 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 121 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 125 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 128 | WARNING | [ ] Line exceeds 85 characters; contains 107 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 134 | ERROR   | [x] Tag value for @param tag indented incorrectly; expected 2
+     |         |     spaces but found 1
+     |         |     (Generic.Commenting.DocComment.TagValueIndent)
+ 135 | ERROR   | [ ] Tag @return cannot be grouped with parameter tags in a doc
+     |         |     comment (Generic.Commenting.DocComment.NonParamGroup)
+ 136 | ERROR   | [ ] Tag @throws cannot be grouped with parameter tags in a doc
+     |         |     comment (Generic.Commenting.DocComment.NonParamGroup)
+ 136 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 143 | WARNING | [ ] Line exceeds 85 characters; contains 107 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 160 | ERROR   | [x] Tag value for @param tag indented incorrectly; expected 2
+     |         |     spaces but found 1
+     |         |     (Generic.Commenting.DocComment.TagValueIndent)
+ 161 | ERROR   | [ ] Tag @return cannot be grouped with parameter tags in a doc
+     |         |     comment (Generic.Commenting.DocComment.NonParamGroup)
+ 168 | WARNING | [ ] Line exceeds 85 characters; contains 110 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/ToolRegistry.php
+--------------------------------------------------------------------------------
+FOUND 5 ERRORS AND 1 WARNING AFFECTING 5 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 11 | ERROR   | Missing doc comment for class ToolRegistry
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 13 | ERROR   | Missing doc comment for function createFromReflection()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 13 | WARNING | Line exceeds 85 characters; contains 99 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 25 | ERROR   | Missing doc comment for function getItemKey()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 33 | ERROR   | Missing short description in doc comment
+    |         | (Generic.Commenting.DocComment.MissingShort)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Attribute/Parameter.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 10 | ERROR | Missing doc comment for class Parameter
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 12 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Attribute/ToolAnnotations.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  6 | ERROR | Missing doc comment for class ToolAnnotations
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 14 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Attribute/Tool.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 10 | ERROR | Missing doc comment for class Tool
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 12 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/EmbeddedResource.php
+--------------------------------------------------------------------------------
+FOUND 6 ERRORS AND 6 WARNINGS AFFECTING 10 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  9 | ERROR   | Missing doc comment for class EmbeddedResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 11 | ERROR   | Private member variable "resource" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 11 | WARNING | Line exceeds 85 characters; contains 87 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 12 | ERROR   | Private member variable "annotations" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 14 | ERROR   | Missing doc comment for function __construct()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 14 | WARNING | Line exceeds 85 characters; contains 86 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 17 | WARNING | Line exceeds 85 characters; contains 98 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 20 | WARNING | Line exceeds 85 characters; contains 118 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 23 | WARNING | Line exceeds 85 characters; contains 92 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 26 | WARNING | Line exceeds 85 characters; contains 109 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 33 | ERROR   | Missing doc comment for function toArray()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/Annotations.php
+--------------------------------------------------------------------------------
+FOUND 4 ERRORS AND 2 WARNINGS AFFECTING 6 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  9 | ERROR   | Missing doc comment for class Annotations
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 14 | ERROR   | Missing doc comment for function __construct()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 19 | WARNING | Line exceeds 85 characters; contains 121 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 24 | WARNING | Line exceeds 85 characters; contains 88 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 30 | ERROR   | Missing doc comment for function toArray()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/AudioContent.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AND 1 WARNING AFFECTING 7 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for class AudioContent
+    |         | (PEAR.Commenting.ClassComment.Missing)
+  9 | ERROR   | Private member variable "data" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 10 | ERROR   | Private member variable "mimeType" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 11 | ERROR   | Private member variable "annotations" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 13 | ERROR   | Missing doc comment for function __construct()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 13 | WARNING | Line exceeds 85 characters; contains 103 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 20 | ERROR   | Missing doc comment for function toArray()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/ImageContent.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AND 1 WARNING AFFECTING 7 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for class ImageContent
+    |         | (PEAR.Commenting.ClassComment.Missing)
+  9 | ERROR   | Private member variable "data" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 10 | ERROR   | Private member variable "mimeType" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 11 | ERROR   | Private member variable "annotations" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 13 | ERROR   | Missing doc comment for function __construct()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 13 | WARNING | Line exceeds 85 characters; contains 103 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 20 | ERROR   | Missing doc comment for function toArray()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/TextContent.php
+--------------------------------------------------------------------------------
+FOUND 6 ERRORS AFFECTING 6 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR | Missing doc comment for class TextContent
+    |       | (PEAR.Commenting.ClassComment.Missing)
+  9 | ERROR | Private member variable "text" must be prefixed with an
+    |       | underscore
+    |       | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 10 | ERROR | Private member variable "annotations" must be prefixed with an
+    |       | underscore
+    |       | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 12 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+ 18 | ERROR | Missing doc comment for function toArray()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Content/ContentItemInterface.php
+--------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+ 2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 7 | ERROR | Missing doc comment for interface ContentItemInterface
+   |       | (PEAR.Commenting.ClassComment.Missing)
+ 9 | ERROR | Missing doc comment for function toArray()
+   |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Tool/Tool.php
+--------------------------------------------------------------------------------
+FOUND 29 ERRORS AND 17 WARNINGS AFFECTING 36 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+  15 | ERROR   | [ ] Missing doc comment for class Tool
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  17 | ERROR   | [ ] Private member variable "metadata" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  18 | ERROR   | [ ] Private member variable "toolAnnotationsData" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  19 | ERROR   | [ ] Private member variable "parameters" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  22 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  31 | ERROR   | [ ] Missing doc comment for function initializeMetadata()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  31 | ERROR   | [ ] Private method name "Tool::initializeMetadata" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+  53 | WARNING | [ ] Line exceeds 85 characters; contains 87 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  61 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  64 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  67 | WARNING | [ ] Line exceeds 85 characters; contains 94 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  70 | WARNING | [ ] Line exceeds 85 characters; contains 92 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  79 | ERROR   | [ ] Missing doc comment for function getName()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  84 | ERROR   | [ ] Missing doc comment for function getDescription()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  89 | ERROR   | [ ] Missing doc comment for function getAnnotations()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  94 | ERROR   | [ ] Missing doc comment for function getInputSchema()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 128 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 132 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 136 | ERROR   | [ ] Missing doc comment for function execute()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 144 | WARNING | [ ] Line exceeds 85 characters; contains 97 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 147 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 155 | ERROR   | [ ] Missing doc comment for function validateArguments()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 167 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 182 | ERROR   | [ ] Missing doc comment for function validateType()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 182 | ERROR   | [ ] Private method name "Tool::validateType" must be prefixed
+     |         |     with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 199 | ERROR   | [ ] Tag @return cannot be grouped with parameter tags in a doc
+     |         |     comment (Generic.Commenting.DocComment.NonParamGroup)
+ 205 | ERROR   | [ ] You must use "/**" style comments for a function comment
+     |         |     (PEAR.Commenting.FunctionComment.WrongStyle)
+ 205 | WARNING | [ ] Line exceeds 85 characters; contains 123 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 210 | ERROR   | [ ] Missing doc comment for function createImageContent()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 210 | WARNING | [ ] Line exceeds 85 characters; contains 149 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 215 | ERROR   | [ ] Missing doc comment for function createAudioContent()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 215 | WARNING | [ ] Line exceeds 85 characters; contains 149 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 220 | ERROR   | [ ] Missing doc comment for function createEmbeddedResource()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 220 | WARNING | [ ] Line exceeds 85 characters; contains 140 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 229 | ERROR   | [x] Tag value for @param tag indented incorrectly; expected 2
+     |         |     spaces but found 1
+     |         |     (Generic.Commenting.DocComment.TagValueIndent)
+ 230 | ERROR   | [x] Expected 2 spaces after parameter type; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamType)
+ 230 | ERROR   | [x] Tag value for @param tag indented incorrectly; expected 2
+     |         |     spaces but found 1
+     |         |     (Generic.Commenting.DocComment.TagValueIndent)
+ 230 | WARNING | [ ] Line exceeds 85 characters; contains 92 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 231 | ERROR   | [x] Expected 2 spaces after parameter type; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamType)
+ 231 | ERROR   | [x] Tag value for @param tag indented incorrectly; expected 2
+     |         |     spaces but found 1
+     |         |     (Generic.Commenting.DocComment.TagValueIndent)
+ 231 | WARNING | [ ] Line exceeds 85 characters; contains 97 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 232 | ERROR   | [ ] Tag @return cannot be grouped with parameter tags in a doc
+     |         |     comment (Generic.Commenting.DocComment.NonParamGroup)
+ 233 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 234 | WARNING | [ ] Line exceeds 85 characters; contains 108 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 236 | WARNING | [ ] Line exceeds 85 characters; contains 120 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 5 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Transport/StdioTransport.php
+--------------------------------------------------------------------------------
+FOUND 15 ERRORS AND 14 WARNINGS AFFECTING 27 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+   8 | ERROR   | [ ] Missing doc comment for class StdioTransport
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  10 | ERROR   | [ ] Private member variable "stdin" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  11 | ERROR   | [ ] Private member variable "stdout" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  12 | ERROR   | [ ] Private member variable "stderr" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  14 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  21 | ERROR   | [ ] Missing doc comment for function receive()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  43 | WARNING | [ ] Line exceeds 85 characters; contains 119 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  48 | ERROR   | [x] Each line in a multi-line IF statement must begin with a
+     |         |     boolean operator
+     |         |     (PEAR.ControlStructures.MultiLineCondition.StartWithBoolean)
+  48 | ERROR   | [x] Closing parenthesis of a multi-line IF statement must be
+     |         |     on a new line
+     |         |     (PEAR.ControlStructures.MultiLineCondition.CloseBracketNewLine)
+  48 | WARNING | [ ] Line exceeds 85 characters; contains 115 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  50 | WARNING | [ ] Line exceeds 85 characters; contains 118 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  53 | WARNING | [ ] Line exceeds 85 characters; contains 106 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  55 | WARNING | [ ] Line exceeds 85 characters; contains 103 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  56 | WARNING | [ ] Line exceeds 85 characters; contains 115 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  57 | WARNING | [ ] Line exceeds 85 characters; contains 87 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  61 | WARNING | [ ] Line exceeds 85 characters; contains 108 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  62 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  65 | WARNING | [ ] Line exceeds 85 characters; contains 114 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  69 | WARNING | [ ] Line exceeds 85 characters; contains 87 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  70 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  71 | WARNING | [ ] Line exceeds 85 characters; contains 132 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  75 | ERROR   | [ ] Missing doc comment for function send()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  88 | WARNING | [ ] Line exceeds 85 characters; contains 87 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  96 | ERROR   | [ ] Missing doc comment for function log()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 102 | ERROR   | [ ] Missing doc comment for function getInputStream()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 107 | ERROR   | [ ] Missing doc comment for function getOutputStream()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 112 | ERROR   | [ ] Missing doc comment for function getErrorStream()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 117 | ERROR   | [ ] Missing doc comment for function isClosed()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Transport/TransportInterface.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AND 1 WARNING AFFECTING 8 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR   | Missing doc comment for interface TransportInterface
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 11 | WARNING | Line exceeds 85 characters; contains 149 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 20 | ERROR   | Missing parameter comment
+    |         | (PEAR.Commenting.FunctionComment.MissingParamComment)
+ 21 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 24 | ERROR   | Doc comment for parameter "$message" missing
+    |         | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 27 | ERROR   | Missing @return tag in function comment
+    |         | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 30 | ERROR   | Missing doc comment for function isClosed()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Transport/AbstractTransport.php
+--------------------------------------------------------------------------------
+FOUND 8 ERRORS AFFECTING 8 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  8 | ERROR | Missing doc comment for class AbstractTransport
+    |       | (PEAR.Commenting.ClassComment.Missing)
+ 15 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 17 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 29 | ERROR | Doc comment for parameter "$data" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 31 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+ 47 | ERROR | Doc comment for parameter "$message" missing
+    |       | (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 49 | ERROR | Missing @return tag in function comment
+    |       | (PEAR.Commenting.FunctionComment.MissingReturn)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Exception/TransportException.php
+--------------------------------------------------------------------------------
+FOUND 6 ERRORS AFFECTING 2 LINES
+--------------------------------------------------------------------------------
+ 2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 7 | ERROR | Missing @category tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingCategoryTag)
+ 7 | ERROR | Missing @package tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingPackageTag)
+ 7 | ERROR | Missing @author tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingAuthorTag)
+ 7 | ERROR | Missing @license tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingLicenseTag)
+ 7 | ERROR | Missing @link tag in class comment
+   |       | (PEAR.Commenting.ClassComment.MissingLinkTag)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Exception/MethodNotSupportedException.php
+--------------------------------------------------------------------------------
+FOUND 7 ERRORS AFFECTING 3 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  7 | ERROR | Missing @category tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingCategoryTag)
+  7 | ERROR | Missing @package tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingPackageTag)
+  7 | ERROR | Missing @author tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingAuthorTag)
+  7 | ERROR | Missing @license tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingLicenseTag)
+  7 | ERROR | Missing @link tag in class comment
+    |       | (PEAR.Commenting.ClassComment.MissingLinkTag)
+ 10 | ERROR | Missing doc comment for function __construct()
+    |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/src/Server.php
+--------------------------------------------------------------------------------
+FOUND 49 ERRORS AND 60 WARNINGS AFFECTING 96 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+   9 | ERROR   | [ ] Missing doc comment for class Server
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  11 | ERROR   | [ ] Missing short description in doc comment
+     |         |     (Generic.Commenting.DocComment.MissingShort)
+  16 | ERROR   | [ ] Private member variable "capabilities" must be prefixed
+     |         |     with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  17 | ERROR   | [ ] Private member variable "initialized" must be prefixed
+     |         |     with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  18 | ERROR   | [ ] Private member variable "shuttingDown" must be prefixed
+     |         |     with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  19 | ERROR   | [ ] Private member variable "transport" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  20 | ERROR   | [ ] Private member variable "clientSetLogLevel" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  23 | ERROR   | [ ] Private member variable "isAuthorizationRequired" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  24 | ERROR   | [ ] Private member variable "expectedAuthTokenValue" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  27 | ERROR   | [ ] Private member variable "logLevelPriorities" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  38 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  49 | ERROR   | [x] Tag value for @param tag indented incorrectly; expected 2
+     |         |     spaces but found 1
+     |         |     (Generic.Commenting.DocComment.TagValueIndent)
+  50 | ERROR   | [ ] Tag @return cannot be grouped with parameter tags in a doc
+     |         |     comment (Generic.Commenting.DocComment.NonParamGroup)
+  55 | WARNING | [ ] Line exceeds 85 characters; contains 126 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  61 | ERROR   | [ ] Missing doc comment for function addCapability()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  66 | ERROR   | [ ] Missing doc comment for function connect()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  71 | ERROR   | [ ] Missing doc comment for function run()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  78 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  83 | WARNING | [ ] Line exceeds 85 characters; contains 113 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  95 | WARNING | [ ] Line exceeds 85 characters; contains 218 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  96 | WARNING | [ ] Line exceeds 85 characters; contains 136 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  97 | WARNING | [ ] Line exceeds 85 characters; contains 114 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  98 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  99 | WARNING | [ ] Line exceeds 85 characters; contains 148 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 100 | WARNING | [ ] Line exceeds 85 characters; contains 133 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 101 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 109 | WARNING | [ ] Line exceeds 85 characters; contains 113 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 110 | WARNING | [ ] Line exceeds 85 characters; contains 123 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 119 | WARNING | [ ] Line exceeds 85 characters; contains 185 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 122 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 124 | WARNING | [ ] Line exceeds 85 characters; contains 100 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 126 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 128 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 130 | WARNING | [ ] Line exceeds 85 characters; contains 121 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 134 | WARNING | [ ] Line exceeds 85 characters; contains 122 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 135 | WARNING | [ ] Line exceeds 85 characters; contains 106 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 154 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 155 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 156 | WARNING | [ ] Line exceeds 85 characters; contains 138 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 157 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 159 | WARNING | [ ] Line exceeds 85 characters; contains 111 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 161 | WARNING | [ ] Line exceeds 85 characters; contains 131 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 170 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 182 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 182 | ERROR   | [ ] Private method name "Server::handleMessage" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 207 | ERROR   | [x] Line indented incorrectly; expected 8 spaces, found 12
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 209 | ERROR   | [x] Line indented incorrectly; expected 8 spaces, found 12
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 211 | ERROR   | [x] Line indented incorrectly; expected 8 spaces, found 12
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 216 | ERROR   | [ ] Missing doc comment for function handleInitialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 216 | ERROR   | [ ] Private method name "Server::handleInitialize" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 222 | WARNING | [ ] Line exceeds 85 characters; contains 142 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 225 | WARNING | [ ] Line exceeds 85 characters; contains 109 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 231 | WARNING | [ ] Line exceeds 85 characters; contains 151 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 232 | ERROR   | [x] Opening statement of multi-line function call not indented
+     |         |     correctly; expected 16 spaces but found 17
+     |         |     (PEAR.Functions.FunctionCallSignature.OpeningIndent)
+ 233 | ERROR   | [x] Multi-line function call not indented correctly; expected
+     |         |     21 spaces but found 20
+     |         |     (PEAR.Functions.FunctionCallSignature.Indent)
+ 234 | ERROR   | [x] Multi-line function call not indented correctly; expected
+     |         |     21 spaces but found 20
+     |         |     (PEAR.Functions.FunctionCallSignature.Indent)
+ 235 | ERROR   | [x] Multi-line function call not indented correctly; expected
+     |         |     21 spaces but found 20
+     |         |     (PEAR.Functions.FunctionCallSignature.Indent)
+ 240 | WARNING | [ ] Line exceeds 85 characters; contains 144 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 247 | WARNING | [ ] Line exceeds 85 characters; contains 125 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 251 | WARNING | [ ] Line exceeds 85 characters; contains 118 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 267 | WARNING | [ ] Line exceeds 85 characters; contains 88 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 269 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 303 | ERROR   | [ ] Missing doc comment for function handleShutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 303 | ERROR   | [ ] Private method name "Server::handleShutdown" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 321 | ERROR   | [ ] Missing doc comment for function handleCapabilityMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 321 | ERROR   | [ ] Private method name "Server::handleCapabilityMessage" must
+     |         |     be prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 321 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 348 | ERROR   | [ ] Missing doc comment for function getServerInstructions()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 348 | ERROR   | [ ] Private method name "Server::getServerInstructions" must
+     |         |     be prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 352 | WARNING | [ ] Line exceeds 85 characters; contains 125 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 359 | ERROR   | [ ] Missing doc comment for function handleSetLogLevel()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 359 | ERROR   | [ ] Private method name "Server::handleSetLogLevel" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 363 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 366 | WARNING | [ ] Line exceeds 85 characters; contains 120 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 372 | WARNING | [ ] Line exceeds 85 characters; contains 108 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 373 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 381 | ERROR   | [x] Expected 6 spaces after parameter type; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamType)
+ 381 | ERROR   | [x] Expected 10 spaces after parameter name; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamName)
+ 382 | ERROR   | [x] Expected 6 spaces after parameter type; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamType)
+ 382 | ERROR   | [x] Expected 5 spaces after parameter name; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamName)
+ 383 | ERROR   | [x] Expected 5 spaces after parameter name; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamName)
+ 383 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 384 | ERROR   | [x] Expected 2 spaces after parameter type; 1 found
+     |         |     (PEAR.Commenting.FunctionComment.SpacingAfterParamType)
+ 384 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 385 | ERROR   | [ ] Missing @return tag in function comment
+     |         |     (PEAR.Commenting.FunctionComment.MissingReturn)
+ 386 | WARNING | [ ] Line exceeds 85 characters; contains 129 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 403 | WARNING | [ ] Line exceeds 85 characters; contains 139 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 407 | WARNING | [ ] Line exceeds 85 characters; contains 101 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 408 | WARNING | [ ] Line exceeds 85 characters; contains 110 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 411 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 417 | WARNING | [ ] Line exceeds 85 characters; contains 100 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 418 | WARNING | [ ] Line exceeds 85 characters; contains 105 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 424 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 425 | WARNING | [ ] Line exceeds 85 characters; contains 110 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 426 | WARNING | [ ] Line exceeds 85 characters; contains 124 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 427 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 428 | WARNING | [ ] Line exceeds 85 characters; contains 101 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 431 | ERROR   | [ ] Expected "if (...) {\n"; found "if(...) {\n"
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+ 443 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 444 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 447 | WARNING | [ ] Line exceeds 85 characters; contains 92 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 452 | ERROR   | [ ] Missing doc comment for function isValidLogLevel()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 452 | ERROR   | [ ] Private method name "Server::isValidLogLevel" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 457 | ERROR   | [ ] Missing doc comment for function shouldSendToClient()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 457 | ERROR   | [ ] Private method name "Server::shouldSendToClient" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 466 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 467 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 468 | WARNING | [ ] Line exceeds 85 characters; contains 129 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 14 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Util/MockTransport.php
+--------------------------------------------------------------------------------
+FOUND 15 ERRORS AND 4 WARNINGS AFFECTING 18 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | [ ] Missing file doc comment
+    |         |     (PEAR.Commenting.FileComment.Missing)
+  8 | ERROR   | [ ] Missing doc comment for class MockTransport
+    |         |     (PEAR.Commenting.ClassComment.Missing)
+ 10 | ERROR   | [ ] Private member variable "incomingMessages" must be prefixed
+    |         |     with an underscore
+    |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 10 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+    |         |     (Generic.Files.LineLength.TooLong)
+ 11 | ERROR   | [ ] Private member variable "sentMessages" must be prefixed
+    |         |     with an underscore
+    |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 16 | ERROR   | [x] There must be exactly one blank line before the tags in a
+    |         |     doc comment
+    |         |     (Generic.Commenting.DocComment.SpacingBeforeTags)
+ 17 | ERROR   | [ ] Missing @return tag in function comment
+    |         |     (PEAR.Commenting.FunctionComment.MissingReturn)
+ 23 | ERROR   | [ ] Missing short description in doc comment
+    |         |     (Generic.Commenting.DocComment.MissingShort)
+ 34 | ERROR   | [ ] Missing short description in doc comment
+    |         |     (Generic.Commenting.DocComment.MissingShort)
+ 35 | ERROR   | [ ] Missing parameter comment
+    |         |     (PEAR.Commenting.FunctionComment.MissingParamComment)
+ 36 | ERROR   | [ ] Missing @return tag in function comment
+    |         |     (PEAR.Commenting.FunctionComment.MissingReturn)
+ 40 | WARNING | [ ] Line exceeds 85 characters; contains 88 characters
+    |         |     (Generic.Files.LineLength.TooLong)
+ 48 | ERROR   | [ ] Missing doc comment for function getLastSent()
+    |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 53 | ERROR   | [ ] Missing doc comment for function getAllSentMessages()
+    |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 58 | ERROR   | [ ] Missing doc comment for function reset()
+    |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 64 | ERROR   | [ ] Missing doc comment for function isClosed()
+    |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 66 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+    |         |     (Generic.Files.LineLength.TooLong)
+ 67 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+    |         |     (Generic.Files.LineLength.TooLong)
+ 71 | ERROR   | [ ] Missing doc comment for function log()
+    |         |     (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 1 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerInitializationTest.php
+--------------------------------------------------------------------------------
+FOUND 98 ERRORS AND 45 WARNINGS AFFECTING 68 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | [ ] Missing doc comment for class ServerInitializationTest
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | [ ] Private member variable "server" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  14 | ERROR   | [ ] Private member variable "transport" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  16 | ERROR   | [ ] Missing doc comment for function setUp()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  24 | ERROR   | [ ] Missing doc comment for function
+     |         |     testRejectsMessageBeforeInitialization()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  28 | WARNING | [ ] Line exceeds 85 characters; contains 102 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  38 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  39 | WARNING | [ ] Line exceeds 85 characters; contains 94 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  42 | ERROR   | [ ] Missing doc comment for function
+     |         |     testInitializeResponseDetails()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  42 | WARNING | [ ] Line exceeds 85 characters; contains 107 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  63 | WARNING | [ ] Line exceeds 85 characters; contains 123 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  64 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  65 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  66 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  67 | WARNING | [ ] Line exceeds 85 characters; contains 102 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  72 | ERROR   | [ ] Missing doc comment for function
+     |         |     testCapabilityConflictHandling()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  77 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  77 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  77 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  78 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  78 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  78 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  78 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  78 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  79 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  79 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  79 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  79 | WARNING | [ ] Line exceeds 85 characters; contains 126 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  79 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  80 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  80 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  80 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  80 | WARNING | [ ] Line exceeds 85 characters; contains 188 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  80 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  81 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  81 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  81 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  82 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  82 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  82 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  86 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  86 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  86 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  87 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  87 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  87 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  87 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  87 | WARNING | [ ] Line exceeds 85 characters; contains 160 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  88 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  88 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  88 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  88 | WARNING | [ ] Line exceeds 85 characters; contains 126 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  88 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  89 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  89 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  89 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  89 | WARNING | [ ] Line exceeds 85 characters; contains 188 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  89 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  90 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  90 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  90 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  91 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  91 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  91 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  97 | WARNING | [ ] Line exceeds 85 characters; contains 157 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  98 | WARNING | [ ] Line exceeds 85 characters; contains 88 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 102 | WARNING | [ ] Line exceeds 85 characters; contains 100 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 109 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 112 | ERROR   | [ ] Expected "foreach (...) {\n"; found "foreach(...) {\n"
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+ 118 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 119 | WARNING | [ ] Line exceeds 85 characters; contains 107 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 121 | WARNING | [ ] Line exceeds 85 characters; contains 125 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 125 | ERROR   | [ ] Missing doc comment for function testInitializationOrder()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 129 | WARNING | [ ] Line exceeds 85 characters; contains 109 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 130 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 130 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 130 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 131 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 131 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 131 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 131 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 132 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 132 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 132 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 132 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 132 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 133 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 133 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 133 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 133 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 133 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 134 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 134 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 134 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 134 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 134 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 135 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 135 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 135 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 137 | WARNING | [ ] Line exceeds 85 characters; contains 109 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 138 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 138 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 138 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 139 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 139 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 139 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 139 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 140 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 140 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 140 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 140 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 140 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 141 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 141 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 141 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 141 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 141 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 142 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 142 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 142 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 142 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 142 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 143 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 143 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 143 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 149 | WARNING | [ ] Line exceeds 85 characters; contains 156 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 153 | WARNING | [ ] Line exceeds 85 characters; contains 126 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 156 | ERROR   | [ ] Missing doc comment for function
+     |         |     testInitializationWithUnsupportedCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 180 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 184 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 185 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 186 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 187 | WARNING | [ ] Line exceeds 85 characters; contains 102 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 188 | WARNING | [ ] Line exceeds 85 characters; contains 101 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 191 | ERROR   | [ ] Missing doc comment for function
+     |         |     testLoggingSetLevelAndNotificationViaMockTransport()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 194 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 200 | WARNING | [ ] Line exceeds 85 characters; contains 153 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 201 | WARNING | [ ] Line exceeds 85 characters; contains 106 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 212 | WARNING | [ ] Line exceeds 85 characters; contains 106 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 216 | WARNING | [ ] Line exceeds 85 characters; contains 120 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 226 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 228 | WARNING | [ ] Line exceeds 85 characters; contains 92 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 62 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Resource/ResourceTest.php
+--------------------------------------------------------------------------------
+FOUND 11 ERRORS AND 1 WARNING AFFECTING 12 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 13 | ERROR   | Missing doc comment for class TestResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 15 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 22 | ERROR   | Missing doc comment for class DynamicResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 24 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 26 | WARNING | Line exceeds 85 characters; contains 90 characters
+    |         | (Generic.Files.LineLength.TooLong)
+ 30 | ERROR   | Missing doc comment for class ResourceTest
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 32 | ERROR   | Missing doc comment for function testResourceMetadata()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 40 | ERROR   | Missing doc comment for function testTextContentCreation()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 50 | ERROR   | Missing doc comment for function testParameterizedResource()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 60 | ERROR   | Missing doc comment for function testBlobContentCreation()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 64 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Resource/ResourceRegistryTest.php
+--------------------------------------------------------------------------------
+FOUND 10 ERRORS AND 1 WARNING AFFECTING 11 LINES
+--------------------------------------------------------------------------------
+  2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+ 12 | ERROR   | Missing doc comment for class MockResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 14 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 21 | ERROR   | Missing doc comment for class OtherMockResource
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 23 | ERROR   | Missing doc comment for function read()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 29 | ERROR   | Missing doc comment for class ResourceRegistryTest
+    |         | (PEAR.Commenting.ClassComment.Missing)
+ 31 | ERROR   | Private member variable "registry" must be prefixed with an
+    |         | underscore
+    |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 33 | ERROR   | Missing doc comment for function setUp()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 38 | ERROR   | Missing doc comment for function testRegister()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 49 | ERROR   | Missing doc comment for function testDiscoverResources()
+    |         | (PEAR.Commenting.FunctionComment.Missing)
+ 71 | WARNING | Line exceeds 85 characters; contains 86 characters
+    |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerErrorHandlingTest.php
+--------------------------------------------------------------------------------
+FOUND 91 ERRORS AND 26 WARNINGS AFFECTING 41 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | [ ] Missing doc comment for class ServerErrorHandlingTest
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | [ ] Private member variable "server" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  14 | ERROR   | [ ] Private member variable "transport" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  16 | ERROR   | [ ] Missing doc comment for function setUp()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  24 | ERROR   | [ ] Missing doc comment for function
+     |         |     testHandlesCapabilityInitializationFailure()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  27 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  27 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  27 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  27 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  27 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  28 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  28 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  28 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  28 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  28 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  29 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  29 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  29 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  29 | WARNING | [ ] Line exceeds 85 characters; contains 100 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  29 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  30 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  30 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  30 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  30 | WARNING | [ ] Line exceeds 85 characters; contains 104 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  30 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  31 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  31 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  31 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  37 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  50 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  51 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  54 | ERROR   | [ ] Missing doc comment for function
+     |         |     testHandlesShutdownFailure()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  57 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  57 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  57 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  57 | WARNING | [ ] Line exceeds 85 characters; contains 108 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  57 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  58 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  58 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  58 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  58 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  58 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  59 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  59 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  59 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  59 | WARNING | [ ] Line exceeds 85 characters; contains 100 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  59 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  60 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  60 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  60 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  61 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  61 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+  61 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+  61 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  61 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+  67 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  83 | ERROR   | [ ] Expected "foreach (...) {\n"; found "foreach(...) {\n"
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+  84 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+  85 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+  89 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  95 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  98 | ERROR   | [ ] Missing doc comment for function testShutdownOrder()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 103 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 103 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 103 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 103 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 104 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 104 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 104 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 105 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 105 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 105 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 105 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 106 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 106 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 106 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 106 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 106 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 107 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 107 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 107 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 107 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 107 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 108 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 108 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 108 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 108 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 108 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 111 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 111 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 111 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 111 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 112 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 112 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 112 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 113 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 113 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 113 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 113 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 114 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 114 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 114 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 114 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 114 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 115 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 115 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 115 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 115 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 115 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 116 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 116 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 116 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 116 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 116 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 124 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 137 | WARNING | [ ] Line exceeds 85 characters; contains 127 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 62 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Capability/ToolsCapabilityTest.php
+--------------------------------------------------------------------------------
+FOUND 43 ERRORS AND 38 WARNINGS AFFECTING 64 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+  16 | ERROR   | [ ] You must use "/**" style comments for a class comment
+     |         |     (PEAR.Commenting.ClassComment.WrongStyle)
+  18 | ERROR   | [ ] Missing doc comment for function doExecute()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  19 | WARNING | [ ] Line exceeds 85 characters; contains 101 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  27 | ERROR   | [ ] You must use "/**" style comments for a function comment
+     |         |     (PEAR.Commenting.FunctionComment.WrongStyle)
+  27 | WARNING | [ ] Line exceeds 85 characters; contains 120 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  31 | WARNING | [ ] Line exceeds 85 characters; contains 109 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  32 | WARNING | [ ] Line exceeds 85 characters; contains 118 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  34 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  39 | ERROR   | [ ] Missing doc comment for class FailingMockTool
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  41 | ERROR   | [ ] Missing doc comment for function doExecute()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  48 | ERROR   | [ ] Missing doc comment for class ToolsCapabilityTest
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  50 | ERROR   | [ ] Private member variable "capability" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  51 | ERROR   | [ ] Private member variable "mockToolInstance" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  51 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  53 | ERROR   | [ ] Missing doc comment for function setUp()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  60 | ERROR   | [ ] Missing doc comment for function testGetCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  65 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  66 | WARNING | [ ] Line exceeds 85 characters; contains 107 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  69 | ERROR   | [ ] Missing doc comment for function testHandleList()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  75 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  81 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  89 | WARNING | [ ] Line exceeds 85 characters; contains 105 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  92 | ERROR   | [ ] Missing doc comment for function testHandleCall()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 102 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 107 | WARNING | [ ] Line exceeds 85 characters; contains 113 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 110 | ERROR   | [ ] Missing doc comment for function
+     |         |     testHandleCallWithUnknownTool()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 120 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 125 | WARNING | [ ] Line exceeds 85 characters; contains 110 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 128 | ERROR   | [ ] Missing doc comment for function
+     |         |     testHandleCallWithFailingTool()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 139 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 144 | WARNING | [ ] Line exceeds 85 characters; contains 140 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 147 | ERROR   | [ ] Missing doc comment for function
+     |         |     testHandleCallWithMissingRequiredArgument()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 149 | WARNING | [ ] Line exceeds 85 characters; contains 92 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 151 | WARNING | [ ] Line exceeds 85 characters; contains 104 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 154 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 165 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 166 | WARNING | [ ] Line exceeds 85 characters; contains 127 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 169 | ERROR   | [ ] Missing doc comment for function
+     |         |     testToolInitializationAndShutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 174 | WARNING | [ ] Line exceeds 85 characters; contains 130 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 176 | ERROR   | [ ] You must use "/**" style comments for a function comment
+     |         |     (PEAR.Commenting.FunctionComment.WrongStyle)
+ 176 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 181 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 181 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 181 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 181 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 182 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 182 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 182 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 182 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 183 | ERROR   | [ ] Missing doc comment for function doExecute()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 183 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 183 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 183 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 183 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 190 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 193 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 197 | ERROR   | [ ] You must use "/**" style comments for a function comment
+     |         |     (PEAR.Commenting.FunctionComment.WrongStyle)
+ 199 | ERROR   | [x] Opening parenthesis of a multi-line function call must be
+     |         |     the last content on the line
+     |         |     (PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket)
+ 202 | ERROR   | [x] Closing parenthesis of a multi-line function call must be
+     |         |     on a line by itself
+     |         |     (PEAR.Functions.FunctionCallSignature.CloseBracketLine)
+ 209 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 210 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 214 | ERROR   | [ ] Missing doc comment for function
+     |         |     testHandleCompleteDefaultSuggestions()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 217 | ERROR   | [ ] Missing doc comment for function doExecute()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 217 | ERROR   | [x] Opening brace should be on a new line
+     |         |     (PEAR.Functions.FunctionDeclaration.BraceOnSameLine)
+ 217 | ERROR   | [x] Opening brace must be the last content on the line
+     |         |     (PEAR.Functions.FunctionDeclaration.ContentAfterBrace)
+ 217 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 217 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 219 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 221 | ERROR   | [x] Opening parenthesis of a multi-line function call must be
+     |         |     the last content on the line
+     |         |     (PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket)
+ 224 | ERROR   | [x] Closing parenthesis of a multi-line function call must be
+     |         |     on a line by itself
+     |         |     (PEAR.Functions.FunctionCallSignature.CloseBracketLine)
+ 230 | WARNING | [ ] Line exceeds 85 characters; contains 113 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 233 | ERROR   | [ ] Missing doc comment for function
+     |         |     testHandleCompleteToolNotFound()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 235 | ERROR   | [x] Opening parenthesis of a multi-line function call must be
+     |         |     the last content on the line
+     |         |     (PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket)
+ 238 | ERROR   | [x] Closing parenthesis of a multi-line function call must be
+     |         |     on a line by itself
+     |         |     (PEAR.Functions.FunctionCallSignature.CloseBracketLine)
+ 242 | WARNING | [ ] Line exceeds 85 characters; contains 130 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 243 | WARNING | [ ] Line exceeds 85 characters; contains 132 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 244 | WARNING | [ ] Line exceeds 85 characters; contains 129 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 245 | WARNING | [ ] Line exceeds 85 characters; contains 143 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 246 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 247 | WARNING | [ ] Line exceeds 85 characters; contains 140 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 18 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Capability/ResourcesCapabilityTest.php
+--------------------------------------------------------------------------------
+FOUND 16 ERRORS AND 16 WARNINGS AFFECTING 30 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  15 | ERROR   | You must use "/**" style comments for a class comment
+     |         | (PEAR.Commenting.ClassComment.WrongStyle)
+  18 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+  18 | WARNING | Line exceeds 85 characters; contains 124 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  23 | ERROR   | Missing doc comment for function read()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  25 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  26 | WARNING | Line exceeds 85 characters; contains 101 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  31 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  32 | ERROR   | You must use "/**" style comments for a class comment
+     |         | (PEAR.Commenting.ClassComment.WrongStyle)
+  34 | ERROR   | Missing doc comment for function __construct()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  34 | WARNING | Line exceeds 85 characters; contains 124 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  39 | ERROR   | Missing doc comment for function read()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  45 | WARNING | Line exceeds 85 characters; contains 90 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  49 | ERROR   | Missing doc comment for class ResourcesCapabilityTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  51 | ERROR   | Private member variable "capability" must be prefixed with an
+     |         | underscore
+     |         | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  53 | ERROR   | Missing doc comment for function setUp()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  59 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  63 | ERROR   | Missing doc comment for function testGetCapabilities()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  71 | ERROR   | Missing doc comment for function testHandleList()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  92 | ERROR   | Missing doc comment for function testHandleRead()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 113 | ERROR   | Missing doc comment for function
+     |         | testHandleReadWithParameters()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 132 | WARNING | Line exceeds 85 characters; contains 113 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 133 | WARNING | Line exceeds 85 characters; contains 103 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 136 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 143 | ERROR   | Missing doc comment for function
+     |         | testHandleReadUnknownResource()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 153 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 154 | WARNING | Line exceeds 85 characters; contains 118 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 155 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 158 | ERROR   | Missing doc comment for function testHandleMissingUri()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 164 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 165 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 166 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Message/JsonRpcMessageTest.php
+--------------------------------------------------------------------------------
+FOUND 19 ERRORS AND 14 WARNINGS AFFECTING 33 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+   8 | ERROR   | Missing doc comment for class JsonRpcMessageTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  10 | ERROR   | Missing doc comment for function testCreateRequest()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  20 | ERROR   | Missing doc comment for function testCreateNotification()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  30 | ERROR   | Missing doc comment for function testFromJson()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  32 | WARNING | Line exceeds 85 characters; contains 97 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  40 | ERROR   | Missing doc comment for function testToJson()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  52 | ERROR   | Missing doc comment for function testCreateErrorResponse()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  65 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  70 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+  72 | WARNING | Line exceeds 85 characters; contains 133 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  85 | WARNING | Line exceeds 85 characters; contains 97 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  89 | ERROR   | Missing doc comment for function
+     |         | testFromJsonArrayEmptyBatchRequest()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  97 | ERROR   | Missing doc comment for function
+     |         | testFromJsonArrayInvalidJson()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 101 | WARNING | Line exceeds 85 characters; contains 100 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 103 | WARNING | Line exceeds 85 characters; contains 103 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 105 | WARNING | Line exceeds 85 characters; contains 106 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 112 | ERROR   | Missing doc comment for function testFromJsonArrayNotAnArray()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 114 | WARNING | Line exceeds 85 characters; contains 94 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 117 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 121 | ERROR   | Missing doc comment for function
+     |         | testFromJsonArrayContainsInvalidMessage()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 124 | WARNING | Line exceeds 85 characters; contains 102 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 128 | WARNING | Line exceeds 85 characters; contains 86 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 133 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+ 155 | ERROR   | Missing doc comment for function
+     |         | testToJsonArrayEmptyBatchResponse()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 161 | ERROR   | Missing doc comment for function
+     |         | testToJsonArrayWithNonMessageThrowsException()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 165 | WARNING | Line exceeds 85 characters; contains 96 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 170 | ERROR   | You must use "/**" style comments for a function comment
+     |         | (PEAR.Commenting.FunctionComment.WrongStyle)
+ 181 | ERROR   | Missing doc comment for function testToResponseArrayForError()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 193 | ERROR   | Missing doc comment for function
+     |         | testToResponseArrayForRequestThrowsException()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 197 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 201 | ERROR   | Missing doc comment for function
+     |         | testToResponseArrayForNotificationThrowsException()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 205 | WARNING | Line exceeds 85 characters; contains 111 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ExtendedToolTest.php
+--------------------------------------------------------------------------------
+FOUND 14 ERRORS AND 8 WARNINGS AFFECTING 22 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | Missing doc comment for class OptionalParamTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  15 | WARNING | Line exceeds 85 characters; contains 102 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  24 | ERROR   | Missing doc comment for class ArrayParamTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  26 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  27 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  28 | WARNING | Line exceeds 85 characters; contains 103 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  40 | ERROR   | Missing doc comment for class MultiOutputTool
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  42 | ERROR   | Missing doc comment for function doExecute()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  43 | WARNING | Line exceeds 85 characters; contains 98 characters
+     |         | (Generic.Files.LineLength.TooLong)
+  53 | ERROR   | Missing doc comment for class ExtendedToolTest
+     |         | (PEAR.Commenting.ClassComment.Missing)
+  55 | ERROR   | Missing doc comment for function testOptionalParameters()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+  83 | ERROR   | Missing doc comment for function testArrayParameters()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 111 | ERROR   | Missing doc comment for function testMultipleOutputTypes()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 127 | ERROR   | Missing doc comment for function testInvalidArrayType()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 132 | WARNING | Line exceeds 85 characters; contains 91 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 142 | ERROR   | Missing doc comment for function testInvalidBooleanType()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 147 | WARNING | Line exceeds 85 characters; contains 93 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 157 | ERROR   | Missing doc comment for function testDescriptionsInSchema()
+     |         | (PEAR.Commenting.FunctionComment.Missing)
+ 162 | WARNING | Line exceeds 85 characters; contains 87 characters
+     |         | (Generic.Files.LineLength.TooLong)
+ 163 | WARNING | Line exceeds 85 characters; contains 89 characters
+     |         | (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ToolRegistryTest.php
+--------------------------------------------------------------------------------
+FOUND 14 ERRORS AFFECTING 14 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR | Missing file doc comment (PEAR.Commenting.FileComment.Missing)
+  12 | ERROR | Missing doc comment for class MockTool
+     |       | (PEAR.Commenting.ClassComment.Missing)
+  14 | ERROR | Missing doc comment for function doExecute()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  21 | ERROR | Missing doc comment for class OtherMockTool
+     |       | (PEAR.Commenting.ClassComment.Missing)
+  23 | ERROR | Missing doc comment for function doExecute()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  29 | ERROR | Missing doc comment for class ToolRegistryTest
+     |       | (PEAR.Commenting.ClassComment.Missing)
+  31 | ERROR | Private member variable "registry" must be prefixed with an
+     |       | underscore
+     |       | (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  33 | ERROR | Missing doc comment for function setUp()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  38 | ERROR | Missing doc comment for function testRegister()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  49 | ERROR | Missing doc comment for function testRegisterMultipleTools()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  63 | ERROR | Missing doc comment for function testRegisterOverwrite()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+  76 | ERROR | Missing doc comment for function testDiscoverTools()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+ 112 | ERROR | Missing doc comment for function
+     |       | testDiscoverToolsWithInvalidDirectory()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+ 118 | ERROR | Missing doc comment for function
+     |       | testDiscoverToolsWithInvalidFile()
+     |       | (PEAR.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Tool/ToolTest.php
+--------------------------------------------------------------------------------
+FOUND 46 ERRORS AND 6 WARNINGS AFFECTING 48 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | [ ] Missing doc comment for class TestTool
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | [ ] Missing doc comment for function doExecute()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  22 | ERROR   | [ ] Missing doc comment for class CalculatorTool
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  24 | ERROR   | [ ] Missing doc comment for function doExecute()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  25 | WARNING | [ ] Line exceeds 85 characters; contains 110 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  40 | ERROR   | [ ] Missing doc comment for class ToolTest
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  42 | ERROR   | [ ] Missing doc comment for function testToolMetadata()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  50 | ERROR   | [ ] Missing doc comment for function testDefaultSchema()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  61 | ERROR   | [ ] Missing doc comment for function testParameterSchema()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  89 | ERROR   | [ ] Missing doc comment for function testValidExecution()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 116 | ERROR   | [ ] Missing doc comment for function
+     |         |     testMissingRequiredArgument()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 131 | ERROR   | [ ] Missing doc comment for function testInvalidArgumentType()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 136 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 147 | ERROR   | [ ] Missing doc comment for function testUnknownArgument()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 164 | ERROR   | [ ] Missing doc comment for function testInvalidOperation()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 180 | ERROR   | [ ] Missing doc comment for function
+     |         |     testSchemaEncodesAsValidJson()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 195 | WARNING | [ ] Line exceeds 85 characters; contains 99 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 201 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 210 | ERROR   | [ ] Missing doc comment for function
+     |         |     testSchemaValidatesAgainstTypeScript()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 246 | ERROR   | [ ] Doc comment for parameter "$data" missing
+     |         |     (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 246 | ERROR   | [ ] Doc comment for parameter "$schema" missing
+     |         |     (PEAR.Commenting.FunctionComment.MissingParamTag)
+ 248 | ERROR   | [ ] Missing @return tag in function comment
+     |         |     (PEAR.Commenting.FunctionComment.MissingReturn)
+ 249 | ERROR   | [ ] Private method name "ToolTest::validateAgainstSchema" must
+     |         |     be prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 253 | ERROR   | [x] Line indented incorrectly; expected 12 spaces, found 16
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 254 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 256 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 257 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 258 | ERROR   | [x] Line indented incorrectly; expected 20 spaces, found 24
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 259 | ERROR   | [x] Line indented incorrectly; expected 24 spaces, found 28
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 259 | ERROR   | [x] First condition of a multi-line IF statement must directly
+     |         |     follow the opening parenthesis
+     |         |     (PEAR.ControlStructures.MultiLineCondition.SpacingAfterOpenBrace)
+ 260 | ERROR   | [x] Each line in a multi-line IF statement must begin with a
+     |         |     boolean operator
+     |         |     (PEAR.ControlStructures.MultiLineCondition.StartWithBoolean)
+ 265 | ERROR   | [x] Line indented incorrectly; expected 24 spaces, found 28
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 266 | ERROR   | [x] Line indented incorrectly; expected 24 spaces, found 28
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 267 | ERROR   | [x] Line indented incorrectly; expected 28 spaces, found 32
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 267 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 269 | ERROR   | [x] Line indented incorrectly; expected 28 spaces, found 32
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 270 | ERROR   | [x] Line indented incorrectly; expected 24 spaces, found 28
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 271 | ERROR   | [x] Line indented incorrectly; expected 20 spaces, found 24
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 272 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 274 | ERROR   | [x] Line indented incorrectly; expected 12 spaces, found 16
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 275 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 277 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 278 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 279 | ERROR   | [x] Line indented incorrectly; expected 20 spaces, found 24
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 280 | ERROR   | [x] Line indented incorrectly; expected 24 spaces, found 28
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 280 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 282 | ERROR   | [x] Line indented incorrectly; expected 24 spaces, found 28
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 283 | ERROR   | [x] Line indented incorrectly; expected 20 spaces, found 24
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 284 | ERROR   | [x] Line indented incorrectly; expected 16 spaces, found 20
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 286 | ERROR   | [x] Line indented incorrectly; expected 12 spaces, found 16
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+ 288 | ERROR   | [x] Line indented incorrectly; expected 12 spaces, found 16
+     |         |     (PEAR.WhiteSpace.ScopeIndent.IncorrectExact)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 26 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/Transport/StdioTransportTest.php
+--------------------------------------------------------------------------------
+FOUND 25 ERRORS AND 9 WARNINGS AFFECTING 32 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+   9 | ERROR   | [ ] Missing doc comment for class TestableStdioTransport
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  11 | ERROR   | [ ] Private member variable "input" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  12 | ERROR   | [ ] Private member variable "output" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  13 | ERROR   | [ ] Private member variable "error" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  15 | ERROR   | [ ] Missing doc comment for function __construct()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  26 | ERROR   | [ ] Missing doc comment for function getInputStream()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  31 | ERROR   | [ ] Missing doc comment for function getOutputStream()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  36 | ERROR   | [ ] Missing doc comment for function getErrorStream()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  42 | ERROR   | [ ] You must use "/**" style comments for a function comment
+     |         |     (PEAR.Commenting.FunctionComment.WrongStyle)
+  53 | ERROR   | [ ] Missing doc comment for function readFromOutput()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  62 | ERROR   | [ ] Missing doc comment for function readFromError()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  71 | ERROR   | [ ] Missing doc comment for function readMultipleJsonOutputs()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  85 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+  88 | WARNING | [ ] Line exceeds 85 characters; contains 123 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  96 | ERROR   | [ ] Missing doc comment for class StdioTransportTest
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  98 | ERROR   | [ ] Private member variable "transport" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+ 100 | ERROR   | [ ] Missing doc comment for function setUp()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 107 | ERROR   | [ ] You must use "/**" style comments for a function comment
+     |         |     (PEAR.Commenting.FunctionComment.WrongStyle)
+ 120 | ERROR   | [ ] Missing doc comment for function testReceiveBatchRequest()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 138 | ERROR   | [ ] Missing doc comment for function
+     |         |     testReceiveEmptyJsonArray()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 146 | ERROR   | [ ] Missing doc comment for function
+     |         |     testReceiveInvalidJsonThrowsException()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 146 | WARNING | [ ] Line exceeds 85 characters; contains 88 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 150 | WARNING | [ ] Line exceeds 85 characters; contains 109 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 155 | ERROR   | [ ] Missing doc comment for function
+     |         |     testReceiveEmptyLineReturnsNull()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 159 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 162 | ERROR   | [ ] Missing doc comment for function
+     |         |     testReceiveStreamClosedReturnsEmptyArray()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 162 | WARNING | [ ] Line exceeds 85 characters; contains 93 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 179 | ERROR   | [ ] Missing doc comment for function testSendSingleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 185 | WARNING | [ ] Line exceeds 85 characters; contains 116 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 188 | ERROR   | [ ] Missing doc comment for function testSendBatchMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 197 | WARNING | [ ] Line exceeds 85 characters; contains 157 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 201 | ERROR   | [ ] Missing doc comment for function testLogging()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 206 | WARNING | [ ] Line exceeds 85 characters; contains 117 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 1 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+
+FILE: /app/tests/ServerTest.php
+--------------------------------------------------------------------------------
+FOUND 42 ERRORS AND 60 WARNINGS AFFECTING 82 LINES
+--------------------------------------------------------------------------------
+   2 | ERROR   | [ ] Missing file doc comment
+     |         |     (PEAR.Commenting.FileComment.Missing)
+  11 | ERROR   | [ ] Missing doc comment for class TestCapability
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  13 | ERROR   | [ ] Private member variable "expectedResponses" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  14 | ERROR   | [ ] Private member variable "receivedMessages" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  16 | ERROR   | [ ] Missing doc comment for function addExpectedResponse()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  16 | WARNING | [ ] Line exceeds 85 characters; contains 88 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  21 | ERROR   | [ ] Missing doc comment for function getReceivedMessages()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  26 | ERROR   | [ ] Missing doc comment for function resetReceivedMessages()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  31 | ERROR   | [ ] Missing doc comment for function getCapabilities()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  36 | ERROR   | [ ] Missing doc comment for function canHandleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  41 | ERROR   | [ ] Missing doc comment for function handleMessage()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  47 | ERROR   | [ ] Missing doc comment for function initialize()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  50 | ERROR   | [ ] Missing doc comment for function shutdown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  55 | ERROR   | [ ] Missing doc comment for class ServerTest
+     |         |     (PEAR.Commenting.ClassComment.Missing)
+  57 | ERROR   | [ ] Private member variable "server" must be prefixed with an
+     |         |     underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  58 | ERROR   | [ ] Private member variable "transport" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  59 | ERROR   | [ ] Private member variable "capability" must be prefixed with
+     |         |     an underscore
+     |         |     (PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore)
+  61 | ERROR   | [ ] Missing doc comment for function setUp()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  64 | WARNING | [ ] Line exceeds 85 characters; contains 103 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  71 | ERROR   | [ ] Missing doc comment for function
+     |         |     initializeServerAndGetInitResponse()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+  71 | ERROR   | [ ] Private method name
+     |         |     "ServerTest::initializeServerAndGetInitResponse" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+  71 | WARNING | [ ] Line exceeds 85 characters; contains 102 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  77 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  83 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  86 | WARNING | [ ] Line exceeds 85 characters; contains 87 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  88 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+  92 | WARNING | [ ] Line exceeds 85 characters; contains 101 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 100 | WARNING | [ ] Line exceeds 85 characters; contains 120 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 104 | ERROR   | [ ] Missing doc comment for function testInitialization()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 112 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 114 | WARNING | [ ] Line exceeds 85 characters; contains 90 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 117 | WARNING | [ ] Line exceeds 85 characters; contains 98 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 119 | WARNING | [ ] Line exceeds 85 characters; contains 97 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 120 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 121 | WARNING | [ ] Line exceeds 85 characters; contains 101 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 124 | ERROR   | [ ] Missing doc comment for function testCapabilityHandling()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 134 | WARNING | [ ] Line exceeds 85 characters; contains 87 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 137 | WARNING | [ ] Line exceeds 85 characters; contains 124 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 138 | WARNING | [ ] Line exceeds 85 characters; contains 97 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 154 | WARNING | [ ] Line exceeds 85 characters; contains 111 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 159 | WARNING | [ ] Line exceeds 85 characters; contains 125 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 163 | ERROR   | [ ] Missing doc comment for function testMethodNotFound()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 170 | WARNING | [ ] Line exceeds 85 characters; contains 121 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 171 | WARNING | [ ] Line exceeds 85 characters; contains 97 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 187 | WARNING | [ ] Line exceeds 85 characters; contains 125 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 190 | WARNING | [ ] Line exceeds 85 characters; contains 95 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 196 | ERROR   | [ ] You must use "/**" style comments for a function comment
+     |         |     (PEAR.Commenting.FunctionComment.WrongStyle)
+ 196 | ERROR   | [ ] Private method name "ServerTest::setEnvVar" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 201 | ERROR   | [ ] Missing doc comment for function clearEnvVar()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 201 | ERROR   | [ ] Private method name "ServerTest::clearEnvVar" must be
+     |         |     prefixed with an underscore
+     |         |     (PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore)
+ 206 | ERROR   | [ ] Missing doc comment for function tearDown()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 213 | ERROR   | [ ] Missing doc comment for function
+     |         |     testBatchRequestProcessing()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 220 | WARNING | [ ] Line exceeds 85 characters; contains 117 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 221 | WARNING | [ ] Line exceeds 85 characters; contains 86 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 222 | WARNING | [ ] Line exceeds 85 characters; contains 96 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 224 | WARNING | [ ] Line exceeds 85 characters; contains 127 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 227 | WARNING | [ ] Line exceeds 85 characters; contains 101 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 234 | WARNING | [ ] Line exceeds 85 characters; contains 100 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 235 | WARNING | [ ] Line exceeds 85 characters; contains 127 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 239 | WARNING | [ ] Line exceeds 85 characters; contains 112 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 243 | ERROR   | [ ] Expected "foreach (...) {\n"; found "foreach(...) { "
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+ 243 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+ 243 | WARNING | [ ] Line exceeds 85 characters; contains 114 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 243 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 244 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 250 | ERROR   | [ ] Expected "foreach (...) {\n"; found "foreach(...) { "
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+ 250 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+ 250 | WARNING | [ ] Line exceeds 85 characters; contains 114 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 250 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 251 | WARNING | [ ] Line exceeds 85 characters; contains 89 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 253 | WARNING | [ ] Line exceeds 85 characters; contains 91 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 256 | ERROR   | [ ] Missing doc comment for function
+     |         |     testAuthorizationRequiredAndSuccessful()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 261 | WARNING | [ ] Line exceeds 85 characters; contains 107 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 262 | WARNING | [ ] Line exceeds 85 characters; contains 111 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 267 | WARNING | [ ] Line exceeds 85 characters; contains 130 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 271 | WARNING | [ ] Line exceeds 85 characters; contains 123 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 276 | ERROR   | [ ] Missing doc comment for function
+     |         |     testAuthorizationRequiredTokenMissing()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 281 | WARNING | [ ] Line exceeds 85 characters; contains 195 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 282 | WARNING | [ ] Line exceeds 85 characters; contains 105 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 290 | WARNING | [ ] Line exceeds 85 characters; contains 123 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 293 | ERROR   | [ ] Expected "foreach (...) {\n"; found "foreach(...) { "
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+ 293 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+ 293 | WARNING | [ ] Line exceeds 85 characters; contains 118 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 293 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 294 | WARNING | [ ] Line exceeds 85 characters; contains 92 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 301 | ERROR   | [ ] Missing doc comment for function
+     |         |     testAuthorizationRequiredTokenInvalid()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 306 | WARNING | [ ] Line exceeds 85 characters; contains 195 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 307 | WARNING | [ ] Line exceeds 85 characters; contains 105 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 315 | WARNING | [ ] Line exceeds 85 characters; contains 123 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 318 | ERROR   | [ ] Expected "foreach (...) {\n"; found "foreach(...) { "
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+ 318 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+ 318 | WARNING | [ ] Line exceeds 85 characters; contains 118 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 318 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+ 319 | WARNING | [ ] Line exceeds 85 characters; contains 92 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 326 | ERROR   | [ ] Missing doc comment for function testSetLogLevelRequest()
+     |         |     (PEAR.Commenting.FunctionComment.Missing)
+ 332 | WARNING | [ ] Line exceeds 85 characters; contains 140 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 333 | WARNING | [ ] Line exceeds 85 characters; contains 102 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 341 | WARNING | [ ] Line exceeds 85 characters; contains 130 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 344 | ERROR   | [ ] Expected "foreach (...) {\n"; found "foreach(...) { "
+     |         |     (PEAR.ControlStructures.ControlSignature.Found)
+ 344 | WARNING | [x] Inline control structures are discouraged
+     |         |     (Generic.ControlStructures.InlineControlStructure.Discouraged)
+ 344 | WARNING | [ ] Line exceeds 85 characters; contains 115 characters
+     |         |     (Generic.Files.LineLength.TooLong)
+ 344 | ERROR   | [x] Closing brace must be on a line by itself
+     |         |     (PEAR.WhiteSpace.ScopeClosingBrace.Line)
+--------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 10 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------
+
+Time: 535ms; Memory: 10MB
