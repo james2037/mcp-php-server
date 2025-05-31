@@ -11,6 +11,10 @@ sudo apt-get update
 echo "Installing software-properties-common..."
 sudo apt-get install -y software-properties-common
 
+# Install python3-apt (for add-apt-repository dependency apt_pkg)
+echo "Installing python3-apt..."
+sudo apt-get install -y python3-apt
+
 # Add PHP PPA
 echo "Adding PHP PPA (ppa:ondrej/php)..."
 sudo add-apt-repository ppa:ondrej/php -y
