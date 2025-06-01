@@ -74,4 +74,10 @@ class MockTransport implements TransportInterface
         // No-op for testing, or could store logs if needed for assertions
         // error_log("MockTransport Log: " . $message); // For debugging tests
     }
+
+    public function preferSseStream(bool $prefer = true): void
+    {
+        // No-op for this mock implementation.
+        // Could store the preference if tests need to assert it was called.
+    }
 }
