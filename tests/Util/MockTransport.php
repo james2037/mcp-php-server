@@ -33,16 +33,16 @@ class MockTransport implements TransportInterface
     }
 
     /**
-     * @param JsonRpcMessage|JsonRpcMessage[] $message
+     * @param JsonRpcMessage|JsonRpcMessage[] $messageOrMessages
      */
-    public function send(JsonRpcMessage|array $message): void
+    public function send(JsonRpcMessage|array $messageOrMessages): void
     {
-        if (is_array($message)) {
+        if (is_array($messageOrMessages)) {
             // If it's an array of JsonRpcMessage objects (batch response/notifications)
-            $this->sentMessages = array_merge($this->sentMessages, $message);
+            $this->sentMessages = array_merge($this->sentMessages, $messageOrMessages);
         } else {
             // If it's a single JsonRpcMessage object
-            $this->sentMessages[] = $message;
+            $this->sentMessages[] = $messageOrMessages;
         }
     }
 
@@ -51,6 +51,9 @@ class MockTransport implements TransportInterface
         return end($this->sentMessages) ?: null;
     }
 
+    /**
+     * @return JsonRpcMessage[]
+     */
     public function getAllSentMessages(): array
     {
         return $this->sentMessages;

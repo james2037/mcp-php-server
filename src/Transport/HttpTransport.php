@@ -296,14 +296,6 @@ class HttpTransport extends AbstractTransport
         // For now, direct flushOutput call is removed here. SAPI may handle flushing.
     }
 
-    private function flushOutput(): void
-    {
-        // if (function_exists('ob_flush')) { // Keep PHP's output buffer intact for tests
-        //     ob_flush();
-        // }
-        flush(); // Flush system output buffer if possible/needed
-    }
-
     public function log(string $message): void
     {
         error_log("HttpTransport: " . $message);
@@ -314,8 +306,8 @@ class HttpTransport extends AbstractTransport
         if ($this->streamOpen) {
             return connection_aborted() === 1;
         }
-        // If headersSent is true AND it wasn't an SSE stream, the request/response cycle is done.
-        if ($this->headersSent && !$this->streamOpen) {
+        // If headersSent is true AND it wasn't an SSE stream (checked by the if above), the request/response cycle is done.
+        if ($this->headersSent) {
             return true;
         }
         return false; // Default

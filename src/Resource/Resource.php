@@ -12,6 +12,7 @@ use MCP\Server\Tool\Content\Annotations;
 abstract class Resource
 {
     private ?ResourceUri $metadata = null;
+    /** @var array<string, mixed> $config */
     protected array $config = [];
 
     // New properties to match the Resource schema for listing
@@ -25,7 +26,7 @@ abstract class Resource
         ?string $mimeType = null,
         ?int $size = null,
         ?Annotations $annotations = null,
-        ?array $config = null
+        ?array $config = null // TODO: Use @param array<string, mixed>|null $config once syntax is supported
     ) {
         $this->name = $name;
         $this->mimeType = $mimeType;
@@ -59,6 +60,9 @@ abstract class Resource
     }
 
     // toArray method to represent the resource for listings
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         $data = [
@@ -84,8 +88,14 @@ abstract class Resource
         return $data;
     }
 
+    /**
+     * @param array<string, string|int|float|bool> $parameters
+     */
     abstract public function read(array $parameters = []): ResourceContents;
 
+    /**
+     * @param array<string, string|int|float|bool> $parameters
+     */
     protected function text(string $text, ?string $mimeType = null, array $parameters = []): TextResourceContents
     {
         return new TextResourceContents(
@@ -95,6 +105,9 @@ abstract class Resource
         );
     }
 
+    /**
+     * @param array<string, string|int|float|bool> $parameters
+     */
     protected function blob(string $data, string $mimeType, array $parameters = []): BlobResourceContents
     {
         return new BlobResourceContents(
@@ -104,6 +117,9 @@ abstract class Resource
         );
     }
 
+    /**
+     * @param array<string, string|int|float|bool> $parameters
+     */
     private function resolveUri(string $template, array $parameters): string
     {
         $uri = $template;

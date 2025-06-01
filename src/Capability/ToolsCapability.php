@@ -185,12 +185,11 @@ class ToolsCapability implements CapabilityInterface
 
         $suggestions = $tool->getCompletionSuggestions($argumentName, $currentValue, $allCurrentArguments);
 
-        // Validate suggestions structure slightly (must have 'values' array)
-        if (!isset($suggestions['values']) || !is_array($suggestions['values'])) {
-             // Tool provided invalid suggestion format, log this server-side
-             // Consider using the Server's logMessage method if accessible, or a direct error_log
+        // Validate suggestions structure
+        // @phpstan-ignore-next-line - Defensive check for tools not adhering to documented return type
+        if (!is_array($suggestions) || !isset($suggestions['values']) || !is_array($suggestions['values'])) {
              error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}'.");
-             $suggestions = ['values' => [], 'total' => 0, 'hasMore' => false]; // Default to empty valid response
+             $suggestions = ['values' => [], 'total' => 0, 'hasMore' => false];
         }
 
         return JsonRpcMessage::result(['completion' => $suggestions], $message->id);

@@ -43,8 +43,7 @@ class ResourceTest extends TestCase
 
     public function testBlobContentCreation(): void
     {
-        $resource = new class ("test_blob_resource_anon") extends Resource {
-            #[ResourceUri('test://image')]
+        $resource = new #[ResourceUri('test://image')] class ("test_blob_resource_anon") extends Resource {
             public function read(array $parameters = []): ResourceContents
             {
                 return $this->blob('binary data', 'image/png');

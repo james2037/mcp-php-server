@@ -22,14 +22,17 @@ use ReflectionParameter;
 abstract class Tool
 {
     private ?ToolAttribute $metadata = null;
+    /** @var ?array<string, string|bool> $toolAnnotationsData */
     private ?array $toolAnnotationsData = null;
+    /** @var array<string, ParameterAttribute> $parameters */
     private array $parameters = [];
+    /** @var array<string, mixed> $config */
     protected array $config = [];
 
     /**
      * Constructs a new Tool instance.
      *
-     * @param array|null $config Optional configuration for the tool.
+     * @param array<string, mixed>|null $config Optional configuration for the tool.
      */
     public function __construct(?array $config = null)
     {
@@ -184,8 +187,8 @@ abstract class Tool
     /**
      * Executes the tool with the given arguments.
      *
-     * @param array $arguments The arguments for the tool.
-     * @return array An array of content items representing the tool's output.
+     * @param array<string, mixed> $arguments The arguments for the tool.
+     * @return array<int, array<string, mixed>> An array of content items representing the tool's output.
      * @throws \InvalidArgumentException If arguments are invalid.
      * @throws \LogicException If doExecute returns invalid content.
      */
@@ -214,7 +217,7 @@ abstract class Tool
     /**
      * Validates the arguments for the tool.
      *
-     * @param array $arguments The arguments to validate.
+     * @param array<string, mixed> $arguments The arguments to validate.
      * @throws \InvalidArgumentException If arguments are invalid.
      */
     protected function validateArguments(array $arguments): void

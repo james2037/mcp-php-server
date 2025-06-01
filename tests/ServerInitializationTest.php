@@ -74,6 +74,7 @@ class ServerInitializationTest extends TestCase
         $handledBy = null; // Variable to track who handled the message
 
         $cap1 = new class ($handledBy) implements CapabilityInterface {
+            // @phpstan-ignore-next-line - $handledByRef is used by reference to capture handler for external assertion.
             public function __construct(private &$handledByRef)
             {
             }
@@ -99,6 +100,7 @@ class ServerInitializationTest extends TestCase
         };
 
         $cap2 = new class ($handledBy) implements CapabilityInterface {
+            // @phpstan-ignore-next-line - $handledByRef is used by reference to capture handler for external assertion.
             public function __construct(private &$handledByRef)
             {
             }
@@ -161,6 +163,7 @@ class ServerInitializationTest extends TestCase
         $initOrder = []; // Passed by reference
 
         $cap1 = new class ($initOrder) implements CapabilityInterface { /* ... constructor and methods ... */
+            // @phpstan-ignore-next-line - $orderRef is used by reference to capture initialization order for external assertion.
             public function __construct(private array &$orderRef)
             {
             }
@@ -185,6 +188,7 @@ class ServerInitializationTest extends TestCase
             }
         };
         $cap2 = new class ($initOrder) implements CapabilityInterface { /* ... constructor and methods ... */
+            // @phpstan-ignore-next-line - $orderRef is used by reference to capture initialization order for external assertion.
             public function __construct(private array &$orderRef)
             {
             }
