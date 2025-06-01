@@ -797,6 +797,420 @@ class HttpTransportTest extends TestCase
         $this->assertStringContainsString($expectedErrorJsonData, $sseOutput, "Error event data not found.");
     }
 
+    // --- New tests for recent changes ---
+
+    public function testSendPostPrefersJsonWhenClientAcceptsBoth()
+    {
+        // Client accepts both, server does not prefer SSE. Should default to JSON.
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'application/json, text/event-stream'],
+            ['Origin', ''],
+            ['Content-Type', 'application/json'],
+            ['Mcp-Session-Id', ''],
+            ['Last-Event-ID', '']
+        ]);
+
+        $transport = $this->createTransport();
+        $message = JsonRpcMessage::result(['data' => 'payload'], 'id1');
+        $transport->send($message);
+
+        $response = $transport->getResponse();
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('application/json', $response->getHeaderLine('Content-Type'));
+        $this->assertStringNotContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+        $this->assertJsonStringEqualsJsonString('{"jsonrpc":"2.0","result":{"data":"payload"},"id":"id1"}', (string)$response->getBody());
+    }
+
+    public function testSendPostPrefersSseWhenClientAcceptsBothAndSsePreferred()
+    {
+        // Client accepts both, server prefers SSE.
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'application/json, text/event-stream'],
+            ['Origin', ''],
+            ['Content-Type', 'application/json'],
+            ['Mcp-Session-Id', 'clientsess'],
+            ['Last-Event-ID', '']
+        ]);
+
+        $transport = $this->createTransport();
+        $transport->preferSseStream(true); // Server prefers SSE
+
+        $message = JsonRpcMessage::result(['data' => 'payload'], 'id1');
+        ob_start();
+        $transport->send($message);
+        $response = $transport->getResponse();
+        $sseOutput = (string) $response->getBody();
+        ob_end_clean();
+
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+
+        $expectedSseData = 'id: clientsess-1' . "\n" . 'data: {"jsonrpc":"2.0","result":{"data":"payload"},"id":"id1"}' . "\n\n";
+        $this->assertEquals($expectedSseData, $sseOutput);
+    }
+
+    public function testSendPostReturns202ForClientAckOnlyBatch()
+    {
+        // Simulate receive() having set clientRequestWasAckOnly = true
+        // This requires crafting a request body that HttpTransport::receive() will parse accordingly.
+        // The input should be a batch of only notifications or responses.
+        $ackOnlyPayload = '[{"jsonrpc":"2.0","method":"some/notification"}]'; // A notification (no ID)
+
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Content-Type', 'application/json'],
+            ['Accept', 'application/json, text/event-stream'],
+            ['Origin', ''],
+            ['Mcp-Session-Id', ''],
+            ['Last-Event-ID', '']
+        ]);
+        $this->mockStream->method('__toString')->willReturn($ackOnlyPayload);
+
+        $transport = $this->createTransport();
+
+        // Call receive() to set the internal flag based on the payload
+        $transport->receive();
+
+        // Now call send with null message
+        $transport->send(null);
+
+        $response = $transport->getResponse();
+        $this->assertEquals(202, $response->getStatusCode());
+        $this->assertEmpty((string) $response->getBody());
+    }
+
+    public function testSendGetSseStreamForResumption()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Last-Event-ID', 'event-123'], // Indicates resumption
+            ['Origin', ''],
+            ['Mcp-Session-Id', 'clientsess'],
+            ['Content-Type', '']
+        ]);
+
+        $transport = $this->createTransport();
+        ob_start();
+        $transport->send(null); // Send null to just open stream
+        $response = $transport->getResponse();
+        $sseOutput = (string) $response->getBody();
+        ob_end_clean();
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+        $this->assertEmpty($sseOutput, "No SSE data should be sent when message is null for resumption open.");
+    }
+
+    public function testSendGetSseStreamWhenServerPrefersSse()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Last-Event-ID', ''], // No resumption
+            ['Origin', ''],
+            ['Mcp-Session-Id', 'clientsess'],
+            ['Content-Type', '']
+        ]);
+
+        $transport = $this->createTransport();
+        $transport->preferSseStream(true); // Server wants to send SSE
+
+        ob_start();
+        $message = JsonRpcMessage::result(['data' => 'initial event'], 'id1');
+        $transport->send($message);
+        $response = $transport->getResponse();
+        $sseOutput = (string) $response->getBody();
+        ob_end_clean();
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+        $expectedSseData = 'id: clientsess-1' . "\n" . 'data: {"jsonrpc":"2.0","result":{"data":"initial event"},"id":"id1"}' . "\n\n";
+        $this->assertEquals($expectedSseData, $sseOutput);
+    }
+
+    public function testSendGetSseStreamWithMessage()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Last-Event-ID', 'event-123'], // Resumption context
+            ['Origin', ''],
+            ['Mcp-Session-Id', 's1'],
+            ['Content-Type', '']
+        ]);
+
+        $transport = $this->createTransport();
+        $message = JsonRpcMessage::result(['replayed' => 'event'], 're-id1');
+
+        ob_start();
+        $transport->send($message);
+        $response = $transport->getResponse();
+        $sseOutput = (string) $response->getBody();
+        ob_end_clean();
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+        $expectedSseData = 'id: s1-1' . "\n" . 'data: {"jsonrpc":"2.0","result":{"replayed":"event"},"id":"re-id1"}' . "\n\n";
+        $this->assertEquals($expectedSseData, $sseOutput);
+    }
+
+    public function testSendGetReturns405ForNewSseWhenNotPreferred()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Last-Event-ID', ''], // No resumption
+            ['Origin', ''],
+            ['Mcp-Session-Id', ''],
+            ['Content-Type', '']
+        ]);
+
+        $transport = $this->createTransport();
+        // $transport->preferSseStream(false); // This is default
+
+        $transport->send(null); // Attempt to send on GET without preference or resumption
+
+        $response = $transport->getResponse();
+        $this->assertEquals(405, $response->getStatusCode());
+        $this->assertEmpty((string) $response->getBody());
+    }
+
+    public function testSendGetReturns406WhenClientDoesNotAcceptSse()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'application/json'], // Client does NOT accept SSE
+            ['Last-Event-ID', ''],
+            ['Origin', ''],
+            ['Mcp-Session-Id', ''],
+            ['Content-Type', '']
+        ]);
+
+        $transport = $this->createTransport();
+        $transport->send(null);
+
+        $response = $transport->getResponse();
+        $this->assertEquals(406, $response->getStatusCode());
+        $this->assertEquals('Client must accept text/event-stream for GET requests.', (string) $response->getBody());
+    }
+
+    // --- Tests for DELETE request handling ---
+
+    public function testReceiveDetectsDeleteRequest()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('DELETE');
+        // No other headers should be strictly necessary for receive() to detect DELETE
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Mcp-Session-Id', 'sid-to-delete'], // For getClientSessionId()
+            ['Origin', ''], // For constructor
+            ['Last-Event-ID', ''] // For constructor
+        ]);
+
+
+        $transport = $this->createTransport();
+        $messages = $transport->receive();
+
+        $this->assertNull($messages, "Receive should return null for DELETE requests.");
+        $this->assertTrue($transport->isDeleteRequest(), "isDeleteRequest flag should be true.");
+        $this->assertEquals('sid-to-delete', $transport->getClientSessionId(), "Client Session ID should be captured.");
+    }
+
+    /**
+     * @dataProvider deleteResponseStatusCodeProvider
+     */
+    public function testPrepareResponseForDeleteSetsCorrectStatusAndBody(int $statusCode, bool $expectContentType)
+    {
+        // Simulate that receive() has already identified this as a DELETE request
+        $this->mockRequest->method('getMethod')->willReturn('DELETE');
+         $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Mcp-Session-Id', ''],
+            ['Origin', ''],
+            ['Last-Event-ID', '']
+        ]);
+
+        $transport = $this->createTransport();
+        // Manually set isDeleteRequest for this test, as receive() is not called directly here.
+        // This is a common pattern if a method relies on state set by another.
+        // Or, call receive() first if it's simple enough. Let's try calling receive.
+        $transport->receive();
+        $this->assertTrue($transport->isDeleteRequest());
+
+
+        // Use a real Psr17Factory to create the initial response in HttpTransport constructor,
+        // so we can properly test header removal like Content-Type.
+        // The createTransport() method already uses $this->psr17Factory.
+        // We need to configure the mockResponse that will be replaced by prepareResponseForDelete.
+
+        // If we use the existing $this->mockResponse and $this->mockResponseFactory:
+        // $this->mockResponseFactory->method('createResponse')->with($statusCode)->willReturn($this->mockResponse);
+        // This doesn't quite work as createResponse() is called in constructor already.
+        // The key is that prepareResponseForDelete *replaces* $this->response.
+
+        // Let's refine createTransport to take mock factories for better control for this specific test.
+        $psr17Factory = new Psr17Factory(); // Real factory for this test
+        $transport = new HttpTransport(
+            $this->mockRequest,
+            $psr17Factory, // Real factory
+            $psr17Factory, // Real factory
+            []
+        );
+        $transport->receive(); // To set isDeleteRequest flag
+
+        $transport->prepareResponseForDelete($statusCode);
+        $response = $transport->getResponse();
+
+        $this->assertEquals($statusCode, $response->getStatusCode());
+        $this->assertEmpty((string) $response->getBody());
+
+        if ($expectContentType) {
+            // For non-204, a default content type might be set by some factories,
+            // or it might be absent. For this test, we are not asserting its presence,
+            // only its absence for 204.
+            // If a specific content type was expected for error codes (e.g. application/problem+json),
+            // this test would need to be more specific.
+            // For now, we only care about Content-Type *not* being there for 204.
+            if ($response->hasHeader('Content-Type')) {
+                 // This is acceptable if not 204
+            }
+        } else {
+            $this->assertFalse($response->hasHeader('Content-Type'), "Content-Type header should be absent for 204 response.");
+        }
+    }
+
+    public static function deleteResponseStatusCodeProvider(): array
+    {
+        return [
+            '204 No Content' => [204, false], // false = expect no Content-Type
+            '200 OK' => [200, true],         // true = Content-Type may be present
+            '404 Not Found' => [404, true],
+            '405 Method Not Allowed' => [405, true],
+            '400 Bad Request' => [400, true],
+        ];
+    }
+
+
+    // --- Tests for SSE Event Flushing & Robustness ---
+
+    public function testSendSseEventDataSuccessfulWriteAndFlush()
+    {
+        // Setup request for SSE
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Origin', ''],
+            ['Mcp-Session-Id', 's1'],
+            ['Last-Event-ID', ''],
+            ['Content-Type', '']
+        ]);
+
+        // Use a real stream for the response body to test write
+        $psr17Factory = new Psr17Factory();
+        $responseBodyStream = $psr17Factory->createStream(''); // Real, writable stream
+
+        // Create a real response and attach the real stream to it
+        $realResponse = $psr17Factory->createResponse()->withBody($responseBodyStream);
+
+        // Mock the response factory to return this real response
+        $mockResponseFactory = $this->createMock(ResponseFactoryInterface::class);
+        $mockResponseFactory->method('createResponse')->willReturn($realResponse);
+
+        $transport = new HttpTransport(
+            $this->mockRequest,
+            $mockResponseFactory, // Use the mock factory that returns our real response
+            $psr17Factory,        // StreamFactory can be real
+            []
+        );
+
+        // Initiate SSE mode by sending a first message/null
+        ob_start(); // Suppress actual flush output during test
+        $transport->send(null); // This calls startSseStreamHeaders
+        ob_end_clean();
+
+        $this->assertTrue($transport->isStreamOpen(), "Stream should be open after SSE initiation.");
+
+        // Now, test sendSseEventData directly (it's private, so test via send)
+        // Or, if we make a helper in HttpTransport to expose sendSseEventData for testing (not ideal)
+        // For now, we test its effect via a subsequent send()
+        $sseEventString = "id: test-1\ndata: test data\n\n";
+
+        // To isolate sendSseEventData behavior, we'd ideally call it directly.
+        // Since it's private, we rely on send() calling it.
+        // The following send will call prepareSseData then sendSseEventData.
+
+        ob_start(); // Suppress actual flush output during test
+        $transport->send(JsonRpcMessage::result("test data", "test-id-for-event")); // This will trigger sendSseEventData
+        $outputWrittenToRealStream = (string) $responseBodyStream;
+        ob_end_clean();
+
+        // We cannot directly assert ob_flush() and flush() were called without more complex output buffer mocking.
+        // However, we can assert that the data was written to the stream.
+        $this->assertStringContainsString('id: s1-1', $outputWrittenToRealStream); // from send(null) via startSseStreamHeaders if it sends a comment or empty.
+                                                                               // Actually, send(null) on GET doesn't send event.
+                                                                               // The first send(message) will be s1-1.
+        $this->assertStringContainsString('id: s1-1'."\n".'data: {"jsonrpc":"2.0","result":"test data","id":"test-id-for-event"}'."\n\n", $outputWrittenToRealStream);
+    }
+
+    public function testSendSseEventDataThrowsIfStreamNotOpen()
+    {
+        $this->expectException(TransportException::class);
+        $this->expectExceptionMessage("SSE Stream not open, cannot send event data.");
+
+        // No request mocking needed as we'll force state
+        $transport = $this->createTransport(); // Uses default mocks
+
+        // Manually ensure stream is NOT open (though it's default)
+        // If sendSseEventData were public, we'd call it here.
+        // To test this, we need to call send() in a way that would try SSE
+        // but ensure streamOpen is false. This is tricky as send() itself manages streamOpen.
+
+        // Let's use reflection to call sendSseEventData directly for this specific unit test
+        $reflection = new \ReflectionObject($transport);
+        $sendSseEventDataMethod = $reflection->getMethod('sendSseEventData');
+        $sendSseEventDataMethod->setAccessible(true);
+
+        // Ensure streamOpen is false (default after construction if send isn't called to open it)
+        $this->assertFalse($transport->isStreamOpen());
+        $sendSseEventDataMethod->invoke($transport, "id: 1\ndata: test\n\n");
+    }
+
+    public function testSendSseEventDataHandlesStreamNotWritable()
+    {
+        $this->expectException(TransportException::class);
+        $this->expectExceptionMessage("SSE stream body is not writable.");
+
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Origin', ''], ['Mcp-Session-Id', ''], ['Last-Event-ID', ''], ['Content-Type', '']
+        ]);
+
+        // Mock the body stream to be non-writable
+        $this->mockStream->method('isWritable')->willReturn(false);
+        // Ensure getBody() on the mockResponse returns this mockStream
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
+        // Ensure the factory returns this mockResponse
+        // $this->mockResponseFactory->method('createResponse')->willReturn($this->mockResponse); already default
+
+        $transport = $this->createTransport();
+
+        // Initiate SSE - this will call startSseStreamHeaders, which sets up $this->response
+        // and its body (our mockStream via the factory).
+        ob_start();
+        $transport->send(null); // Attempt to start SSE stream
+        ob_end_clean();
+
+        $this->assertTrue($transport->isStreamOpen(), "Stream should be marked open initially.");
+
+        // Now, try to send data, which should fail because isWritable is false.
+        // This will be called internally by the next send().
+        $transport->send(JsonRpcMessage::result('data', 'id'));
+    }
+
+
     // --- Tests for isClosed() method ---
 
     public function testIsClosedInitiallyReturnsFalse()

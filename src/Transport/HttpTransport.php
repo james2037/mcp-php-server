@@ -25,6 +25,8 @@ class HttpTransport extends AbstractTransport
     private array $allowedOrigins;
     private bool $originValidationFailed = false;
     private bool $sseStreamPreferred = false; // Added for SSE preference
+    private bool $clientRequestWasAckOnly = false;
+    private bool $isDeleteRequest = false;
 
     // TODO: Add SSL configuration options (less relevant if behind a reverse proxy)
 
@@ -71,12 +73,23 @@ class HttpTransport extends AbstractTransport
             // Error code -32001 (could be any server-defined error)
             throw new TransportException('Origin not allowed.', -32001);
         }
-        if ($this->request->getMethod() !== 'POST') {
-            // GET requests are for establishing SSE from client or resumability.
-            // They don't carry MCP messages *to* the server in their body for processing by receive().
+
+        $method = $this->request->getMethod();
+
+        if ($method === 'DELETE') {
+            $this->isDeleteRequest = true;
+            // No body processing for DELETE, signal to Server via isDeleteRequest() and null messages.
             return null;
         }
 
+        if ($method !== 'POST') {
+            // GET requests are for establishing SSE from client or resumability.
+            // They don't carry MCP messages *to* the server in their body for processing by receive().
+            // Other methods (PUT, PATCH, etc.) are not supported for message receiving in MCP.
+            return null;
+        }
+
+        // From here, we are processing a POST request.
         $contentType = $this->request->getHeaderLine('Content-Type');
         if (stripos($contentType, 'application/json') === false) {
             // MCP requires JSON, though specific error handling might differ.
@@ -94,18 +107,54 @@ class HttpTransport extends AbstractTransport
 
         try {
             $decodedInput = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            $messages = [];
 
             if (is_array($decodedInput) && (empty($decodedInput) || array_keys($decodedInput) === range(0, count($decodedInput) - 1))) {
                 if (empty($decodedInput)) {
+                    // Still an empty batch, but let's consider if this should be an ack-only case.
+                    // An empty batch itself doesn't fit "solely of notifications or responses".
+                    // For now, it's not ack-only.
                     return []; // Empty batch
                 }
-                return JsonRpcMessage::fromJsonArray($body);
+                // This is a batch, parse it into JsonRpcMessage objects
+                $messages = JsonRpcMessage::fromJsonArray($body);
             } elseif (is_object($decodedInput) || (is_array($decodedInput) && !empty($decodedInput))) {
-                $message = JsonRpcMessage::fromJson($body);
-                return [$message];
+                // This is a single message
+                $messages = [JsonRpcMessage::fromJson($body)];
             } else {
                 throw new TransportException('Invalid JSON-RPC message structure in POST body.', JsonRpcMessage::PARSE_ERROR);
             }
+
+            // Now, check if the decoded input messages consist solely of notifications or responses.
+            // A notification has no 'id' key. A response has an 'id' key.
+            // A request has an 'id' key and a 'method' key.
+            // The key is that the client is sending *us* notifications or responses.
+            if (!empty($messages)) {
+                $allNotificationsOrResponses = true;
+                foreach ($decodedInput as $rawMessage) {
+                    if (!is_array($rawMessage)) { // Should be an array (decoded from JSON object)
+                        $allNotificationsOrResponses = false;
+                        break;
+                    }
+                    $isNotification = !array_key_exists('id', $rawMessage);
+                    $isResponse = array_key_exists('id', $rawMessage) && (array_key_exists('result', $rawMessage) || array_key_exists('error', $rawMessage)) && !array_key_exists('method', $rawMessage);
+                    // A valid request would have 'method' and 'id' (unless it's a notification)
+                    // A client might send a "request" that is actually a response object.
+                    // The crucial part for "ack only" is that there's no "method" field for the server to act upon.
+                    $isRequestToServer = array_key_exists('method', $rawMessage);
+
+                    if ($isRequestToServer) {
+                        $allNotificationsOrResponses = false;
+                        break;
+                    }
+                    // If it's not a request, it's implicitly a notification (no id) or a response-like structure (has id, result/error)
+                }
+                if ($allNotificationsOrResponses) {
+                    $this->clientRequestWasAckOnly = true;
+                }
+            }
+            return $messages;
+
         } catch (\JsonException $e) {
             throw new TransportException('JSON Parse Error: ' . $e->getMessage(), JsonRpcMessage::PARSE_ERROR, $e);
         } catch (\Exception $e) { // Catch errors from JsonRpcMessage parsing
@@ -113,116 +162,226 @@ class HttpTransport extends AbstractTransport
         }
     }
 
-    public function send(JsonRpcMessage|array $message): void
+    public function send(JsonRpcMessage|array|null $message): void // Allow null for 202 case
     {
         if ($this->headersSent && !$this->streamOpen) {
             throw new TransportException("Cannot send new HTTP response; headers already sent for a non-SSE response.");
         }
 
+        // MCP 2025-03-26: Pure Notification/Response Batch for POST requests
+        // If client input was purely notifications or responses, and server isn't sending a payload, return 202.
+        if ($this->request->getMethod() === 'POST' && $this->clientRequestWasAckOnly && ($message === null || (is_array($message) && empty($message)))) {
+            $this->response = $this->responseFactory->createResponse(202);
+            // Add Mcp-Session-Id if available, even for 202
+            if ($this->serverSessionId !== null) {
+                $this->response = $this->response->withHeader('Mcp-Session-Id', $this->serverSessionId);
+            }
+            $this->headersSent = true;
+            $this->streamOpen = false; // Ensure stream is not considered open
+            return;
+        }
+        // If message is null/empty at this point but it wasn't an ack-only scenario,
+        // it might be an error or an intentional empty response that should be JSON.
+        // For example, a server might process a request and explicitly decide to send an empty JSON array `[]` or `null` within a JSON response.
+        // If $message is truly null (not just empty array), we might default to empty JSON if not SSE.
+        // However, the JsonRpcMessage structure usually means $message won't be null if it's from server logic.
+        // If it IS null, and we didn't hit the 202 case, it's likely an issue or needs specific handling for what that means.
+        // For now, let's assume if $message is null here, it implies no content to send, which is different from an empty JSON array.
+        // JsonRpcMessage::toJsonArray([]) would produce "[]". JsonRpcMessage->toJson() for a null-result response is also valid JSON.
+        // Let's treat $message === null as "no response data", which might mean an error if not handled by 202.
+        // For safety, if $message is null and we are not doing SSE, we should probably send `null` as JSON.
+        // If $message is null and we intend SSE, that's an issue as SSE expects data.
+
         // Determine intent for the current message based on request headers and server preferences
         $acceptHeader = $this->request->getHeaderLine('Accept');
-        $isSseRequestedByClient = stripos($acceptHeader, 'text/event-stream') !== false;
+        $clientAcceptsJson = stripos($acceptHeader, 'application/json') !== false;
+        $clientAcceptsSse = stripos($acceptHeader, 'text/event-stream') !== false;
         $isGetRequest = $this->request->getMethod() === 'GET';
         $ssePreferenceForThisSend = $this->sseStreamPreferred;
         $this->sseStreamPreferred = false; // Reset for the next independent send() call
 
         $useSseForCurrentCall = false;
-        if ($isSseRequestedByClient) {
-            if ($isGetRequest) {
-                $useSseForCurrentCall = true;
-            } else { // POST
-                if ($ssePreferenceForThisSend || !is_array($message)) {
+
+        if ($isGetRequest) {
+            if ($clientAcceptsSse) {
+                // Handle GET for SSE Resumability or New SSE stream
+                $hasLastEventId = $this->getLastEventId() !== null;
+                if ($hasLastEventId || $ssePreferenceForThisSend) {
+                    // Resumption attempt or server explicitly wants to send SSE on this GET
                     $useSseForCurrentCall = true;
+                } else {
+                    // Not a resumption and server does not want to open a new unsolicited SSE stream.
+                    // Per MCP 2025-03-26 / shared hosting: return 405 Method Not Allowed.
+                    $this->response = $this->responseFactory->createResponse(405)
+                        ->withBody($this->streamFactory->createStream('')); // Empty body
+                    // Add Mcp-Session-Id if available
+                    if ($this->serverSessionId !== null) {
+                        $this->response = $this->response->withHeader('Mcp-Session-Id', $this->serverSessionId);
+                    }
+                    $this->headersSent = true;
+                    $this->streamOpen = false;
+                    return;
                 }
+            } else {
+                // Client sent GET but doesn't accept text/event-stream.
+                // This is not a valid SSE request. Server should probably respond with 406 Not Acceptable,
+                // or let it fall through to a non-SSE response if possible (though GET implies SSE).
+                // For now, this will likely lead to a non-SSE response or error further down if $message is null.
+                // If $message is not null, it will try to send JSON, which is unusual for GET.
+                // A specific 406 response here might be more appropriate.
+                // However, current logic will make $useSseForCurrentCall = false;
+                // If $message is null, this will result in JSON 'null', which is not ideal for GET.
+                // Let's refine this: if GET and no Accept: text/event-stream, it's a bad request for MCP context.
+                 $this->response = $this->responseFactory->createResponse(406) // Not Acceptable
+                    ->withBody($this->streamFactory->createStream('Client must accept text/event-stream for GET requests.'));
+                if ($this->serverSessionId !== null) {
+                    $this->response = $this->response->withHeader('Mcp-Session-Id', $this->serverSessionId);
+                }
+                $this->headersSent = true;
+                $this->streamOpen = false;
+                return;
+            }
+        } elseif ($this->request->getMethod() === 'POST') {
+            if ($clientAcceptsSse && $clientAcceptsJson) {
+                // Client accepts both. Server decides.
+                // Use sseStreamPreferred or if the message implies a stream (e.g. not an array, or server intends to stream)
+                if ($ssePreferenceForThisSend) { // Explicit server preference
+                    $useSseForCurrentCall = true;
+                } elseif ($message !== null && !is_array($message)) { // Single message often implies it could be part of a stream
+                    $useSseForCurrentCall = true; // Default to SSE if server sends a single item and client accepts both
+                } else {
+                    // It's a batch or server doesn't prefer SSE for this message. Default to JSON.
+                    $useSseForCurrentCall = false;
+                }
+            } elseif ($clientAcceptsSse) {
+                // Client *only* accepts SSE for this POST (or SSE is listed first and we prioritize it).
+                $useSseForCurrentCall = true;
+            } elseif ($clientAcceptsJson) {
+                // Client *only* accepts JSON.
+                $useSseForCurrentCall = false;
+            } else {
+                // Client accepts neither, or Accept header is missing/empty.
+                // Default to JSON response. Or Server could send 406 Not Acceptable.
+                // For now, HttpTransport will assume JSON if no clear SSE signal.
+                $useSseForCurrentCall = false;
             }
         }
-        if (!$isSseRequestedByClient && $useSseForCurrentCall) { // Cannot force SSE if client doesn't accept
+
+        // If $message is null and we are attempting SSE (and it's not just opening a stream for future events e.g. on GET)
+        // SSE requires data for an event. If server logic provides null for a data event, it's an issue.
+        // However, for GET resumability, $message could be null if no immediate events to replay, but stream should open.
+        if ($message === null && $useSseForCurrentCall && $this->request->getMethod() === 'POST') {
+            // For POST, if trying SSE and message is null, this is an issue. Switch to JSON 'null'.
             $useSseForCurrentCall = false;
         }
+        // For GET with $useSseForCurrentCall = true and $message = null, it means open stream without initial data event.
 
         // If an SSE stream is currently active
         if ($this->streamOpen) {
-            if ($useSseForCurrentCall) { // And current message is also for SSE: send event and continue stream
+            // If current call wants SSE and there's a message, send it as an event.
+            if ($useSseForCurrentCall && $message !== null) {
                 $this->sendSseEventData($this->prepareSseData($message));
-            } else { // Current message is not for SSE (e.g., JSON): transition, close SSE stream
+            } elseif (!$useSseForCurrentCall) {
+                // Current call is JSON, but stream was open. Close stream and send JSON.
                 $this->streamOpen = false;
-                // Proceed to send this message as a final JSON response
                 if ($this->originValidationFailed) {
                      $this->response = $this->responseFactory->createResponse(403)
                         ->withHeader('Content-Type', 'text/plain')
                         ->withBody($this->streamFactory->createStream('Origin not allowed.'));
                     $this->headersSent = true;
-                    // streamOpen is already false now
-                    return; // Return after setting the 403 response
+                    return;
                 }
-                $this->prepareJsonResponse($message); // sets headersSent = true
+                // If $message became null and we are here, it means we are closing an SSE stream
+                // and the final response should be JSON `null`.
+                $this->prepareJsonResponse($message); // handles null by creating JSON 'null'
             }
-            return; // Processing for this send() call is complete whether it continued SSE or switched to JSON
+            return; // Processing for this send() call is complete
         }
 
-        // No SSE stream was previously active (this->streamOpen is false from constructor or previous closure)
+        // No SSE stream was previously active.
 
-        // Handle pure notification batches (202 response) only if not starting an SSE stream.
-        if (!$useSseForCurrentCall && $this->isPureNotificationBatch($message)) {
-            $this->response = $this->responseFactory->createResponse(202);
-            $this->headersSent = true;
-            // $this->streamOpen is already false and remains false
-            return;
-        }
+        // Handle outgoing "pure notification" batches if they are NOT to be sent over SSE.
+        // This is about the *server's* outgoing message.
+        // The $clientRequestWasAckOnly (202 response) is for *client's incoming* message.
+        // This original check might still be relevant if the server itself constructs a batch of only notifications
+        // and wants to send it as a fire-and-forget JSON, not meriting a 202 (as 202 is for client input).
+        // However, the MCP spec for 202 is specific to client *input*.
+        // An outgoing batch of notifications from the server should just be sent as JSON if not SSE.
+        // So, removing the $this->isOutgoingBatchPurelyNotifications($message) check for a 202.
+        // The 202 logic is handled at the beginning now.
 
-        // At this point, stream is not open, and it's not a 202-batch.
+        // At this point, stream is not open, and it's not a 202 based on client input.
         // Decide whether to start a new SSE stream or send a single JSON response.
         if ($useSseForCurrentCall) {
-            $this->startSseStreamHeaders(); // Sets $this->streamOpen = true and $this->headersSent = true (for initial headers)
-            // startSseStreamHeaders also handles origin validation internally.
-            if ($this->response->getStatusCode() === 403) { // Check if origin validation failed within startSseStreamHeaders
-                $this->streamOpen = false; // Ensure stream is marked closed if it failed to open due to origin
+            // This covers:
+            // 1. GET for resumability ($message might be null or have replayed events)
+            // 2. GET for new stream preferred by server ($message might be null or have initial events)
+            // 3. POST where SSE is chosen ($message should not be null here due to check above)
+            $this->startSseStreamHeaders(); // Sets $this->streamOpen = true, $this->headersSent = true for stream headers
+            if ($this->response->getStatusCode() === 403) { // Origin validation failed
+                $this->streamOpen = false;
                 return;
             }
-            // If stream is successfully opened (not 403), send the first event.
-            if ($this->streamOpen) { // Check streamOpen again, as startSseStreamHeaders might have failed silently if not for origin
-                $this->sendSseEventData($this->prepareSseData($message));
+            if ($this->streamOpen) {
+                if ($message !== null) { // Only send data if there is a message
+                    $this->sendSseEventData($this->prepareSseData($message));
+                }
+                // For POST text/event-stream, MCP implies the stream is for this request's related messages then closes.
+                if ($this->request->getMethod() === 'POST') {
+                    $this->streamOpen = false;
+                }
+                // For GET, the stream remains open until explicitly closed or client disconnects.
             }
         } else { // Send a normal JSON response
-            // This call is for a JSON response. Any SSE stream is now conceptually finished.
             $this->streamOpen = false;
-
             if ($this->originValidationFailed) {
                 $this->response = $this->responseFactory->createResponse(403)
                     ->withHeader('Content-Type', 'text/plain')
                     ->withBody($this->streamFactory->createStream('Origin not allowed.'));
-                // $this->headersSent will be set true below
             } else {
-                $this->prepareJsonResponse($message); // This also sets $this->headersSent = true
+                $this->prepareJsonResponse($message); // Handles null message by creating JSON 'null'
             }
-            $this->headersSent = true; // Ensure headersSent is true if this JSON path is taken
+            $this->headersSent = true;
         }
     }
 
-    // Renamed and logic adjusted
-    private function isPureNotificationBatch(JsonRpcMessage|array $messageOrMessages): bool
+    // Renamed: This checks if the *server's outgoing message* is purely notifications.
+    // This is NOT for the client input ack (202) case.
+    private function isOutgoingBatchPurelyNotifications(JsonRpcMessage|array|null $messageOrMessages): bool
     {
+        if ($messageOrMessages === null) {
+            return false; // No message is not a batch of notifications.
+        }
         $messages = is_array($messageOrMessages) ? $messageOrMessages : [$messageOrMessages];
 
         if (empty($messages)) {
-            return false;
+            return false; // An empty array is not considered a batch of notifications here.
         }
 
         foreach ($messages as $msg) {
-            // If not a JsonRpcMessage or if it has an ID (meaning it's a response, not a notification)
+            // Check if it's a JsonRpcMessage and a notification (id is null).
             if (!$msg instanceof JsonRpcMessage || $msg->id !== null) {
-                return false;
+                return false; // Not a notification.
             }
         }
-        return true; // All messages are JsonRpcMessage instances and have null IDs
+        return true; // All messages are notifications.
     }
 
-    private function prepareJsonResponse(JsonRpcMessage|array $message): void
+    private function prepareJsonResponse(JsonRpcMessage|array|null $message): void // Allow null
     {
         if ($this->serverSessionId !== null) {
             $this->response = $this->response->withHeader('Mcp-Session-Id', $this->serverSessionId);
         }
-        $json = is_array($message) ? JsonRpcMessage::toJsonArray($message) : $message->toJson();
+
+        $json = 'null'; // Default for null message
+        if ($message instanceof JsonRpcMessage) {
+            $json = $message->toJson();
+        } elseif (is_array($message)) {
+            // Handles empty array to "[]"
+            $json = JsonRpcMessage::toJsonArray($message);
+        }
+        // If $message was already null, $json remains 'null'.
+
         $this->response = $this->response
             ->withHeader('Content-Type', 'application/json')
             ->withBody($this->streamFactory->createStream($json));
@@ -255,13 +414,23 @@ class HttpTransport extends AbstractTransport
         }
 
         // Set the body to a new stream for progressive writing by sendSseEventData
-        $this->response = $this->response->withBody($this->streamFactory->createStream(''));
-        $this->headersSent = false; // Headers are prepared on $this->response, but not "sent" by the transport itself.
-                                   // The Server/Emitter will send them when getResponse() is called.
-                                   // For SSE, headersSent might mean the *initial* headers for the stream.
-                                   // Let's consider headersSent true once the stream is initiated.
-        $this->headersSent = true;
+        try {
+            $this->response = $this->response->withBody($this->streamFactory->createStream(''));
+        } catch (\Throwable $e) {
+            $this->log("Error creating stream for SSE: " . $e->getMessage());
+            // If stream creation fails, we can't proceed with SSE.
+            // This is a critical failure for starting an SSE stream.
+            // We should ensure streamOpen is false and headersSent reflects that we haven't fully set up.
+            $this->headersSent = true; // Headers might have been partially set on $this->response
+            $this->streamOpen = false;
+            // Re-throw as a transport exception, Server should handle this by sending an error response.
+            throw new TransportException("Failed to create stream for SSE: " . $e->getMessage(), 0, $e, true); // isCritical = true
+        }
+
+        $this->headersSent = true; // Initial headers for the stream are now considered "sent" to the Response object.
+                                   // The actual transmission will be handled by a PSR-7 emitter.
         $this->streamOpen = true;
+        $this->log("SSE stream started. Client Session ID: " . ($this->clientSessionId ?: 'N/A') . ", Server Session ID: " . ($this->serverSessionId ?: 'N/A'));
     }
 
     private function prepareSseData(JsonRpcMessage|array $messages): string
@@ -286,14 +455,38 @@ class HttpTransport extends AbstractTransport
     private function sendSseEventData(string $sseFormattedData): void
     {
         if (!$this->streamOpen) {
-            // This implies headers for SSE were not prepared or sent.
+            $this->log("Error: Attempted to send SSE event, but stream is not open.");
+            // This implies headers for SSE were not prepared or sent, or stream was prematurely closed.
             // This is an internal error in logic.
             throw new TransportException("SSE Stream not open, cannot send event data.");
         }
-        // Write to the response body stream instead of echoing
-        $this->response->getBody()->write($sseFormattedData);
-        // Flushing the stream might be necessary depending on the stream implementation and server setup.
-        // For now, direct flushOutput call is removed here. SAPI may handle flushing.
+
+        try {
+            $body = $this->response->getBody();
+            if (!$body->isWritable()) {
+                $this->streamOpen = false; // Mark stream as unusable
+                $this->log("Error: SSE stream body is not writable.");
+                throw new TransportException("SSE stream body is not writable.", 0, null, false); // isCritical = false, as Server might handle this
+            }
+
+            $body->write($sseFormattedData);
+
+            // Explicitly flush output buffers to ensure SSE event is sent immediately.
+            // This is crucial in PHP environments where output buffering might be active by default (e.g., php-fpm, web servers).
+            // ob_flush() flushes the PHP output buffer, if active.
+            // flush() flushes the system output buffer (e.g., web server's buffer).
+            // These should be called in this order.
+            if (ob_get_level() > 0) { // Check if output buffering is active
+                ob_flush();
+            }
+            flush();
+
+        } catch (\Throwable $e) {
+            // Catch any throwable (Exception, Error) during write or flush.
+            $this->streamOpen = false; // Mark stream as unusable after an error.
+            $this->log("Error during SSE event send: " . $e->getMessage());
+            throw new TransportException("Error sending SSE event data: " . $e->getMessage(), 0, $e, false); // isCritical = false
+        }
     }
 
     public function log(string $message): void
@@ -359,5 +552,43 @@ class HttpTransport extends AbstractTransport
     public function isStreamOpen(): bool
     {
         return $this->streamOpen;
+    }
+
+    public function isDeleteRequest(): bool
+    {
+        return $this->isDeleteRequest;
+    }
+
+    public function prepareResponseForDelete(int $statusCode): void
+    {
+        if (!$this->isDeleteRequest) {
+            // This method should only be called if it's a DELETE request.
+            // However, Server logic should ensure this.
+            // For robustness, one might throw an exception or log a warning.
+            // For now, we'll trust Server to call it correctly.
+        }
+
+        $this->response = $this->responseFactory->createResponse($statusCode);
+
+        // For 204 No Content, ensure no body and Content-Length is 0 or absent.
+        // PSR-7 response factory or emitter should handle this for 204.
+        // Explicitly setting an empty body is good practice.
+        $this->response = $this->response->withBody($this->streamFactory->createStream(''));
+
+        if ($statusCode === 204) {
+            // Ensure Content-Type is not sent for 204 responses.
+            // Some PSR-7 ResponseInterface implementations might add a default Content-Type.
+            $this->response = $this->response->withoutHeader('Content-Type');
+        }
+
+        // Optionally, include Mcp-Session-Id from the request if it was present.
+        // This might be useful if the server wants to confirm which session ID was acted upon,
+        // or if client needs it for any reason (though less common for DELETE).
+        // if ($this->clientSessionId !== null) {
+        //     $this->response = $this->response->withHeader('Mcp-Session-Id', $this->clientSessionId);
+        // }
+
+        $this->headersSent = true;
+        $this->streamOpen = false;
     }
 }
