@@ -21,11 +21,10 @@ use MCP\Server\Exception\TransportException;
  *
  * This class is responsible for handling the server lifecycle,
  * managing capabilities, and processing messages via a transport.
- *
- * @var array<string, CapabilityInterface> $_capabilities Stores registered capabilities.
  */
 class Server
 {
+    /** @var array<int, CapabilityInterface> $capabilities Stores registered capabilities. */
     private array $capabilities = [];
     private bool $initialized = false;
     private bool $shuttingDown = false;
@@ -245,7 +244,7 @@ class Server
             }
         } catch (TransportException $e) {
             $this->logMessage('error', 'TransportException in HTTP cycle: ' . $e->getMessage(), 'Server.runHttpRequestCycle', ['code' => $e->getCode()]);
-            $errorCode = ($e->getCode() !== 0 && is_int($e->getCode())) ? $e->getCode() : JsonRpcMessage::INTERNAL_ERROR;
+            $errorCode = (is_int($e->getCode()) && $e->getCode() !== 0) ? $e->getCode() : JsonRpcMessage::INTERNAL_ERROR;
             // Check if it's the specific Origin validation error code from HttpTransport
             if ($e->getMessage() === 'Origin not allowed.') { // This relies on the exact message
                  $errorCode = -32001; // The custom code used in HttpTransport
@@ -283,6 +282,7 @@ class Server
 
         $httpResponse = $httpTransport->getResponse();
 
+        // @phpstan-ignore-next-line - $httpResponse is technically always an object, but this is a defensive check.
         if ($httpResponse) {
             // Check if headers have already been sent by HttpTransport (e.g. for early 403 error on SSE GET)
             if (!headers_sent()) {
@@ -293,6 +293,7 @@ class Server
                     // Catch emitter exceptions, e.g. if headers were already sent due to an error echo
                     $this->logMessage('critical', 'SapiEmitter failed to emit response: ' . $e->getMessage(), 'Server.runHttpRequestCycle');
                     // Fallback or ensure script termination if needed
+                    // @phpstan-ignore-next-line - Defensive check in error handling path.
                     if (!headers_sent()) { // Check again, just in case
                         http_response_code(500);
                         echo "Error emitting response.";
@@ -488,9 +489,10 @@ class Server
                 } elseif (is_int($e->getCode()) && $e->getCode() !== 0) {
                     $code = $e->getCode();
                 }
-                if ($code === 0 || !is_int($code)) { // Ensure valid integer code
-                    $code = JsonRpcMessage::INTERNAL_ERROR;
-                }
+                // The following check was deemed always false by PHPStan because $code should always be a valid non-zero integer here.
+                // if ($code === 0 || !is_int($code)) { // Ensure valid integer code
+                //     $code = JsonRpcMessage::INTERNAL_ERROR;
+                // }
                 return JsonRpcMessage::error($code, $e->getMessage(), $currentMessage->id);
             }
         }

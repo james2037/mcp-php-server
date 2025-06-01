@@ -132,7 +132,7 @@ class JsonRpcMessage
      * Parses a JSON string representing an array of JSON-RPC messages.
      *
      * @param  string $json The JSON string to parse.
-     * @return array An array of JsonRpcMessage objects.
+     * @return self[] An array of JsonRpcMessage objects.
      * @throws \RuntimeException If JSON decoding fails or the result is not an array.
      */
     public static function fromJsonArray(string $json): array
@@ -157,7 +157,7 @@ class JsonRpcMessage
     /**
      * Serializes an array of JsonRpcMessage objects into a JSON string.
      *
-     * @param  array $messages An array of JsonRpcMessage objects.
+     * @param  self[] $messages An array of JsonRpcMessage objects.
      * @return string The JSON string representation of the messages.
      */
     public static function toJsonArray(array $messages): string

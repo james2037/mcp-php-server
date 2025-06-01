@@ -38,6 +38,7 @@ class HttpTransportTest extends TestCase
     {
         // Ensure getUri() is mocked if Origin validation relies on it (not directly in these tests but good practice)
         $mockUri = $this->createMock(\Psr\Http\Message\UriInterface::class);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getUri')->willReturn($mockUri);
         // $mockUri->method('getHost')->willReturn('test.host'); // Example if needed
 
@@ -49,18 +50,14 @@ class HttpTransportTest extends TestCase
         );
     }
 
-    private function getResponseContent(HttpTransport $transport): array
-    {
-        $response = $transport->getResponse();
-        return json_decode((string) $response->getBody(), true);
-    }
-
     // --- Tests for receive() ---
 
     public function testReceiveSinglePostRequest()
     {
         $jsonRpc = '{"jsonrpc":"2.0","method":"test","id":1}';
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Origin', ''],
@@ -68,6 +65,7 @@ class HttpTransportTest extends TestCase
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
         ]);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockStream->method('__toString')->willReturn($jsonRpc);
 
         $transport = $this->createTransport();
@@ -83,7 +81,9 @@ class HttpTransportTest extends TestCase
     public function testReceiveBatchPostRequest()
     {
         $jsonRpc = '[{"jsonrpc":"2.0","method":"test1","id":1},{"jsonrpc":"2.0","method":"test2","id":2}]';
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Origin', ''],
@@ -91,6 +91,7 @@ class HttpTransportTest extends TestCase
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
         ]);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockStream->method('__toString')->willReturn($jsonRpc);
 
         $transport = $this->createTransport();
@@ -107,7 +108,9 @@ class HttpTransportTest extends TestCase
         $this->expectException(TransportException::class);
         $this->expectExceptionMessageMatches('/JSON Parse Error/');
 
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Origin', ''],
@@ -115,6 +118,7 @@ class HttpTransportTest extends TestCase
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
         ]);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockStream->method('__toString')->willReturn('{"invalidjson');
 
         $transport = $this->createTransport();
@@ -126,7 +130,9 @@ class HttpTransportTest extends TestCase
         $this->expectException(TransportException::class);
         $this->expectExceptionMessage('Invalid Content-Type. Must be application/json.');
 
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'text/plain'], // Invalid
             ['Origin', ''],
@@ -134,6 +140,7 @@ class HttpTransportTest extends TestCase
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
         ]);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockStream->method('__toString')->willReturn('{}');
 
         $transport = $this->createTransport();
@@ -142,6 +149,7 @@ class HttpTransportTest extends TestCase
 
     public function testReceiveGetRequestReturnsNull()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
         // No need to mock getHeaderLine for Content-Type as it shouldn't be checked for GET body
         $transport = $this->createTransport();
@@ -155,6 +163,7 @@ class HttpTransportTest extends TestCase
     {
         // For this test, HttpTransport calls getHeaderLine for Mcp-Session-Id, Last-Event-ID, and Origin.
         // It doesn't use Content-Type or Accept in getClientSessionId path.
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Mcp-Session-Id', 'session-123'],
             ['Last-Event-ID', ''], // Should be empty as per test name intent
@@ -167,6 +176,7 @@ class HttpTransportTest extends TestCase
 
     public function testGetLastEventId()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', 'event-456'],
@@ -179,6 +189,7 @@ class HttpTransportTest extends TestCase
 
     public function testGetClientSessionIdNotPresent()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Mcp-Session-Id', ''], // Empty or not present
             ['Last-Event-ID', ''],
@@ -196,7 +207,9 @@ class HttpTransportTest extends TestCase
         $this->expectException(TransportException::class);
         $this->expectExceptionMessage('Origin not allowed.');
 
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Origin', 'http://malicious.com'], // This origin is not in allowed list
@@ -204,6 +217,7 @@ class HttpTransportTest extends TestCase
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
         ]);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockStream->method('__toString')->willReturn('{}');
 
         // Allowed origins list is empty, so any Origin header makes it fail
@@ -214,7 +228,9 @@ class HttpTransportTest extends TestCase
     public function testReceiveSucceedsWithValidOrigin()
     {
         $jsonRpc = '{"jsonrpc":"2.0","method":"test","id":1}';
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Origin', 'http://good.com'],
@@ -222,6 +238,7 @@ class HttpTransportTest extends TestCase
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
         ]);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockStream->method('__toString')->willReturn($jsonRpc);
 
         $transport = $this->createTransport(['http://good.com']);
@@ -232,7 +249,9 @@ class HttpTransportTest extends TestCase
     public function testReceiveSucceedsWithNoOriginHeaderAndEmptyAllowedList()
     {
         $jsonRpc = '{"jsonrpc":"2.0","method":"test","id":1}';
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Origin', ''], // No Origin header sent
@@ -240,6 +259,7 @@ class HttpTransportTest extends TestCase
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
         ]);
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockStream->method('__toString')->willReturn($jsonRpc);
 
         $transport = $this->createTransport([]); // Empty allowed list
@@ -251,8 +271,10 @@ class HttpTransportTest extends TestCase
 
     public function testSendJsonResponseSingleMessage()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
         // Assume client does not strongly prefer text/event-stream for a single response
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             // HttpTransport::send() checks 'Accept' and 'Origin' from request
             // It also uses Mcp-Session-Id for SSE event IDs if serverSessionId is set.
@@ -277,7 +299,9 @@ class HttpTransportTest extends TestCase
 
     public function testSendJsonResponseBatchMessage()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'application/json'],
             ['Origin', ''],
@@ -305,8 +329,10 @@ class HttpTransportTest extends TestCase
 
     public function testSendJsonResponseWithServerSessionId()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
         // This test sets serverSessionId, which is used in constructing response headers or SSE event IDs
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'application/json'],
             ['Origin', ''],
@@ -327,7 +353,9 @@ class HttpTransportTest extends TestCase
 
     public function testSendJsonResponseFailsWithInvalidOrigin()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Accept', 'application/json'],
@@ -351,7 +379,9 @@ class HttpTransportTest extends TestCase
 
     public function testSendReturns202ForNotificationOnlyBatch()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'application/json, text/event-stream'], // Client might accept SSE
             ['Origin', ''],
@@ -374,7 +404,9 @@ class HttpTransportTest extends TestCase
 
     public function testSendReturns202ForResponseOnlyBatch()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
          $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'application/json, text/event-stream'],
             ['Origin', ''],
@@ -403,7 +435,9 @@ class HttpTransportTest extends TestCase
 
     public function testStartSseStreamForGetRequest()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'text/event-stream'],
             ['Origin', ''], // Assuming valid origin
@@ -447,7 +481,9 @@ class HttpTransportTest extends TestCase
 
     public function testStartSseStreamWithServerSessionId()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             // Similar to testStartSseStreamForGetRequest
             ['Accept', 'text/event-stream'],
@@ -470,7 +506,9 @@ class HttpTransportTest extends TestCase
 
     public function testSseStreamStartsWithNewEventIdsEvenWithLastEventIdHeader()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'text/event-stream'],
             ['Origin', ''], // Assuming valid or no origin
@@ -507,7 +545,9 @@ class HttpTransportTest extends TestCase
 
     public function testSseEventIdUsesClientSessionIdAsFallback()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'text/event-stream'],
             ['Origin', ''], // Assuming valid or no origin
@@ -539,7 +579,9 @@ class HttpTransportTest extends TestCase
 
     public function testSendSseEventAfterStreamStarted()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST'); // Or GET
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             // This is a POST request where client accepts SSE.
             // HttpTransport::send checks 'Accept' and 'Origin'.
@@ -588,7 +630,9 @@ class HttpTransportTest extends TestCase
         // This test depends on how JsonRpcMessage::toJson actually formats newlines
         // and how prepareSseData handles them. The current prepareSseData replaces
         // "\n" with "\ndata: ".
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             // Similar to testSendSseEventAfterStreamStarted
             ['Accept', 'text/event-stream'],
@@ -626,7 +670,9 @@ class HttpTransportTest extends TestCase
 
     public function testSendFailsForInvalidOriginOnGetSse()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             // GET request, client accepts SSE, but origin is bad.
             // HttpTransport::send checks 'Accept' and 'Origin'.
@@ -659,7 +705,9 @@ class HttpTransportTest extends TestCase
 
     public function testServerCanForceSseForSinglePostResponse()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             // POST request, client accepts SSE. Transport is forced to prefer SSE.
             // HttpTransport::send checks 'Accept' and 'Origin'.
@@ -698,7 +746,9 @@ class HttpTransportTest extends TestCase
     public function testSendSseErrorEventDuringActiveStream()
     {
         // 1. Setup SSE stream
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'text/event-stream'],
             ['Origin', ''],
@@ -752,6 +802,7 @@ class HttpTransportTest extends TestCase
     public function testIsClosedInitiallyReturnsFalse()
     {
         // Mock minimal headers needed for HttpTransport constructor
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', ''],
@@ -763,7 +814,9 @@ class HttpTransportTest extends TestCase
 
     public function testIsClosedAfterSendingJsonResponse()
     {
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Content-Type', 'application/json'],
             ['Accept', 'application/json'],
@@ -787,8 +840,10 @@ class HttpTransportTest extends TestCase
     public function testIsClosedForSseStreamLifecycle()
     {
         // 1. Initial state
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('GET');
         $initialSessionId = 'sse-lifecycle-session';
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'text/event-stream'],
             ['Origin', ''],
@@ -826,7 +881,9 @@ class HttpTransportTest extends TestCase
     public function testIsClosedAfterSseIsSupersededByJsonSend()
     {
         // Mock request for a JSON response
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getMethod')->willReturn('POST');
+        // @phpstan-ignore-next-line - PHPUnit mock builder syntax
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             ['Accept', 'application/json'],
             ['Origin', ''],

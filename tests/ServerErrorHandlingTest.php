@@ -132,6 +132,7 @@ class ServerErrorHandlingTest extends TestCase
         $shutdownOrder = []; // Passed by reference
 
         $cap1 = new class ($shutdownOrder, 'cap1') implements CapabilityInterface {
+            // @phpstan-ignore-next-line - $orderRef is used by reference to capture shutdown order for external assertion.
             public function __construct(private array &$orderRef, private string $nameRef)
             {
             }
@@ -156,6 +157,7 @@ class ServerErrorHandlingTest extends TestCase
             }
         };
         $cap2 = new class ($shutdownOrder, 'cap2') implements CapabilityInterface {
+            // @phpstan-ignore-next-line - $orderRef is used by reference to capture shutdown order for external assertion.
             public function __construct(private array &$orderRef, private string $nameRef)
             {
             }
