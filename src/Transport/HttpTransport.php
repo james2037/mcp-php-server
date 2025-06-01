@@ -269,10 +269,13 @@ class HttpTransport extends AbstractTransport
 
         // Ensure no literal newlines in payload that would break SSE format for 'data:' line.
         // JsonRpcMessage::toJson() should produce a single line of JSON.
-        // If payload could have newlines intended for multi-line data fields:
-        $escapedPayload = str_replace("\n", "\ndata: ", $payload);
+        // If the JSON string itself contains literal newlines (e.g., from json_encode with JSON_PRETTY_PRINT),
+        // each line of that pretty-printed JSON would need to be prefixed with "data: ".
+        // However, our JsonRpcMessage::toJson() produces compact JSON. Internal newlines are escaped (e.g. \n).
+        // Therefore, the payload is typically a single line and doesn't need this specific escaping.
+        // $escapedPayload = str_replace("\n", "\ndata: ", $payload); // This was incorrect for compact JSON payloads
 
-        return "id: " . $eventId . "\n" . "data: " . $escapedPayload . "\n\n";
+        return "id: " . $eventId . "\n" . "data: " . $payload . "\n\n";
     }
 
     private function sendSseEventData(string $sseFormattedData): void
