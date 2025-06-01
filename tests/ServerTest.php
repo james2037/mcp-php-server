@@ -2,8 +2,6 @@
 
 namespace MCP\Server\Tests;
 
-require_once __DIR__ . '/Transport/StdioTransportTest.php';
-
 use PHPUnit\Framework\TestCase;
 use MCP\Server\Server;
 use MCP\Server\Capability\CapabilityInterface;
