@@ -10,6 +10,9 @@ use MCP\Server\Tests\Transport\TestableStdioTransport;
 // TestCapability is now in a separate file.
 use MCP\Server\Tests\TestCapability;
 
+/**
+ * @covers \MCP\Server\Server
+ */
 class ServerTest extends TestCase
 {
     private Server $server;

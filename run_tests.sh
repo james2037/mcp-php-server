@@ -28,7 +28,7 @@ fi
 
 echo "Running PHPUnit tests..."
 if [ -f vendor/bin/phpunit ]; then
-    vendor/bin/phpunit > test_outputs/phpunit_output.txt 2>&1 || true
+    vendor/bin/phpunit --testdox > test_outputs/phpunit_output.txt 2>&1 || true
     echo "PHPUnit Output:"
     cat test_outputs/phpunit_output.txt
 else
