@@ -174,6 +174,7 @@ class ResourcesCapability implements CapabilityInterface
             $parameters = $this->matchUriTemplate($template, $uri);
             if ($parameters !== null) {
                 try {
+                    /** @var \MCP\Server\Resource\TextResourceContents|\MCP\Server\Resource\BlobResourceContents $resourceContent */
                     $resourceContent = $resource->read($parameters);
                     // The result structure must be
                     // ['contents' => [ResourceContents->toArray()]]

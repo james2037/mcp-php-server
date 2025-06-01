@@ -18,6 +18,7 @@ For more information about MCP, please visit the official website: https://model
 | Sampling   | Not Started |
 | Roots      | Not Started |
 | Transport (Stdio) | Complete    |
+| Transport (Streamable HTTP) | Complete |
 
 ## Capabilities
 
@@ -62,6 +63,84 @@ The `src/Server.php` file defines a `Server` class. To use it, you need to creat
 ### Transport
 
 By default, the server is designed to work with `StdioTransport`, communicating over standard input/output. You will need to instantiate this or another transport as shown above. For more information on transports, see the [MCP Transports documentation](https://modelcontextprotocol.io/docs/concepts/transports).
+
+### HttpTransport (Streamable HTTP)
+
+The `HttpTransport` class implements the Streamable HTTP transport mechanism as defined by the Model Context Protocol. It allows the server to communicate over HTTP, handling standard JSON-RPC requests/responses and Server-Sent Events (SSE) for streaming.
+
+Key features:
+-   Uses PSR-7 HTTP message interfaces (`ServerRequestInterface`, `ResponseInterface`) for handling HTTP requests and responses.
+-   Supports session management via `Mcp-Session-Id` headers.
+-   Supports SSE resumability via `Last-Event-ID` headers and includes `id` in outgoing SSE events.
+-   Includes Origin header validation for security.
+
+**Usage with `HttpTransport`:**
+
+To use `HttpTransport`, you need to:
+1.  Create a PSR-7 `ServerRequestInterface` object from the current HTTP request (e.g., using a library like `nyholm/psr7-server`).
+2.  Instantiate PSR-7 factories (`ResponseFactoryInterface`, `StreamFactoryInterface`, e.g., from `nyholm/psr7`).
+3.  Instantiate `HttpTransport` with the request and factories.
+4.  Optionally, provide an array of allowed origins to the `HttpTransport` constructor for Origin header validation. If an `Origin` header is sent by the client, it *must* be in this list. If the list is empty, any request sending an `Origin` header will be rejected. Requests without an `Origin` header (e.g., same-origin or non-browser clients) are considered acceptable if the list is empty.
+5.  Connect it to the `Server` instance.
+6.  Call the `Server::run()` method. When used with `HttpTransport`, `run()` will handle the single HTTP request/response cycle and then exit.
+7.  An external PSR-7 emitter (like `Laminas\HttpHandlerRunner\Emitter\SapiEmitter`) is used by the `Server` to send the final HTTP response.
+
+**Example (conceptual `public/index.php` or bootstrap file):**
+
+```php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php'; // Adjust path as needed
+
+use MCP\Server\Server;
+use MCP\Server\Transport\HttpTransport;
+use MCP\Server\Capability\ResourcesCapability; // Example capability
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
+
+// 1. Create PSR-7 request and factories
+$psr17Factory = new Psr17Factory();
+$requestCreator = new ServerRequestCreator(
+    $psr17Factory, // ServerRequestFactory
+    $psr17Factory, // UriFactory
+    $psr17Factory, // UploadedFileFactory
+    $psr17Factory  // StreamFactory
+);
+$request = $requestCreator->fromGlobals();
+
+// 2. Instantiate Server
+$server = new Server('My MCPServer (HTTP)', '1.0.0');
+
+// 3. Add Capabilities (example)
+$server->addCapability(new ResourcesCapability());
+// Add other capabilities (Tools, etc.)
+
+// 4. Configure allowed origins (optional, but recommended for security)
+//    Replace with your actual allowed client origins.
+$allowedOrigins = [
+    // 'http://localhost:3000', // Example: local frontend development server
+    // 'https://your-client-app.com',
+];
+
+// 5. Instantiate and connect HttpTransport
+$transport = new HttpTransport($request, $psr17Factory, $psr17Factory, $allowedOrigins);
+$server->connect($transport);
+
+// Optional: If your Server needs the request for other purposes (not typical for MCP server directly)
+// $server->setCurrentHttpRequest($request);
+
+// 6. Run the server for this request
+//    This will process the request, send the response (including SSE headers if applicable),
+//    and then HttpTransport will echo SSE events if the stream is kept open by server logic.
+//    The SapiEmitter within Server::runHttpRequestCycle will send the response.
+$server->run();
+
+// For SSE, if HttpTransport::send() was used to stream events, those would have been echoed.
+// The script typically ends here for a standard PHP request.
+// For long-running SSE streams with PHP-FPM, more advanced SAPI configurations or
+// an async environment (Swoole, ReactPHP) would be needed to keep the connection alive
+// beyond the initial response emission. HttpTransport's current SSE is hybrid.
+```
 
 ## Creating Custom Resources
 

@@ -105,7 +105,8 @@ class ServerInitializationTest extends TestCase
             public function getCapabilities(): array
             {
                 return ['conflict_cap_alt' => true];
-            } // Different capability name to avoid simple array merge overwrite
+            }
+            // Different capability name to avoid simple array merge overwrite
             public function canHandleMessage(JsonRpcMessage $message): bool
             {
                 return $message->method === 'conflict.method';
@@ -124,7 +125,8 @@ class ServerInitializationTest extends TestCase
         };
 
         $this->server->addCapability($cap1);
-        $this->server->addCapability($cap2); // cap2 added second
+        $this->server->addCapability($cap2);
+        // cap2 added second
 
         $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']], 'init_conflict');
         $conflictMessage = new JsonRpcMessage('conflict.method', [], 'conflict_call_1');

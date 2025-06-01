@@ -193,4 +193,16 @@ class StdioTransport extends AbstractTransport
     {
         return feof($this->stdin);
     }
+
+    /**
+     * Checks if the transport stream is currently open.
+     * For StdioTransport, this is always false as it doesn't maintain
+     * a persistent open stream in the way HttpTransport (SSE) does.
+     *
+     * @return bool Always false.
+     */
+    public function isStreamOpen(): bool
+    {
+        return false;
+    }
 }

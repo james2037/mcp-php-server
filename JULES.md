@@ -4,13 +4,15 @@ This guide is for you, Jules, to get up and running quickly in a new session. Fo
 
 ## Initial Setup
 
-Before starting any work, ensure the environment is prepared by running:
+**Important: At the beginning of each new work session, you *must* run the setup script first.** This ensures the environment is correctly initialized.
+
+To prepare the environment, execute:
 
 ```bash
 bash jules_setup.sh
 ```
 
-This script installs necessary PHP versions, Composer, and project dependencies. You only need to ensure it's run once per session.
+This script installs necessary PHP versions, Composer, and project dependencies. Running this at the start of your session will prevent common issues.
 
 ## Development Workflow
 
