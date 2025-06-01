@@ -11,7 +11,9 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\ResponseInterface;
-use Nyholm\Psr7\Factory\Psr17Factory; // Using Nyholm as a concrete factory for tests
+use Nyholm\Psr7\Factory\Psr17Factory;
+
+// Using Nyholm as a concrete factory for tests
 
 class HttpTransportTest extends TestCase
 {
@@ -255,7 +257,7 @@ class HttpTransportTest extends TestCase
             // HttpTransport::send() checks 'Accept' and 'Origin' from request
             // It also uses Mcp-Session-Id for SSE event IDs if serverSessionId is set.
             ['Accept', 'application/json'],
-            ['Origin', ''], 
+            ['Origin', ''],
             ['Content-Type', 'application/json'], // Though not directly used by send, good for consistency
             ['Mcp-Session-Id', ''], // For potential SSE ID generation base
             ['Last-Event-ID', '']   // Not directly used by send
@@ -323,6 +325,30 @@ class HttpTransportTest extends TestCase
         $this->assertEquals('server-session-789', $response->getHeaderLine('Mcp-Session-Id'));
     }
 
+    public function testSendJsonResponseFailsWithInvalidOrigin()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Content-Type', 'application/json'],
+            ['Accept', 'application/json'],
+            ['Origin', 'http://some-bad-origin.com'], // Invalid origin
+            ['Mcp-Session-Id', ''],
+            ['Last-Event-ID', '']
+        ]);
+
+        // Allowed origins list is empty, so any Origin header makes it fail
+        $transport = $this->createTransport([]);
+        $message = JsonRpcMessage::result(['status' => 'ok'], 'req-id');
+
+        // send() itself doesn't throw for origin validation anymore,
+        // it sets up the response to be a 403.
+        $transport->send($message);
+        $response = $transport->getResponse();
+
+        $this->assertEquals(403, $response->getStatusCode());
+        $this->assertStringContainsString('Origin not allowed', (string) $response->getBody());
+    }
+
     public function testSendReturns202ForNotificationOnlyBatch()
     {
         $this->mockRequest->method('getMethod')->willReturn('POST');
@@ -355,7 +381,7 @@ class HttpTransportTest extends TestCase
             ['Content-Type', 'application/json'],
             ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']
-        ]);
+         ]);
 
         $transport = $this->createTransport();
         // Test with actual notifications (no ID) as isNotificationOrResponseOnlyBatch currently
@@ -384,9 +410,9 @@ class HttpTransportTest extends TestCase
             // For GET, Content-Type of request is not typically used by HttpTransport::send
             // Mcp-Session-Id from request can be used for SSE event IDs if serverSessionId not set
             ['Accept', 'text/event-stream'],
-            ['Origin', ''], 
+            ['Origin', ''],
             ['Content-Type', ''], // Not relevant for GET body processing in send
-            ['Mcp-Session-Id', ''], 
+            ['Mcp-Session-Id', ''],
             ['Last-Event-ID', '']   // Not directly used by send
         ]);
 
@@ -440,6 +466,75 @@ class HttpTransportTest extends TestCase
 
         $response = $transport->getResponse();
         $this->assertEquals('sse-session-123', $response->getHeaderLine('Mcp-Session-Id'));
+    }
+
+    public function testSseStreamStartsWithNewEventIdsEvenWithLastEventIdHeader()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Origin', ''], // Assuming valid or no origin
+            ['Mcp-Session-Id', 'client-session-for-event-id'], // Client-provided session ID
+            ['Last-Event-ID', 'some-past-event-id-123'] // Client reports a past event ID
+        ]);
+
+        $transport = $this->createTransport();
+        $transport->setServerSessionId('server-sess'); // Server sets its own session ID
+
+        $message = JsonRpcMessage::result(['status' => 'streaming'], 'req-1');
+
+        ob_start();
+        try {
+            $transport->send($message); // Initiate SSE stream and send the first event
+            $response = $transport->getResponse();
+            $sseOutput = (string) $response->getBody();
+        } finally {
+            ob_end_clean();
+        }
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+
+        // Event ID should start with 'server-sess-1', not related to 'some-past-event-id-123'
+        // nor 'client-session-for-event-id-1' if server session ID takes precedence.
+        $expectedEventIdLine = 'id: server-sess-1';
+        $this->assertStringContainsString($expectedEventIdLine, $sseOutput);
+
+        // Also verify that the Last-Event-ID from request is available if needed by other logic
+        // (though current HttpTransport doesn't use it to *resume* server-side event ID counting)
+        $this->assertEquals('some-past-event-id-123', $transport->getLastEventId());
+    }
+
+    public function testSseEventIdUsesClientSessionIdAsFallback()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Origin', ''], // Assuming valid or no origin
+            ['Mcp-Session-Id', 'client-fallback-sess-id'], // Client-provided session ID
+            ['Last-Event-ID', ''] // Not relevant for this test
+        ]);
+
+        $transport = $this->createTransport();
+        // DO NOT call $transport->setServerSessionId() to test fallback
+
+        $message = JsonRpcMessage::result(['status' => 'streaming-fallback'], 'req-fallback');
+
+        ob_start();
+        try {
+            $transport->send($message); // Initiate SSE stream and send the first event
+            $response = $transport->getResponse();
+            $sseOutput = (string) $response->getBody();
+        } finally {
+            ob_end_clean();
+        }
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+
+        // Event ID should use client's session ID as fallback, count should be 1
+        $expectedEventIdLine = 'id: client-fallback-sess-id-1';
+        $this->assertStringContainsString($expectedEventIdLine, $sseOutput);
     }
 
     public function testSendSseEventAfterStreamStarted()
@@ -511,21 +606,21 @@ class HttpTransportTest extends TestCase
             $multiLineData = ["line1\nline2", "another field"];
             $rpcMessage = JsonRpcMessage::result($multiLineData, 'multiline-id');
             $transport->send($rpcMessage);
-            
+
             $response = $transport->getResponse();
             $outputFromBody = (string) $response->getBody();
             $echoedOutput = ob_get_contents(); // Should be empty
         } finally {
             ob_end_clean(); // Ensure buffer is cleaned
         }
-        
+
         $this->assertEmpty($echoedOutput, "No direct echo output should occur with PSR-7 stream refactor for SSE.");
 
         // After fixing prepareSseData in HttpTransport, the JSON payload is sent as is.
         // JsonRpcMessage::toJson() produces a compact JSON string where internal newlines are escaped as \\n.
         $expectedDataPayload = '{"jsonrpc":"2.0","result":["line1\\nline2","another field"],"id":"multiline-id"}';
         $expectedFullEvent = 'id: sMulti-1' . "\n" . 'data: ' . $expectedDataPayload . "\n\n";
-        
+
         $this->assertEquals($expectedFullEvent, $outputFromBody);
     }
 
@@ -568,7 +663,7 @@ class HttpTransportTest extends TestCase
         $this->mockRequest->method('getHeaderLine')->willReturnMap([
             // POST request, client accepts SSE. Transport is forced to prefer SSE.
             // HttpTransport::send checks 'Accept' and 'Origin'.
-            ['Accept', 'application/json, text/event-stream'], 
+            ['Accept', 'application/json, text/event-stream'],
             ['Origin', ''],
             ['Content-Type', 'application/json'], // Request content type
             ['Mcp-Session-Id', ''],
@@ -598,5 +693,184 @@ class HttpTransportTest extends TestCase
         $this->assertStringContainsString($expectedSseData, $outputFromBody);
         $this->assertMatchesRegularExpression('/^id: .+\n/m', $outputFromBody); // Check for an ID line (multiline)
         $this->assertEmpty($echoedOutput, "No direct echo output should occur with PSR-7 stream refactor.");
+    }
+
+    public function testSendSseErrorEventDuringActiveStream()
+    {
+        // 1. Setup SSE stream
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Origin', ''],
+            ['Mcp-Session-Id', 'client-sess-id'], // Irrelevant if server sets its own
+            ['Last-Event-ID', '']
+        ]);
+
+        $transport = $this->createTransport();
+        $transport->setServerSessionId('sse-err-test');
+
+        ob_start(); // Capture all output
+        try {
+            // Send initial message to establish stream
+            $transport->send(JsonRpcMessage::result(['status' => 'sse stream active'], 'init-event'));
+
+            // 2. Send an Error Message
+            // Using null for error ID as it's a server-initiated error, not in response to a specific request ID.
+            $errorMessage = JsonRpcMessage::error(-32000, 'Server error during stream', null, ['detail' => 'something went wrong']);
+            $transport->send($errorMessage);
+
+            $response = $transport->getResponse();
+            $sseOutput = (string) $response->getBody();
+        } finally {
+            ob_end_clean();
+        }
+
+        $this->assertEquals(200, $response->getStatusCode(), "Response status code should be 200 for SSE stream.");
+        $this->assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
+
+        // 3. Capture and Assert Output
+        // The output will contain both events. We are interested in the second one (the error).
+
+        // Event 1 (init-event)
+        $expectedEvent1Id = "id: sse-err-test-1";
+        $expectedEvent1Data = 'data: {"jsonrpc":"2.0","result":{"status":"sse stream active"},"id":"init-event"}';
+
+        // Event 2 (error message)
+        $expectedEvent2Id = "id: sse-err-test-2";
+        // Note: JsonRpcMessage::error with null ID will have "id":null in JSON.
+        $expectedErrorJsonData = 'data: {"jsonrpc":"2.0","error":{"code":-32000,"message":"Server error during stream","data":{"detail":"something went wrong"}},"id":null}';
+
+        $this->assertStringContainsString($expectedEvent1Id, $sseOutput, "Initial event ID not found.");
+        $this->assertStringContainsString($expectedEvent1Data, $sseOutput, "Initial event data not found.");
+
+        $this->assertStringContainsString($expectedEvent2Id, $sseOutput, "Error event ID not found.");
+        $this->assertStringContainsString($expectedErrorJsonData, $sseOutput, "Error event data not found.");
+    }
+
+    // --- Tests for isClosed() method ---
+
+    public function testIsClosedInitiallyReturnsFalse()
+    {
+        // Mock minimal headers needed for HttpTransport constructor
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Mcp-Session-Id', ''],
+            ['Last-Event-ID', ''],
+            ['Origin', ''] // Assume no origin or valid origin for simplicity
+        ]);
+        $transport = $this->createTransport();
+        $this->assertFalse($transport->isClosed(), "Transport should not be closed immediately after construction.");
+    }
+
+    public function testIsClosedAfterSendingJsonResponse()
+    {
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Content-Type', 'application/json'],
+            ['Accept', 'application/json'],
+            ['Origin', ''], // Assuming valid or no origin
+            ['Mcp-Session-Id', ''],
+            ['Last-Event-ID', '']
+        ]);
+
+        $transport = $this->createTransport();
+        $message = JsonRpcMessage::result(['status' => 'ok'], 'req-isClosedTest');
+
+        // Capture output just in case, though for JSON response it shouldn't echo
+        ob_start();
+        $transport->send($message);
+        ob_end_clean();
+
+        // After a JSON response is sent, the transport should consider itself "done" for that cycle.
+        $this->assertTrue($transport->isClosed(), "Transport should be considered closed after sending a JSON response.");
+    }
+
+    public function testIsClosedForSseStreamLifecycle()
+    {
+        // 1. Initial state
+        $this->mockRequest->method('getMethod')->willReturn('GET');
+        $initialSessionId = 'sse-lifecycle-session';
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'text/event-stream'],
+            ['Origin', ''],
+            ['Mcp-Session-Id', $initialSessionId],
+            ['Last-Event-ID', '']
+        ]);
+        $transport = $this->createTransport();
+        $this->assertFalse($transport->isClosed(), "Initially, transport should not be closed.");
+
+        // 2. Initiate SSE stream
+        ob_start(); // Capture potential output
+        try {
+            $transport->send(JsonRpcMessage::result(['status' => 'sse open'], 'event1'));
+            $response = $transport->getResponse(); // Get initial SSE response headers
+            $this->assertFalse($transport->isClosed(), "After starting SSE stream, transport should be open.");
+        } finally {
+            ob_end_clean();
+        }
+
+        // 3. Send another SSE event
+        ob_start();
+        try {
+            $transport->send(new JsonRpcMessage('sse.event', ['data' => 'more data'], null));
+            $this->assertFalse($transport->isClosed(), "During active SSE stream, transport should be open.");
+        } finally {
+            ob_end_clean();
+        }
+
+        // The following section was removed due to difficulties reliably testing
+        // the state transition with mock re-configuration mid-test.
+        // This specific transition (SSE -> JSON causing isClosed()=true)
+        // is now covered by testIsClosedAfterSseIsSupersededByJsonSend.
+    }
+
+    public function testIsClosedAfterSseIsSupersededByJsonSend()
+    {
+        // Mock request for a JSON response
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->willReturnMap([
+            ['Accept', 'application/json'],
+            ['Origin', ''],
+            ['Content-Type', 'application/json'],
+            ['Mcp-Session-Id', 'sess-supersede'],
+            ['Last-Event-ID', '']
+        ]);
+
+        $transport = $this->createTransport();
+
+        // Simulate that an SSE stream was active:
+        // Manually set internal state using Reflection
+        $reflection = new \ReflectionObject($transport);
+
+        $streamOpenProperty = $reflection->getProperty('streamOpen');
+        $streamOpenProperty->setAccessible(true);
+        $streamOpenProperty->setValue($transport, true); // SSE stream was open
+
+        $headersSentProperty = $reflection->getProperty('headersSent');
+        $headersSentProperty->setAccessible(true);
+        $headersSentProperty->setValue($transport, true); // SSE initial headers were sent
+
+        // Sanity check before the crucial send call
+        // With streamOpen=true, isClosed should be false (unless connection_aborted)
+        $this->assertFalse($transport->isClosed(), "Pre-condition: Transport should appear 'open' (SSE active).");
+
+        // Now, send a JSON message. This should detect Accept: application/json,
+        // realize it's not SSE, and because streamOpen was true, it should close the stream
+        // and prepare a JSON response.
+        ob_start(); // Prevent any accidental echo from send if it were to occur
+        try {
+            $transport->send(JsonRpcMessage::result(['status' => 'json now'], 'req-json-super'));
+        } finally {
+            ob_end_clean();
+        }
+
+        // After sending a JSON response that supersedes an SSE stream:
+        // - streamOpen should become false.
+        // - headersSent should remain true (or be set true by prepareJsonResponse).
+        // Therefore, isClosed() should now be true.
+        $this->assertTrue($transport->isClosed(), "Transport should be closed after SSE is superseded by JSON send.");
+
+        // Restore accessibility if good practice, though instance is ending.
+        $streamOpenProperty->setAccessible(false);
+        $headersSentProperty->setAccessible(false);
     }
 }

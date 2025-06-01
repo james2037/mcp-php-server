@@ -119,98 +119,102 @@ class HttpTransport extends AbstractTransport
             throw new TransportException("Cannot send new HTTP response; headers already sent for a non-SSE response.");
         }
 
-        // If it's an ongoing SSE stream, send event
-        if ($this->streamOpen) {
-            $this->sendSseEventData($this->prepareSseData($message));
-            return;
-        }
-
-        // Reset SSE preference at the start of a new send cycle, get current preference
-        $ssePreferenceForThisSend = $this->sseStreamPreferred;
-        $this->sseStreamPreferred = false;
-
-        // Determine if this should be an SSE response or a single JSON response.
+        // Determine intent for the current message based on request headers and server preferences
         $acceptHeader = $this->request->getHeaderLine('Accept');
         $isSseRequestedByClient = stripos($acceptHeader, 'text/event-stream') !== false;
         $isGetRequest = $this->request->getMethod() === 'GET';
+        $ssePreferenceForThisSend = $this->sseStreamPreferred;
+        $this->sseStreamPreferred = false; // Reset for the next independent send() call
 
-        // Server decides to use SSE if:
-        // 1. It's a GET request explicitly asking for SSE (for server-initiated events).
-        // 2. It's a POST request, client accepts SSE, AND the server intends to stream multiple messages
-        //    (e.g., multiple responses for a batch, or subsequent updates/notifications).
-        //    This "server intends to stream" is a crucial part. For now, we might simplify:
-        //    If client accepts SSE on a POST, and the $message is an array (implying batch or multiple parts),
-        //    or if a flag is set on the transport to prefer SSE.
+        $useSseForCurrentCall = false;
+        if ($isSseRequestedByClient) {
+            if ($isGetRequest) {
+                $useSseForCurrentCall = true;
+            } else { // POST
+                if ($ssePreferenceForThisSend || !is_array($message)) {
+                    $useSseForCurrentCall = true;
+                }
+            }
+        }
+        if (!$isSseRequestedByClient && $useSseForCurrentCall) { // Cannot force SSE if client doesn't accept
+            $useSseForCurrentCall = false;
+        }
 
-        // Simplified decision for now:
-        $useSse = false;
+        // If an SSE stream is currently active
+        if ($this->streamOpen) {
+            if ($useSseForCurrentCall) { // And current message is also for SSE: send event and continue stream
+                $this->sendSseEventData($this->prepareSseData($message));
+            } else { // Current message is not for SSE (e.g., JSON): transition, close SSE stream
+                $this->streamOpen = false;
+                // Proceed to send this message as a final JSON response
+                if ($this->originValidationFailed) {
+                     $this->response = $this->responseFactory->createResponse(403)
+                        ->withHeader('Content-Type', 'text/plain')
+                        ->withBody($this->streamFactory->createStream('Origin not allowed.'));
+                    $this->headersSent = true;
+                    // streamOpen is already false now
+                    return; // Return after setting the 403 response
+                }
+                $this->prepareJsonResponse($message); // sets headersSent = true
+            }
+            return; // Processing for this send() call is complete whether it continued SSE or switched to JSON
+        }
 
-        if ($this->isNotificationOrResponseOnlyBatch($message)) {
+        // No SSE stream was previously active (this->streamOpen is false from constructor or previous closure)
+
+        // Handle pure notification batches (202 response) only if not starting an SSE stream.
+        if (!$useSseForCurrentCall && $this->isPureNotificationBatch($message)) {
             $this->response = $this->responseFactory->createResponse(202);
             $this->headersSent = true;
+            // $this->streamOpen is already false and remains false
             return;
         }
 
-        // If it's not a 202-batch, then determine if SSE or JSON
-        if ($isSseRequestedByClient) {
-            if ($isGetRequest) { // GET request explicitly asking for SSE
-                $useSse = true;
-            } else { // POST request and client accepts SSE
-                if ($ssePreferenceForThisSend) { // Explicit server preference
-                    $useSse = true;
-                } elseif (!is_array($message)) {
-                    // Fallback: If it's a single message, assume it could be the start of an SSE stream.
-                    // If it's an array (batch of responses), it will use JSON by default ($useSse remains false).
-                    $useSse = true;
-                }
-                // else: $message is an array (batch) and no explicit SSE preference, $useSse remains false for JSON batch.
+        // At this point, stream is not open, and it's not a 202-batch.
+        // Decide whether to start a new SSE stream or send a single JSON response.
+        if ($useSseForCurrentCall) {
+            $this->startSseStreamHeaders(); // Sets $this->streamOpen = true and $this->headersSent = true (for initial headers)
+            // startSseStreamHeaders also handles origin validation internally.
+            if ($this->response->getStatusCode() === 403) { // Check if origin validation failed within startSseStreamHeaders
+                $this->streamOpen = false; // Ensure stream is marked closed if it failed to open due to origin
+                return;
             }
-        }
-        // If $isSseRequestedByClient is false, $useSse also remains false (unless $ssePreferenceForThisSend was true, which is a bit contradictory but possible)
-        // However, if client doesn't accept SSE, we should probably not force it.
-        // Let's refine: SSE is only used if client accepts it AND (GET or (POST with preference or POST single message))
-        if (!$isSseRequestedByClient && $useSse) { // Correcting: if client doesn't want SSE, don't force it.
-            $useSse = false;
-        }
-
-        if ($useSse) {
-            $this->startSseStreamHeaders();
-
-            if ($this->originValidationFailed) { // If origin validation failed in startSseStreamHeaders
-                return; // The response is already set to 403, headersSent=true. Exit send().
-            }
-
-            // Only proceed to send data if the stream is actually open
-            // (which implies origin was OK and startSseStreamHeaders completed successfully to that point)
-            if ($this->streamOpen) {
+            // If stream is successfully opened (not 403), send the first event.
+            if ($this->streamOpen) { // Check streamOpen again, as startSseStreamHeaders might have failed silently if not for origin
                 $this->sendSseEventData($this->prepareSseData($message));
-            } else {
-                // This case implies SSE was intended ($useSse=true) but stream didn't open,
-                // and it wasn't due to an origin validation failure that startSseStreamHeaders handled by returning.
-                // The response might still be the initial one (e.g. 200 OK with SSE headers but no body yet if startSseStreamHeaders didn't set 403).
             }
-        } else { // Not using SSE
-            $this->prepareJsonResponse($message);
+        } else { // Send a normal JSON response
+            // This call is for a JSON response. Any SSE stream is now conceptually finished.
+            $this->streamOpen = false;
+
+            if ($this->originValidationFailed) {
+                $this->response = $this->responseFactory->createResponse(403)
+                    ->withHeader('Content-Type', 'text/plain')
+                    ->withBody($this->streamFactory->createStream('Origin not allowed.'));
+                // $this->headersSent will be set true below
+            } else {
+                $this->prepareJsonResponse($message); // This also sets $this->headersSent = true
+            }
+            $this->headersSent = true; // Ensure headersSent is true if this JSON path is taken
         }
     }
 
-    private function isNotificationOrResponseOnlyBatch(JsonRpcMessage|array $messageOrMessages): bool
+    // Renamed and logic adjusted
+    private function isPureNotificationBatch(JsonRpcMessage|array $messageOrMessages): bool
     {
         $messages = is_array($messageOrMessages) ? $messageOrMessages : [$messageOrMessages];
 
-        if (empty($messages)) { // No messages, so not a batch to consider for 202
+        if (empty($messages)) {
             return false;
         }
 
         foreach ($messages as $msg) {
-            if ($msg instanceof JsonRpcMessage && $msg->isRequest()) {
-                return false;
-            }
-            if (!$msg instanceof JsonRpcMessage) { // Should not happen with proper usage
+            // If not a JsonRpcMessage or if it has an ID (meaning it's a response, not a notification)
+            if (!$msg instanceof JsonRpcMessage || $msg->id !== null) {
                 return false;
             }
         }
-        return true;
+        return true; // All messages are JsonRpcMessage instances and have null IDs
     }
 
     private function prepareJsonResponse(JsonRpcMessage|array $message): void
@@ -263,7 +267,8 @@ class HttpTransport extends AbstractTransport
     private function prepareSseData(JsonRpcMessage|array $messages): string
     {
         $this->sseEventCounter++;
-        $eventId = $this->serverSessionId ? $this->serverSessionId . '-' . $this->sseEventCounter : 'event-' . $this->sseEventCounter; // Example event ID
+        $baseId = $this->serverSessionId ?: ($this->clientSessionId ?: 'event');
+        $eventId = $baseId . '-' . $this->sseEventCounter;
 
         $payload = is_array($messages) ? JsonRpcMessage::toJsonArray($messages) : $messages->toJson();
 
