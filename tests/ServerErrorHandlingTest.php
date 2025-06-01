@@ -10,15 +10,15 @@ use MCP\Server\Tests\Util\MockTransport;
 
 class ServerErrorHandlingTest extends TestCase
 {
-    private Server $_server;
-    private MockTransport $_transport;
+    private Server $server;
+    private MockTransport $transport;
 
     protected function setUp(): void
     {
-        $this->_server = new Server('test-server', '1.0.0');
-        $this->_transport = new MockTransport();
-        $this->_server->connect($this->_transport);
-        $this->_transport->reset(); // Ensure clean transport for each test
+        $this->server = new Server('test-server', '1.0.0');
+        $this->transport = new MockTransport();
+        $this->server->connect($this->transport);
+        $this->transport->reset(); // Ensure clean transport for each test
     }
 
     public function testHandlesCapabilityInitializationFailure(): void
@@ -44,17 +44,17 @@ class ServerErrorHandlingTest extends TestCase
             {
             }
         };
-        $this->_server->addCapability($failingCap);
+        $this->server->addCapability($failingCap);
 
         $initMessage = new JsonRpcMessage(
             'initialize',
             ['protocolVersion' => '2025-03-26', 'clientInfo' => ['name' => 'c', 'version' => '1']],
             'init_fail_1'
         );
-        $this->_transport->queueIncomingMessages([$initMessage]);
-        $this->_server->run();
+        $this->transport->queueIncomingMessages([$initMessage]);
+        $this->server->run();
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         $this->assertCount(1, $sentMessages);
         $response = $sentMessages[0];
         $this->assertNotNull($response);
@@ -88,7 +88,7 @@ class ServerErrorHandlingTest extends TestCase
                 throw new \RuntimeException('Shutdown failed');
             }
         };
-        $this->_server->addCapability($failingCap);
+        $this->server->addCapability($failingCap);
 
         $initMessage = new JsonRpcMessage(
             'initialize',
@@ -97,11 +97,11 @@ class ServerErrorHandlingTest extends TestCase
         );
         $shutdownMessage = new JsonRpcMessage('shutdown', [], 'shutdown_fail_1');
 
-        $this->_transport->queueIncomingMessages([$initMessage]);
-        $this->_transport->queueIncomingMessages([$shutdownMessage]);
-        $this->_server->run();
+        $this->transport->queueIncomingMessages([$initMessage]);
+        $this->transport->queueIncomingMessages([$shutdownMessage]);
+        $this->server->run();
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         // Expect 2 responses: successful init, then error for shutdown
         $this->assertCount(2, $sentMessages);
 
@@ -180,8 +180,8 @@ class ServerErrorHandlingTest extends TestCase
             }
         };
 
-        $this->_server->addCapability($cap1);
-        $this->_server->addCapability($cap2);
+        $this->server->addCapability($cap1);
+        $this->server->addCapability($cap2);
 
         $initMessage = new JsonRpcMessage(
             'initialize',
@@ -190,11 +190,11 @@ class ServerErrorHandlingTest extends TestCase
         );
         $shutdownMessage = new JsonRpcMessage('shutdown', [], 'shutdown_order_1');
 
-        $this->_transport->queueIncomingMessages([$initMessage]);
-        $this->_transport->queueIncomingMessages([$shutdownMessage]);
-        $this->_server->run();
+        $this->transport->queueIncomingMessages([$initMessage]);
+        $this->transport->queueIncomingMessages([$shutdownMessage]);
+        $this->server->run();
 
-        $sentMessages = $this->_transport->getAllSentMessages();
+        $sentMessages = $this->transport->getAllSentMessages();
         $this->assertCount(2, $sentMessages); // Init response, Shutdown response
 
         // Check shutdown order matches registration order
