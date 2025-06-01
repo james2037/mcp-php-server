@@ -5,6 +5,9 @@ namespace MCP\Server\Tests\Message;
 use MCP\Server\Message\JsonRpcMessage;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \MCP\Server\Message\JsonRpcMessage
+ */
 class JsonRpcMessageTest extends TestCase
 {
     public function testCreateRequest(): void
