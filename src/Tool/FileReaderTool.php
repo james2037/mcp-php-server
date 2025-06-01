@@ -24,6 +24,9 @@ class FileReaderTool extends Tool
             throw new \InvalidArgumentException("File not found at path: " . $filepath);
         }
 
+        if (!is_readable($filepath)) {
+            throw new \RuntimeException("File is not readable: " . $filepath);
+        }
         $content = file_get_contents($filepath);
 
         if ($content === false) {

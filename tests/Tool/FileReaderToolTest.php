@@ -54,7 +54,7 @@ class FileReaderToolTest extends TestCase
         chmod($testFilePath, 0000);
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage("Unable to read file content from path: " . $testFilePath);
+        $this->expectExceptionMessage("File is not readable: " . $testFilePath);
 
         try {
             $this->fileReaderTool->execute(['filepath' => $testFilePath]);
