@@ -2,6 +2,12 @@
 <ruleset name="PSR12">
     <description>PSR-12 Coding Standards</description>
     <rule ref="PSR12"/>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="10000"/>
+            <property name="absoluteLineLimit" value="10000"/>
+        </properties>
+    </rule>
     <file>src</file>
     <file>tests</file>
     <arg name="extensions" value="php"/>

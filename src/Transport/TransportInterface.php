@@ -49,5 +49,12 @@ interface TransportInterface
      */
     public function isClosed(): bool;
 
+    /**
+     * Checks if the transport stream is currently open (e.g., for SSE).
+     *
+     * @return bool True if the stream is open, false otherwise.
+     */
+    public function isStreamOpen(): bool;
+
     public function preferSseStream(bool $prefer = true): void;
 }

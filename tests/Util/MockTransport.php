@@ -80,4 +80,15 @@ class MockTransport implements TransportInterface
         // No-op for this mock implementation.
         // Could store the preference if tests need to assert it was called.
     }
+
+    /**
+     * Checks if the transport stream is currently open.
+     * For this mock, defaults to false. Can be made configurable if needed.
+     *
+     * @return bool Always false by default.
+     */
+    public function isStreamOpen(): bool
+    {
+        return false; // Default mock behavior
+    }
 }

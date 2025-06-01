@@ -207,6 +207,7 @@ class Server
             $this->logMessage('critical', 'HttpTransport not available in runHttpRequestCycle', 'Server.run');
             return;
         }
+        $httpTransport = $this->transport; // Explicitly typed for PHPStan
 
         $responseMessages = [];
         $errorResponse = null;
@@ -263,8 +264,8 @@ class Server
         } elseif ($this->currentHttpRequest && $this->currentHttpRequest->getMethod() === 'GET') {
             // For GET requests (SSE stream initiation), if no errors and no specific messages to send,
             // call send([]) to trigger SSE header emission if not already handled by an Origin error.
-            if (!$this->transport->getResponse()->getStatusCode() || $this->transport->getResponse()->getStatusCode() === 200) { // check if not already a 403
-                $this->transport->send([]);
+            if (!$httpTransport->getResponse()->getStatusCode() || $httpTransport->getResponse()->getStatusCode() === 200) { // check if not already a 403
+                $httpTransport->send([]);
             }
         } else {
              // For POST with only notifications (HttpTransport handles 202) or other edge cases.
@@ -280,7 +281,7 @@ class Server
              // This shouldn't happen with current logic.
         }
 
-        $httpResponse = $this->transport->getResponse();
+        $httpResponse = $httpTransport->getResponse();
 
         if ($httpResponse) {
             // Check if headers have already been sent by HttpTransport (e.g. for early 403 error on SSE GET)

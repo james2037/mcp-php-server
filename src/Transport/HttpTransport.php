@@ -363,4 +363,9 @@ class HttpTransport extends AbstractTransport
     {
         $this->sseStreamPreferred = $prefer;
     }
+
+    public function isStreamOpen(): bool
+    {
+        return $this->streamOpen;
+    }
 }
