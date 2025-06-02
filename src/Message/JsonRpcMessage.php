@@ -2,7 +2,7 @@
 
 namespace MCP\Server\Message;
 
-class JsonRpcMessage
+class JsonRpcMessage implements \JsonSerializable
 {
     public const PARSE_ERROR = -32700;
     public const INVALID_REQUEST = -32600;
@@ -168,14 +168,48 @@ class JsonRpcMessage
                 throw new \InvalidArgumentException('All items in the array must be JsonRpcMessage objects.');
             }
             // Each message (request, response, or notification) is converted to its array form
-            // json_decode($message->toJson(), true) correctly gets the array structure for any message type
-            $decodedMessage = json_decode($message->toJson(), true);
-            if ($decodedMessage === null && json_last_error() !== JSON_ERROR_NONE) {
-                throw new \RuntimeException('Failed to decode individual message to array: ' . json_last_error_msg());
-            }
-            $dataArray[] = $decodedMessage;
+            // by leveraging jsonSerialize if the object is directly encodable,
+            // or toJson then decode if we need to be sure.
+            // Given we are adding jsonSerialize, this can be simplified.
+            $dataArray[] = $message->jsonSerialize();
         }
 
         return json_encode($dataArray, JSON_THROW_ON_ERROR);
+    }
+
+    public function jsonSerialize(): array
+    {
+        $data = ['jsonrpc' => $this->jsonrpc];
+
+        // Order of checks matters: error, then result, then request/notification.
+        if ($this->error !== null) {
+            $data['error'] = $this->error;
+            // JSON-RPC error objects require an ID, which can be null.
+            $data['id'] = $this->id;
+        } elseif ($this->result !== null) {
+            $data['result'] = $this->result;
+            // JSON-RPC result objects require an ID.
+            if ($this->id === null) {
+                // This case should ideally not happen for a valid result message.
+                // Throwing an error or defaulting ID might be options.
+                // For now, let's ensure ID is included.
+                throw new \LogicException('Result message must have an ID.');
+            }
+            $data['id'] = $this->id;
+        } else { // This is a request or notification
+            if (!isset($this->method) || $this->method === '') {
+                 // This indicates an improperly constructed message object if it's not an error/result.
+                 throw new \LogicException('Request message must have a method.');
+            }
+            $data['method'] = $this->method;
+            if ($this->params !== null) {
+                $data['params'] = $this->params;
+            }
+            // ID is optional for notifications. If present, it's a request.
+            if ($this->id !== null) {
+                $data['id'] = $this->id;
+            }
+        }
+        return $data;
     }
 }

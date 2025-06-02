@@ -18,7 +18,7 @@ For more information about MCP, please visit the official website: https://model
 | Sampling   | Not Started |
 | Roots      | Not Started |
 | Transport (Stdio) | Complete    |
-| Transport (Streamable HTTP) | Complete (MCP 2025-03-26 Compliant) |
+| Transport (Streamable HTTP) | Simplified (Basic POST JSON-RPC) |
 
 ## Capabilities
 
@@ -64,37 +64,35 @@ The `src/Server.php` file defines a `Server` class. To use it, you need to creat
 
 By default, the server is designed to work with `StdioTransport`, communicating over standard input/output. You will need to instantiate this or another transport as shown above. For more information on transports, see the [MCP Transports documentation](https://modelcontextprotocol.io/docs/concepts/transports).
 
-### HttpTransport (Streamable HTTP)
+### HTTP Transport
 
-The `HttpTransport` class implements the Streamable HTTP transport mechanism as defined by the Model Context Protocol, specifically adhering to the **MCP 2025-03-26 specification**. It allows the server to communicate over HTTP, handling standard JSON-RPC requests/responses and Server-Sent Events (SSE) for streaming.
+The `HttpTransport` class provides a basic mechanism to expose the MCP server over HTTP. It focuses on a simple, stateless request-response model using JSON-RPC.
 
-Key features:
+**Key Characteristics:**
+
 -   Uses PSR-7 HTTP message interfaces (`ServerRequestInterface`, `ResponseInterface`) for handling HTTP requests and responses.
--   **POST Request Handling**:
-    -   If the client `Accept` header includes both `application/json` and `text/event-stream`, the server can decide the response `Content-Type`. It may respond with `application/json` for a single JSON response or initiate a `text/event-stream` for events related to that POST request.
-    -   If a client's POST input consists solely of JSON-RPC notifications or responses, the server will return an **HTTP 202 Accepted** response with no body.
--   **GET Request Handling (SSE)**:
-    -   Primarily supports SSE stream **resumability** using the `Last-Event-ID` header.
-    -   If a GET request with `Accept: text/event-stream` does not indicate resumability (no `Last-Event-ID`) and the server is not configured to initiate a new, unsolicited SSE stream for that context, it will respond with **HTTP 405 Method Not Allowed**.
-    -   If a GET request does not include `Accept: text/event-stream`, it will receive an **HTTP 406 Not Acceptable**.
--   **DELETE Request Handling**:
-    -   Supports session termination via HTTP `DELETE` requests targeting a specific `Mcp-Session-Id`. Responses can include 200/204 (success), 404 (session not found), or 400/405 (bad request/not allowed).
--   **SSE Features**:
-    -   Supports SSE resumability via `Last-Event-ID` headers and includes unique `id` fields in all outgoing SSE events.
-    -   Implements explicit output flushing for more reliable SSE event delivery.
--   **Session Management**: Supports `Mcp-Session-Id` headers for identifying client sessions.
--   **Security**: Includes Origin header validation.
+-   **Supports POST Requests Only**: All client requests to the server endpoint must use the HTTP POST method.
+-   **Content-Type**:
+    -   Clients **must** send requests with a `Content-Type: application/json` header.
+    -   The server will always respond with `Content-Type: application/json`.
+-   **Payload**:
+    -   The request body must contain a valid JSON-RPC request object or batch of request objects.
+    -   The response body will contain a valid JSON-RPC response object or batch of response objects.
+-   **Unsupported Features**: This simplified `HttpTransport` does **not** support:
+    -   Server-Sent Events (SSE) or any form of response streaming.
+    -   GET requests (e.g., for resumability or capability discovery over GET).
+    -   DELETE requests (e.g., for session management).
+    -   Complex session management, resumability via `Last-Event-ID`, or `Origin` header validation.
 
 **Usage with `HttpTransport`:**
 
-To use `HttpTransport`, you need to:
+To use the simplified `HttpTransport`:
 1.  Create a PSR-7 `ServerRequestInterface` object from the current HTTP request (e.g., using a library like `nyholm/psr7-server`).
 2.  Instantiate PSR-7 factories (`ResponseFactoryInterface`, `StreamFactoryInterface`, e.g., from `nyholm/psr7`).
-3.  Instantiate `HttpTransport` with the request and factories.
-4.  Optionally, provide an array of allowed origins to the `HttpTransport` constructor for Origin header validation. If an `Origin` header is sent by the client, it *must* be in this list. If the list is empty, any request sending an `Origin` header will be rejected. Requests without an `Origin` header (e.g., same-origin or non-browser clients) are considered acceptable if the list is empty.
-5.  Connect it to the `Server` instance.
-6.  Call the `Server::run()` method. When used with `HttpTransport`, `run()` will handle the single HTTP request/response cycle and then exit.
-7.  An external PSR-7 emitter (like `Laminas\HttpHandlerRunner\Emitter\SapiEmitter`) is used by the `Server` to send the final HTTP response.
+3.  Instantiate `HttpTransport` with the request and these factories.
+4.  Connect the `HttpTransport` instance to your `Server` instance.
+5.  Call `Server::run()`. This method will handle the request-response cycle for the current HTTP request.
+6.  The `Server` class internally uses a PSR-7 emitter (like `Laminas\HttpHandlerRunner\Emitter\SapiEmitter`) to send the final HTTP response prepared by `HttpTransport`.
 
 **Example (conceptual `public/index.php` or bootstrap file):**
 
@@ -126,68 +124,17 @@ $server = new Server('My MCPServer (HTTP)', '1.0.0');
 $server->addCapability(new ResourcesCapability());
 // Add other capabilities (Tools, etc.)
 
-// 4. Configure allowed origins (optional, but recommended for security)
-//    Replace with your actual allowed client origins.
-$allowedOrigins = [
-    // 'http://localhost:3000', // Example: local frontend development server
-    // 'https://your-client-app.com',
-];
-
-// 5. Instantiate and connect HttpTransport
-$transport = new HttpTransport($request, $psr17Factory, $psr17Factory, $allowedOrigins);
+// 4. Instantiate and connect HttpTransport
+// No allowedOrigins or other complex configurations needed for the simplified transport.
+$transport = new HttpTransport($request, $psr17Factory, $psr17Factory);
 $server->connect($transport);
 
-// Optional: If your Server needs the request for other purposes (not typical for MCP server directly)
-// $server->setCurrentHttpRequest($request);
-
-// 6. Run the server for this request
-//    This will process the request, send the response (including SSE headers if applicable),
-//    and then HttpTransport will echo SSE events if the stream is kept open by server logic.
-//    The SapiEmitter within Server::runHttpRequestCycle will send the response.
+// 5. Run the server for this request
+// The SapiEmitter within Server::runHttpRequestCycle will send the response.
 $server->run();
 
-// For SSE, if HttpTransport::send() was used to stream events, those would have been echoed.
-// The script typically ends here for a standard PHP request.
-// See the "Usage in Shared Hosting Environments" section for more details on SSE behavior.
+// The script typically ends here for a standard PHP request-response cycle.
 ```
-
-## Usage in Shared Hosting Environments
-
-The MCP PHP Server with `HttpTransport` can be used in shared hosting environments, but it's important to understand how PHP's execution model in such environments affects streaming capabilities.
-
-**Core Principle:** Shared hosting typically imposes limits on script execution time (`max_execution_time`) and may not support true long-running processes required for persistent, unsolicited Server-Sent Events (SSE) streams.
-
-**Supported & Recommended Modes:**
-
-1.  **POST with `application/json` Response:**
-    *   This is the most straightforward and shared-hosting-friendly mode. The client sends a POST request, and the server responds with a complete `application/json` payload. This is a standard request-response cycle.
-
-2.  **POST with Finite SSE Stream Response:**
-    *   A client can send a POST request and receive a stream of server-sent events that are *directly related to processing that specific request*. For example, a tool call that generates multiple, sequential pieces of information.
-    *   `HttpTransport` will send the events and then the connection for that request will be closed by the server (specifically, `HttpTransport` marks its internal stream as closed for that request).
-    *   Explicit output flushing is implemented in `HttpTransport` to help ensure these events are delivered to the client as they are generated, rather than being fully buffered.
-    *   **Caution:** Even these finite streams are subject to the server's `max_execution_time`. If processing the POST request and generating all related events takes longer than this limit, the script may be terminated prematurely.
-
-3.  **GET Requests for SSE Resumability:**
-    *   If a POST-initiated SSE stream (as described above) is interrupted, clients can use the `Last-Event-ID` header with a GET request to attempt to resume the stream. The server can then potentially replay missed events. This is supported and can be useful in shared hosting.
-
-4.  **Session Management (DELETE):**
-    *   Using HTTP `DELETE` requests to terminate a session (identified by `Mcp-Session-Id`) is fully supported and suitable for shared hosting. This is a standard, short-lived HTTP request.
-
-**Limitations & Alternatives for Long-Running SSE:**
-
-*   **New, Unsolicited Long-Running SSE via GET:**
-    *   Initiating *new, unsolicited, long-running* SSE streams via client GET requests, where the server is expected to keep the connection open indefinitely to push arbitrary future messages (e.g., notifications not directly tied to an initial request), is generally **not suitable** for typical PHP shared hosting environments.
-    *   This is because PHP scripts in these environments are usually terminated after `max_execution_time`, and there's often no mechanism to keep a PHP process alive and actively pushing data over a long period for many concurrent users.
-    *   The `HttpTransport` will correctly respond with **HTTP 405 Method Not Allowed** if a GET request attempts to establish such a new SSE stream unless the server logic explicitly configures it (e.g., via `preferSseStream(true)` for a specific GET context, which should be used with caution in shared hosting).
-
-*   **Recommendations for Full, Persistent SSE:**
-    *   If your application requires true, persistent, long-running server-push capabilities for many users, consider hosting environments designed for such workloads:
-        *   **VPS or Dedicated Servers:** Where you have full control over execution limits and server software.
-        *   **Platforms with Asynchronous PHP Support:** Using technologies like Swoole or ReactPHP, which allow PHP to handle many concurrent, long-lived connections efficiently.
-
-**Resumability is Key:**
-Regardless of the hosting environment, if you use any form of SSE, implementing robust resumability logic on both client and server is highly recommended. Network connections can be unreliable, and resumability ensures a better user experience.
 
 ## Creating Custom Resources
 
