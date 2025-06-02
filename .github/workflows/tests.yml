@@ -184,15 +184,29 @@ jobs:
         thresholds: '60 80'
     
     # Upload test results using dorny/test-reporter (optional, for native GitHub integration)
+    - name: Debug JUnit XML
+      if: always()
+      run: |
+        if [ -f test_outputs/phpunit.xml ]; then
+          echo "JUnit XML file exists, showing first 50 lines:"
+          head -50 test_outputs/phpunit.xml
+          echo "--- File size and structure ---"
+          ls -la test_outputs/phpunit.xml
+          xmllint --format test_outputs/phpunit.xml | head -20 || echo "xmllint not available"
+        else
+          echo "No JUnit XML file found"
+        fi
+    
     - name: Publish Test Results
       id: test-reporter
       uses: dorny/test-reporter@v1
-      if: always()
+      if: always() && hashFiles('test_outputs/phpunit.xml') != ''
       with:
         name: PHPUnit Tests
         path: test_outputs/phpunit.xml
         reporter: java-junit
         fail-on-error: false
+        fail-on-empty: false
     
     # Comment PR with comprehensive results
     - name: Add comprehensive test summary to PR
