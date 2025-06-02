@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 // Helper classes moved to separate files
 use MCP\Server\Tests\Capability\ResourcesCapabilityMockResource;
 use MCP\Server\Tests\Capability\ResourcesCapabilityParameterizedResource;
+use MCP\Server\Tests\Capability\ResourcesCapabilityErrorOnReadResource;
 
 class ResourcesCapabilityTest extends TestCase
 {
@@ -132,5 +133,56 @@ class ResourcesCapabilityTest extends TestCase
         $this->assertNotNull($response->error, "Response should be an error object.");
         $this->assertEquals(JsonRpcMessage::INVALID_PARAMS, $response->error['code']);
         $this->assertStringContainsString('Missing uri parameter', $response->error['message']);
+    }
+
+    public function testCanHandleMessageWithListMethod(): void
+    {
+        $request = new JsonRpcMessage('resources/list', [], '1');
+        $this->assertTrue($this->capability->canHandleMessage($request));
+    }
+
+    public function testCanHandleMessageWithReadMethod(): void
+    {
+        $request = new JsonRpcMessage('resources/read', ['uri' => 'test://static'], '1');
+        $this->assertTrue($this->capability->canHandleMessage($request));
+    }
+
+    public function testCanHandleMessageWithUnsupportedMethod(): void
+    {
+        $request = new JsonRpcMessage('unsupported/method', [], '1');
+        $this->assertFalse($this->capability->canHandleMessage($request));
+    }
+
+    public function testInitializeRunsWithoutExceptions(): void
+    {
+        $this->capability->initialize();
+        // The assertion is that no exception is thrown
+        $this->assertTrue(true);
+    }
+
+    public function testShutdownRunsWithoutExceptions(): void
+    {
+        $this->capability->shutdown();
+        // The assertion is that no exception is thrown
+        $this->assertTrue(true);
+    }
+
+    public function testHandleReadThrowsException(): void
+    {
+        $this->capability->addResource(
+            new ResourcesCapabilityErrorOnReadResource('Error Resource', 'text/plain')
+        );
+
+        $request = new JsonRpcMessage(
+            'resources/read',
+            ['uri' => 'test://erroronread'],
+            '1'
+        );
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response);
+        $this->assertNotNull($response->error, "Response should be an error object.");
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
+        $this->assertStringContainsString('Error reading resource test://erroronread: Mock error reading resource', $response->error['message']);
     }
 }
