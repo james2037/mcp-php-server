@@ -119,18 +119,58 @@ jobs:
         fi
       continue-on-error: true
     
+    # Debug PHPUnit configuration before running tests
+    - name: Debug PHPUnit setup
+      run: |
+        echo "=== PHPUnit Configuration Debug ==="
+        echo "PHPUnit version:"
+        vendor/bin/phpunit --version || echo "PHPUnit version check failed"
+        echo ""
+        echo "PHPUnit configuration file:"
+        if [ -f phpunit.xml ]; then
+          echo "Found phpunit.xml"
+          head -20 phpunit.xml
+        elif [ -f phpunit.xml.dist ]; then
+          echo "Found phpunit.xml.dist"
+          head -20 phpunit.xml.dist
+        else
+          echo "No PHPUnit configuration file found"
+        fi
+        echo ""
+        echo "Test directory structure:"
+        find tests/ -name "*.php" | head -10
+        echo ""
+        echo "Checking for bootstrap file:"
+        if [ -f vendor/autoload.php ]; then
+          echo "✅ Autoloader found"
+        else
+          echo "❌ Autoloader missing"
+        fi
+    
     # Run PHPUnit tests and capture results
     - name: Run PHPUnit tests
       id: phpunit
       run: |
         if [ -f vendor/bin/phpunit ]; then
+          echo "=== Starting PHPUnit Tests ==="
+          
+          # First, try a simple version check to ensure PHPUnit works
+          echo "Testing PHPUnit basic functionality:"
+          vendor/bin/phpunit --version
+          
+          # Try running without coverage first to isolate issues
+          echo "Running tests without coverage to check for basic issues:"
+          vendor/bin/phpunit --no-coverage --stop-on-error --stop-on-failure --verbose 2>&1 | tee test_outputs/phpunit_debug.txt || echo "Basic test run failed"
+          
+          echo ""
+          echo "=== Running full test suite with coverage ==="
           # Run tests and capture exit code
           XDEBUG_MODE=coverage vendor/bin/phpunit \
             --coverage-clover test_outputs/coverage/clover.xml \
             --coverage-cobertura test_outputs/coverage/cobertura.xml \
             --coverage-html test_outputs/coverage/html \
             --log-junit test_outputs/phpunit.xml \
-            --testdox-xml test_outputs/testdox.xml \
+            --verbose \
             > test_outputs/phpunit_output.txt 2>&1
           PHPUNIT_EXIT_CODE=$?
           
@@ -138,8 +178,24 @@ jobs:
           echo "exit_code=$PHPUNIT_EXIT_CODE" >> $GITHUB_OUTPUT
           
           # Show PHPUnit output
-          echo "PHPUnit Output:"
-          cat test_outputs/phpunit_output.txt
+          echo "=== PHPUnit Output ==="
+          if [ -f test_outputs/phpunit_output.txt ]; then
+            cat test_outputs/phpunit_output.txt
+          else
+            echo "❌ No PHPUnit output file created"
+          fi
+          
+          echo ""
+          echo "=== Debug Output ==="
+          if [ -f test_outputs/phpunit_debug.txt ]; then
+            echo "Debug run output:"
+            cat test_outputs/phpunit_debug.txt
+          fi
+          
+          echo ""
+          echo "=== Generated Files ==="
+          ls -la test_outputs/ || echo "No test_outputs directory"
+          ls -la test_outputs/coverage/ || echo "No coverage directory"
           
           # Parse results from output
           if [ -f test_outputs/phpunit_output.txt ]; then
@@ -163,11 +219,11 @@ jobs:
                 echo "status=✅ Tests completed successfully" >> $GITHUB_OUTPUT
               fi
             else
-              echo "status=❌ Tests failed" >> $GITHUB_OUTPUT
+              echo "status=❌ Tests failed (Exit code: $PHPUNIT_EXIT_CODE)" >> $GITHUB_OUTPUT
             fi
           else
             echo "tests_summary=No test output found" >> $GITHUB_OUTPUT
-            echo "status=⚠️ No test results" >> $GITHUB_OUTPUT
+            echo "status=❌ PHPUnit failed to generate output (Exit code: $PHPUNIT_EXIT_CODE)" >> $GITHUB_OUTPUT
           fi
         else
           echo "PHPUnit not found. Skipping."
@@ -237,8 +293,19 @@ jobs:
         fail-on-error: false
         fail-on-empty: false
         max-annotations: 50
-        list-suites: all
-        list-tests: all
+        list-suites: failed
+        list-tests: failed
+      continue-on-error: true
+    
+    # Alternative test reporter if dorny fails
+    - name: Alternative Test Results (if main reporter fails)
+      if: always() && steps.test-reporter.outcome == 'failure' && hashFiles('test_outputs/phpunit.xml') != ''
+      uses: mikepenz/action-junit-report@v4
+      with:
+        report_paths: 'test_outputs/phpunit.xml'
+        check_name: 'PHPUnit Test Results (Alternative)'
+        fail_on_failure: false
+        require_tests: false
     
     # Comment PR with comprehensive results
     - name: Add comprehensive test summary to PR
