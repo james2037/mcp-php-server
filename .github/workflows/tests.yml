@@ -280,31 +280,17 @@ jobs:
           echo "❌ No JUnit XML file found"
         fi
     
-    # Use test reporter with better error handling
+    # Use mikepenz test reporter (better PHPUnit XML support)
     - name: Publish Test Results
       id: test-reporter
-      uses: dorny/test-reporter@v1
+      uses: mikepenz/action-junit-report@v4
       if: always() && hashFiles('test_outputs/phpunit.xml') != ''
       with:
-        name: PHPUnit Tests
-        path: test_outputs/phpunit.xml
-        reporter: java-junit
-        fail-on-error: false
-        fail-on-empty: false
-        max-annotations: 50
-        list-suites: failed
-        list-tests: failed
-      continue-on-error: true
-    
-    # Alternative test reporter if dorny fails
-    - name: Alternative Test Results (if main reporter fails)
-      if: always() && steps.test-reporter.outcome == 'failure' && hashFiles('test_outputs/phpunit.xml') != ''
-      uses: mikepenz/action-junit-report@v4
-      with:
         report_paths: 'test_outputs/phpunit.xml'
-        check_name: 'PHPUnit Test Results (Alternative)'
+        check_name: 'PHPUnit Test Results'
         fail_on_failure: false
         require_tests: false
+      continue-on-error: true
     
     # Comment PR with comprehensive results
     - name: Add comprehensive test summary to PR
