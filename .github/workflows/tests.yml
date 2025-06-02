@@ -10,7 +10,7 @@ permissions:
   contents: read
   issues: write
   pull-requests: write
-  checks: write  # Required for test reporting
+  checks: write
 
 jobs:
   test:
@@ -119,31 +119,55 @@ jobs:
         fi
       continue-on-error: true
     
-    # Run PHPUnit tests
+    # Run PHPUnit tests and capture results
     - name: Run PHPUnit tests
+      id: phpunit
       run: |
         if [ -f vendor/bin/phpunit ]; then
+          # Run tests and capture exit code
           XDEBUG_MODE=coverage vendor/bin/phpunit \
             --coverage-clover test_outputs/coverage/clover.xml \
             --coverage-cobertura test_outputs/coverage/cobertura.xml \
             --coverage-html test_outputs/coverage/html \
-            --log-junit test_outputs/phpunit.xml
+            --log-junit test_outputs/phpunit.xml \
+            > test_outputs/phpunit_output.txt 2>&1
+          PHPUNIT_EXIT_CODE=$?
+          
+          echo "PHPUnit Exit Code: $PHPUNIT_EXIT_CODE"
+          echo "exit_code=$PHPUNIT_EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          # Show PHPUnit output
+          echo "PHPUnit Output:"
+          cat test_outputs/phpunit_output.txt
+          
+          # Parse results from output
+          if [ -f test_outputs/phpunit_output.txt ]; then
+            # Extract test summary line
+            TESTS_LINE=$(grep -E "Tests: [0-9]+" test_outputs/phpunit_output.txt | tail -1 || echo "")
+            echo "tests_summary=$TESTS_LINE" >> $GITHUB_OUTPUT
+            
+            # Determine status based on exit code and output
+            if [ $PHPUNIT_EXIT_CODE -eq 0 ]; then
+              if grep -q "OK" test_outputs/phpunit_output.txt; then
+                echo "status=✅ All tests passed!" >> $GITHUB_OUTPUT
+              else
+                echo "status=✅ Tests completed successfully" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "status=❌ Tests failed" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "tests_summary=No test output found" >> $GITHUB_OUTPUT
+            echo "status=⚠️ No test results" >> $GITHUB_OUTPUT
+          fi
         else
           echo "PHPUnit not found. Skipping."
+          echo "exit_code=1" >> $GITHUB_OUTPUT
+          echo "status=⚠️ PHPUnit not found" >> $GITHUB_OUTPUT
+          echo "tests_summary=PHPUnit not available" >> $GITHUB_OUTPUT
         fi
     
-    # Publish test results using dorny/test-reporter
-    - name: Publish Test Results
-      id: test-reporter
-      uses: dorny/test-reporter@v1
-      if: always()
-      with:
-        name: PHPUnit Tests
-        path: test_outputs/phpunit.xml
-        reporter: java-junit
-        fail-on-error: false
-    
-    # Generate code coverage report
+    # Generate coverage report
     - name: Code Coverage Report
       id: coverage
       uses: irongut/CodeCoverageSummary@v1.3.0
@@ -159,8 +183,19 @@ jobs:
         output: both
         thresholds: '60 80'
     
+    # Upload test results using dorny/test-reporter (optional, for native GitHub integration)
+    - name: Publish Test Results
+      id: test-reporter
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: PHPUnit Tests
+        path: test_outputs/phpunit.xml
+        reporter: java-junit
+        fail-on-error: false
+    
     # Comment PR with comprehensive results
-    - name: Create comprehensive test summary
+    - name: Add comprehensive test summary to PR
       if: github.event_name == 'pull_request'
       uses: marocchino/sticky-pull-request-comment@v2
       with:
@@ -169,10 +204,9 @@ jobs:
           ## 🧪 Test Results Summary
           
           ### PHPUnit Tests
-          ${{ steps.test-reporter.conclusion == 'success' && '✅ All tests passed!' || '❌ Some tests failed - check the Tests tab for details' }}
+          ${{ steps.phpunit.outputs.status }}
           
-          ### Code Coverage
-          ${{ steps.coverage.outputs.summary-text }}
+          **Details:** ${{ steps.phpunit.outputs.tests_summary || 'Test summary not available' }}
           
           ### Code Quality
           - **PHPCS:** ${{ steps.phpcs.outputs.errors == '0' && steps.phpcs.outputs.warnings == '0' && '✅' || '⚠️' }} ${{ steps.phpcs.outputs.errors || '0' }} errors, ${{ steps.phpcs.outputs.warnings || '0' }} warnings
@@ -185,6 +219,24 @@ jobs:
           
           ---
           <sub>This comment will update automatically when you push new commits.</sub>
+    
+    # Add coverage details from the generated markdown file
+    - name: Add coverage report to PR comment
+      if: github.event_name == 'pull_request' && hashFiles('code-coverage-results.md') != ''
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        append: true
+        message: |
+          
+          ### Code Coverage
+          
+    
+    - name: Append coverage file to PR comment
+      if: github.event_name == 'pull_request' && hashFiles('code-coverage-results.md') != ''
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        append: true
+        path: code-coverage-results.md
     
     # Upload detailed test artifacts
     - name: Upload test outputs
