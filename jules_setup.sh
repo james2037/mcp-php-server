@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Function to print status messages
 print_status() {
     echo "[INFO] $1"
