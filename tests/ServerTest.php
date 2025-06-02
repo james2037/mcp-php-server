@@ -417,11 +417,11 @@ class ServerTest extends TestCase
         ];
         $mockRequest = $this->createMockRequest($initRequestPayload);
         $httpTransport->setMockRequest($mockRequest);
-        
+
         // No actual output is emitted in tests, SapiEmitter is bypassed by not being in SAPI env
         // or by headers_sent being true (which we can't easily mock here without PECL functions)
         // The key is that $httpTransport->getResponse() will contain what *would* be emitted.
-        
+
         // Suppress output from SapiEmitter if it tries to run
         // One way is to ensure headers are "sent"
         // @runInSeparateProcess might be needed if SapiEmitter is hard to control
@@ -479,7 +479,7 @@ class ServerTest extends TestCase
         $capturedMalformedResponse = $httpTransport->getCapturedResponse();
         $this->assertNotNull($capturedMalformedResponse);
         // HttpTransport now sends JSON-RPC errors with HTTP 200
-        $this->assertEquals(200, $capturedMalformedResponse->getStatusCode()); 
+        $this->assertEquals(200, $capturedMalformedResponse->getStatusCode());
         $malformedBody = json_decode((string) $capturedMalformedResponse->getBody(), true);
         $this->assertEquals(JsonRpcMessage::PARSE_ERROR, $malformedBody['error']['code']);
         $this->assertNull($malformedBody['id']);
@@ -498,7 +498,7 @@ class ServerTest extends TestCase
         $capturedUnknownResponse = $httpTransport->getCapturedResponse();
         $this->assertNotNull($capturedUnknownResponse);
         // HttpTransport now sends JSON-RPC errors with HTTP 200
-        $this->assertEquals(200, $capturedUnknownResponse->getStatusCode()); 
+        $this->assertEquals(200, $capturedUnknownResponse->getStatusCode());
         $unknownBody = json_decode((string) $capturedUnknownResponse->getBody(), true);
         $this->assertEquals($unknownMethodId, $unknownBody['id']);
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $unknownBody['error']['code']);
