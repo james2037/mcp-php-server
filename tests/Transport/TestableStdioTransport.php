@@ -27,17 +27,17 @@ class TestableStdioTransport extends StdioTransport
     }
 
     // These override parent methods to use our memory streams
-    protected function getInputStream()
+    public function getInputStream()
     {
         return $this->input;
     }
 
-    protected function getOutputStream()
+    public function getOutputStream()
     {
         return $this->output;
     }
 
-    protected function getErrorStream()
+    public function getErrorStream()
     {
         return $this->error;
     }

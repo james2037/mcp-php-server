@@ -121,4 +121,42 @@ class StdioTransportTest extends TestCase
         // It does not add static::class prefix when errorStream is available (which it is in TestableStdioTransport)
         $this->assertEquals("Test log message\n", $errorLogOutput);
     }
+
+    public function testGetStreamMethods(): void
+    {
+        $inputStream = $this->transport->getInputStream();
+        $this->assertIsResource($inputStream);
+        $this->assertEquals('stream', get_resource_type($inputStream));
+
+        $outputStream = $this->transport->getOutputStream();
+        $this->assertIsResource($outputStream);
+        $this->assertEquals('stream', get_resource_type($outputStream));
+
+        $errorStream = $this->transport->getErrorStream();
+        $this->assertIsResource($errorStream);
+        $this->assertEquals('stream', get_resource_type($errorStream));
+    }
+
+    public function testIsClosed(): void
+    {
+        $this->assertFalse($this->transport->isClosed(), "Initially, transport should not be closed");
+
+        // Write a single message to trigger reading from input
+        $this->transport->writeToInput('{"jsonrpc":"2.0","method":"test","id":1}');
+
+        // First receive() consumes the message
+        $messages = $this->transport->receive();
+        $this->assertNotNull($messages, "Should receive one message");
+
+        // Second receive() should encounter EOF on the input stream
+        $this->transport->receive();
+
+        // After EOF is reached on the input stream, isClosed() should return true
+        $this->assertTrue($this->transport->isClosed(), "Transport should be closed after EOF");
+    }
+
+    public function testIsStreamOpen(): void
+    {
+        $this->assertFalse($this->transport->isStreamOpen());
+    }
 }
