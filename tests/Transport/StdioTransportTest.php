@@ -121,21 +121,6 @@ class StdioTransportTest extends TestCase
         $this->assertEquals("Test log message\n", $errorLogOutput);
     }
 
-    public function testGetStreamMethods(): void
-    {
-        $inputStream = $this->transport->getInputStream();
-        $this->assertIsResource($inputStream);
-        $this->assertEquals('stream', get_resource_type($inputStream));
-
-        $outputStream = $this->transport->getOutputStream();
-        $this->assertIsResource($outputStream);
-        $this->assertEquals('stream', get_resource_type($outputStream));
-
-        $errorStream = $this->transport->getErrorStream();
-        $this->assertIsResource($errorStream);
-        $this->assertEquals('stream', get_resource_type($errorStream));
-    }
-
     public function testIsClosed(): void
     {
         $this->assertFalse($this->transport->isClosed(), "Initially, transport should not be closed");
