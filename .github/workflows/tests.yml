@@ -152,8 +152,14 @@ jobs:
           echo "DEBUG: PHPCS file exists, contents:"
           cat test_outputs/phpcs_output.txt || echo "Failed to read PHPCS file"
           
-          PHPCS_ERRORS="$(grep -c "ERROR" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")"
-          PHPCS_WARNINGS="$(grep -c "WARNING" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")"
+          # Check if file has any content, if empty set to 0
+          if [ -s test_outputs/phpcs_output.txt ]; then
+            PHPCS_ERRORS="$(grep -c "ERROR" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")"
+            PHPCS_WARNINGS="$(grep -c "WARNING" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")"
+          else
+            PHPCS_ERRORS="0"
+            PHPCS_WARNINGS="0"
+          fi
           echo "DEBUG: PHPCS_ERRORS='${PHPCS_ERRORS}'"
           echo "DEBUG: PHPCS_WARNINGS='${PHPCS_WARNINGS}'"
           echo "phpcs_errors=${PHPCS_ERRORS}" >> $GITHUB_OUTPUT
