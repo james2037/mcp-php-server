@@ -143,10 +143,10 @@ jobs:
           echo "coverage_percentage=Unable to calculate" >> $GITHUB_OUTPUT
         fi
         
-        # Extract PHPCS issues count
+        # Extract PHPCS issues count (FIXED)
         if [ -f test_outputs/phpcs_output.txt ]; then
-          PHPCS_ERRORS=$(grep -c "ERROR" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")
-          PHPCS_WARNINGS=$(grep -c "WARNING" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")
+          PHPCS_ERRORS="$(grep -c "ERROR" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")"
+          PHPCS_WARNINGS="$(grep -c "WARNING" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")"
           echo "phpcs_errors=${PHPCS_ERRORS}" >> $GITHUB_OUTPUT
           echo "phpcs_warnings=${PHPCS_WARNINGS}" >> $GITHUB_OUTPUT
         else
@@ -154,13 +154,13 @@ jobs:
           echo "phpcs_warnings=0" >> $GITHUB_OUTPUT
         fi
         
-        # Extract PHPStan issues
+        # Extract PHPStan issues (FIXED)
         if [ -f test_outputs/phpstan_output.txt ]; then
-          if grep -q "No errors found" test_outputs/phpstan_output.txt 2>/dev/null; then
+          if grep -q "No errors found" test_outputs/phpstan_output.txt 2>/dev/null || grep -q "\[OK\] No errors" test_outputs/phpstan_output.txt 2>/dev/null; then
             echo "phpstan_status=✅ No errors found" >> $GITHUB_OUTPUT
           else
-            PHPSTAN_ERRORS=$(grep -oE "[0-9]+ error" test_outputs/phpstan_output.txt 2>/dev/null | head -1 | grep -oE "[0-9]+" || echo "unknown")
-            if [ "$PHPSTAN_ERRORS" != "unknown" ] && [ "$PHPSTAN_ERRORS" != "" ]; then
+            PHPSTAN_ERRORS="$(grep -oE "[0-9]+ error" test_outputs/phpstan_output.txt 2>/dev/null | head -1 | grep -oE "[0-9]+" || echo "unknown")"
+            if [ "${PHPSTAN_ERRORS}" != "unknown" ] && [ "${PHPSTAN_ERRORS}" != "" ]; then
               echo "phpstan_status=❌ ${PHPSTAN_ERRORS} errors found" >> $GITHUB_OUTPUT
             else
               echo "phpstan_status=⚠️ Errors detected" >> $GITHUB_OUTPUT
