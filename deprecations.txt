@@ -1,8 +1,0 @@
-Tool invalidSuggestionsTool provided invalid suggestions format for argument 'someArg'.
-Tool invalidSuggestionsTool provided invalid suggestions format for argument 'someArg'.
-[2025-06-02 04:47:18] [INFO] Client log level set to: debug
-[2025-06-02 04:47:18] [DEBUG] test-logger: test client log message | Data: {"extra":"data"}
-[2025-06-02 04:47:18] [INFO] Server.Authorization: Client successfully authorized via MCP_AUTHORIZATION_TOKEN.
-[2025-06-02 04:47:18] [ERROR] Server.Authorization: Client failed to provide MCP_AUTHORIZATION_TOKEN during initialization.
-[2025-06-02 04:47:18] [ERROR] Server.Authorization: Client provided an invalid MCP_AUTHORIZATION_TOKEN during initialization.
-[2025-06-02 04:47:18] [INFO] Client log level set to: debug
