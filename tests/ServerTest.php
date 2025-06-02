@@ -9,6 +9,7 @@ use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Tests\Transport\TestableStdioTransport;
 // TestCapability is now in a separate file.
 use MCP\Server\Tests\TestCapability;
+use MCP\Server\Capability\ResourcesCapability;
 
 /**
  * @covers \MCP\Server\Server
@@ -338,5 +339,40 @@ class ServerTest extends TestCase
             $this->assertArrayHasKey('result', $setLevelResponse);
             $this->assertEquals([], $setLevelResponse['result']);
         }
+    }
+
+    public function testServerCallsLifecycleMethodsOnCapabilities(): void
+    {
+        $server = new Server('test-lifecycle-server', '1.0.0');
+        $transport = new TestableStdioTransport();
+
+        $mockCapability = $this->createMock(CapabilityInterface::class);
+
+        $mockCapability->expects($this->once())->method('initialize');
+        $mockCapability->expects($this->once())->method('shutdown');
+        // Provide a basic implementation for getCapabilities as the server calls it.
+        $mockCapability->method('getCapabilities')->willReturn(['mockcap' => new \stdClass()]);
+
+        $server->addCapability($mockCapability);
+        $server->connect($transport);
+
+        // Simulate server lifecycle
+        $initRequestId = 'init_lifecycle_id_' . uniqid();
+        $initRequest = [
+            'jsonrpc' => '2.0', 'method' => 'initialize',
+            'params' => [
+                'protocolVersion' => '2025-03-26',
+                // No client capabilities needed if the mock doesn't use them for this test
+            ],
+            'id' => $initRequestId
+        ];
+        $transport->writeToInput(json_encode($initRequest));
+
+        $shutdownRequestId = 'shutdown_lifecycle_id_' . uniqid();
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownRequestId];
+        $transport->writeToInput(json_encode($shutdownRequest));
+
+        $server->run();
+        // PHPUnit automatically verifies mock expectations upon test completion.
     }
 }

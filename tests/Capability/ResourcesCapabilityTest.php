@@ -155,16 +155,24 @@ class ResourcesCapabilityTest extends TestCase
 
     public function testInitializeRunsWithoutExceptions(): void
     {
-        $this->capability->initialize();
-        // The assertion is that no exception is thrown
-        $this->assertTrue(true);
+        $exception = null;
+        try {
+            $this->capability->initialize();
+        } catch (\Throwable $exception) {
+            // Exception is captured
+        }
+        $this->assertNull($exception, "ResourcesCapability::initialize() should not throw an exception.");
     }
 
     public function testShutdownRunsWithoutExceptions(): void
     {
-        $this->capability->shutdown();
-        // The assertion is that no exception is thrown
-        $this->assertTrue(true);
+        $exception = null;
+        try {
+            $this->capability->shutdown();
+        } catch (\Throwable $exception) {
+            // Exception is captured
+        }
+        $this->assertNull($exception, "ResourcesCapability::shutdown() should not throw an exception.");
     }
 
     public function testHandleReadThrowsException(): void
