@@ -307,7 +307,7 @@ class ToolsCapabilityTest extends TestCase
         $this->assertStringContainsString('Tool not found for completion: unknownToolForCompletion', $response->error['message']);
     }
 
-    public function provideHandleCompleteInvalidParamsCases(): array
+    public static function provideHandleCompleteInvalidParamsCases(): array
     {
         $baseValidRef = ['type' => 'ref/prompt', 'name' => 'test'];
         $baseValidArgument = ['name' => 'data', 'value' => 'ap'];
