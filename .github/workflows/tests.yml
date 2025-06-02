@@ -130,6 +130,7 @@ jobs:
             --coverage-cobertura test_outputs/coverage/cobertura.xml \
             --coverage-html test_outputs/coverage/html \
             --log-junit test_outputs/phpunit.xml \
+            --testdox-xml test_outputs/testdox.xml \
             > test_outputs/phpunit_output.txt 2>&1
           PHPUNIT_EXIT_CODE=$?
           
@@ -145,6 +146,14 @@ jobs:
             # Extract test summary line
             TESTS_LINE=$(grep -E "Tests: [0-9]+" test_outputs/phpunit_output.txt | tail -1 || echo "")
             echo "tests_summary=$TESTS_LINE" >> $GITHUB_OUTPUT
+            
+            # Extract individual counts for better reporting
+            if [ -n "$TESTS_LINE" ]; then
+              TOTAL_TESTS=$(echo "$TESTS_LINE" | grep -oE "Tests: [0-9]+" | grep -oE "[0-9]+")
+              ASSERTIONS=$(echo "$TESTS_LINE" | grep -oE "Assertions: [0-9]+" | grep -oE "[0-9]+")
+              echo "total_tests=${TOTAL_TESTS:-0}" >> $GITHUB_OUTPUT
+              echo "total_assertions=${ASSERTIONS:-0}" >> $GITHUB_OUTPUT
+            fi
             
             # Determine status based on exit code and output
             if [ $PHPUNIT_EXIT_CODE -eq 0 ]; then
@@ -183,20 +192,40 @@ jobs:
         output: both
         thresholds: '60 80'
     
-    # Upload test results using dorny/test-reporter (optional, for native GitHub integration)
-    - name: Debug JUnit XML
+    # Validate and debug JUnit XML structure
+    - name: Debug and validate JUnit XML
       if: always()
       run: |
         if [ -f test_outputs/phpunit.xml ]; then
-          echo "JUnit XML file exists, showing first 50 lines:"
-          head -50 test_outputs/phpunit.xml
-          echo "--- File size and structure ---"
+          echo "=== JUnit XML file exists ==="
           ls -la test_outputs/phpunit.xml
-          xmllint --format test_outputs/phpunit.xml | head -20 || echo "xmllint not available"
+          echo ""
+          echo "=== File structure (first 100 lines) ==="
+          head -100 test_outputs/phpunit.xml
+          echo ""
+          echo "=== Validation ==="
+          # Check if XML is well-formed
+          if command -v xmllint &> /dev/null; then
+            if xmllint --noout test_outputs/phpunit.xml 2>/dev/null; then
+              echo "✅ XML is well-formed"
+              # Count test cases
+              TESTCASE_COUNT=$(xmllint --xpath "count(//testcase)" test_outputs/phpunit.xml 2>/dev/null || echo "0")
+              echo "Found $TESTCASE_COUNT test cases in XML"
+            else
+              echo "❌ XML validation failed"
+              xmllint --noout test_outputs/phpunit.xml || true
+            fi
+          else
+            echo "xmllint not available, skipping XML validation"
+            # Alternative count using grep
+            TESTCASE_COUNT=$(grep -c "<testcase" test_outputs/phpunit.xml || echo "0")
+            echo "Found $TESTCASE_COUNT test cases in XML (via grep)"
+          fi
         else
-          echo "No JUnit XML file found"
+          echo "❌ No JUnit XML file found"
         fi
     
+    # Use test reporter with better error handling
     - name: Publish Test Results
       id: test-reporter
       uses: dorny/test-reporter@v1
@@ -207,6 +236,9 @@ jobs:
         reporter: java-junit
         fail-on-error: false
         fail-on-empty: false
+        max-annotations: 50
+        list-suites: all
+        list-tests: all
     
     # Comment PR with comprehensive results
     - name: Add comprehensive test summary to PR
@@ -221,6 +253,9 @@ jobs:
           ${{ steps.phpunit.outputs.status }}
           
           **Details:** ${{ steps.phpunit.outputs.tests_summary || 'Test summary not available' }}
+          
+          ${{ steps.phpunit.outputs.total_tests && format('- **Total Tests:** {0}', steps.phpunit.outputs.total_tests) || '' }}
+          ${{ steps.phpunit.outputs.total_assertions && format('- **Total Assertions:** {0}', steps.phpunit.outputs.total_assertions) || '' }}
           
           ### Code Quality
           - **PHPCS:** ${{ steps.phpcs.outputs.errors == '0' && steps.phpcs.outputs.warnings == '0' && '✅' || '⚠️' }} ${{ steps.phpcs.outputs.errors || '0' }} errors, ${{ steps.phpcs.outputs.warnings || '0' }} warnings
