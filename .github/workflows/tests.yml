@@ -160,7 +160,7 @@ jobs:
           
           # Try running without coverage first to isolate issues
           echo "Running tests without coverage to check for basic issues:"
-          vendor/bin/phpunit --no-coverage --stop-on-error --stop-on-failure --verbose 2>&1 | tee test_outputs/phpunit_debug.txt || echo "Basic test run failed"
+          vendor/bin/phpunit --no-coverage --stop-on-error --stop-on-failure 2>&1 | tee test_outputs/phpunit_debug.txt || echo "Basic test run failed"
           
           echo ""
           echo "=== Running full test suite with coverage ==="
@@ -170,7 +170,6 @@ jobs:
             --coverage-cobertura test_outputs/coverage/cobertura.xml \
             --coverage-html test_outputs/coverage/html \
             --log-junit test_outputs/phpunit.xml \
-            --verbose \
             > test_outputs/phpunit_output.txt 2>&1
           PHPUNIT_EXIT_CODE=$?
           
