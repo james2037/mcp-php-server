@@ -2,7 +2,7 @@ name: PHP Unit Tests
 
 on:
   push:
-    branches: [ '*' ]
+    branches: [ 'master' ]
   pull_request:
     branches: [ master ]
 
@@ -95,6 +95,9 @@ jobs:
       id: phpstan
       run: |
         if [ -f vendor/bin/phpstan ]; then
+          # Initialize exit code
+          PHPSTAN_EXIT_CODE=0
+          
           if [ -f phpstan.neon ] || [ -f phpstan.neon.dist ]; then
             vendor/bin/phpstan analyse --memory-limit=2G > test_outputs/phpstan-output.txt 2>&1
             PHPSTAN_EXIT_CODE=$?
@@ -102,6 +105,9 @@ jobs:
             vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G > test_outputs/phpstan-output.txt 2>&1
             PHPSTAN_EXIT_CODE=$?
           fi
+          
+          # Store exit code for reference FIRST
+          echo "exit_code=$PHPSTAN_EXIT_CODE" >> $GITHUB_OUTPUT
           
           # Set status based on exit code
           if [ $PHPSTAN_EXIT_CODE -eq 0 ]; then
@@ -113,13 +119,10 @@ jobs:
           # Show results
           echo "PHPStan Output:"
           cat test_outputs/phpstan-output.txt
-          
-          # Store exit code for reference
-          echo "exit_code=$PHPSTAN_EXIT_CODE" >> $GITHUB_OUTPUT
         else
           echo "PHPStan not found. Skipping."
-          echo "status=⚠️ Not run" >> $GITHUB_OUTPUT
           echo "exit_code=0" >> $GITHUB_OUTPUT
+          echo "status=⚠️ Not run" >> $GITHUB_OUTPUT
         fi
       continue-on-error: true
     
