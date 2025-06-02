@@ -5,6 +5,7 @@ namespace MCP\Server\Tests\Transport;
 use PHPUnit\Framework\TestCase;
 use MCP\Server\Transport\StdioTransport;
 use MCP\Server\Message\JsonRpcMessage;
+use MCP\Server\Tests\Transport\ProtectedAccessorStdioTransport; // Added
 
 // TestableStdioTransport is now in a separate file.
 
@@ -158,5 +159,37 @@ class StdioTransportTest extends TestCase
     public function testIsStreamOpen(): void
     {
         $this->assertFalse($this->transport->isStreamOpen());
+    }
+
+    public function testOriginalGetStreamMethodsCoverage(): void
+    {
+        // For this test, we want to ensure STDIN, STDOUT, STDERR are defined
+        // or at least don't cause errors when StdioTransport tries to use them.
+        // PHPUnit might run in environments where these are not standard streams.
+        // However, the goal is to hit the lines in StdioTransport.
+        // If STDIN/OUT/ERR are not actual streams, they might be null or closed resources.
+        // The primary assertion is that the methods are callable and return a resource,
+        // which means the lines in StdioTransport were executed.
+
+        if (!defined('STDIN')) {
+            define('STDIN', fopen('php://memory', 'r'));
+        }
+        if (!defined('STDOUT')) {
+            define('STDOUT', fopen('php://memory', 'w'));
+        }
+        if (!defined('STDERR')) {
+            define('STDERR', fopen('php://memory', 'w'));
+        }
+
+        $accessorTransport = new ProtectedAccessorStdioTransport();
+
+        $inputStream = $accessorTransport->callParentGetInputStream();
+        $this->assertIsResource($inputStream, "STDIN should be a resource via parent getInputStream");
+
+        $outputStream = $accessorTransport->callParentGetOutputStream();
+        $this->assertIsResource($outputStream, "STDOUT should be a resource via parent getOutputStream");
+
+        $errorStream = $accessorTransport->callParentGetErrorStream();
+        $this->assertIsResource($errorStream, "STDERR should be a resource via parent getErrorStream");
     }
 }
