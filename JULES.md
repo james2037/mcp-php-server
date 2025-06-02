@@ -12,7 +12,7 @@ To prepare the environment, execute:
 bash jules_setup.sh
 ```
 
-This script installs necessary PHP versions, Composer, and project dependencies. Running this at the start of your session will prevent common issues.
+This script installs necessary PHP versions, Composer, project dependencies, and Xdebug (to enable code coverage generation). Running this at the start of your session will prevent common issues.
 
 ## Development Workflow
 
@@ -42,7 +42,7 @@ To run the unit test suite:
 ```bash
 vendor/bin/phpunit
 ```
-*(Note: This will use the `phpunit.xml.dist` configuration.)*
+*(Note: This will use the `phpunit.xml.dist` configuration. If you need code coverage reports when running manually like this, ensure Xdebug is enabled in your PHP CLI configuration. However, for most cases, using `bash run_tests.sh` is recommended as it handles this and provides a consolidated output.)*
 
 ### Unit Testing Obligation
 
@@ -56,4 +56,8 @@ Before committing any code changes, always run the full test suite to ensure eve
 bash run_tests.sh
 ```
 
-This script runs PHPcs, PHPStan, and PHPUnit. Make sure all tests pass before submitting.
+This script runs PHPCS, PHPStan, and PHPUnit.
+*   It will now generate code coverage reports in `test_outputs/coverage/html` (viewable in a browser) and `test_outputs/coverage/clover.xml`.
+*   Crucially, the script is configured to exit immediately with an error if PHPCS, PHPStan, or PHPUnit report any issues or test failures.
+
+Make sure all checks pass and review coverage if applicable before submitting.

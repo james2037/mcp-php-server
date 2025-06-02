@@ -9,6 +9,12 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+    <coverage>
+        <report>
+            <html outputDirectory="test_outputs/coverage/html"/>
+            <clover outputFile="test_outputs/coverage/clover.xml"/>
+        </report>
+    </coverage>
     <source>
         <include>
             <directory>src</directory>

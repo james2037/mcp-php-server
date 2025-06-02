@@ -5,7 +5,7 @@ echo "Running linters and tests..."
 
 echo "Running PHP CodeSniffer (phpcs)..."
 if [ -f vendor/bin/phpcs ]; then
-    vendor/bin/phpcs -s src/ tests/ > test_outputs/phpcs_output.txt 2>&1 || true
+    vendor/bin/phpcs -s src/ tests/ > test_outputs/phpcs_output.txt 2>&1
     echo "PHPCS Output:"
     cat test_outputs/phpcs_output.txt
 else
@@ -15,10 +15,10 @@ fi
 echo "Running PHPStan..."
 if [ -f vendor/bin/phpstan ]; then
     if [ -f phpstan.neon ] || [ -f phpstan.neon.dist ]; then
-        vendor/bin/phpstan analyse --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1 || true
+        vendor/bin/phpstan analyse --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1
     else
         # Default to level 5 if no config file. Adjust as needed.
-        vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1 || true
+        vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1
     fi
     echo "PHPStan Output:"
     cat test_outputs/phpstan_output.txt
@@ -28,7 +28,7 @@ fi
 
 echo "Running PHPUnit tests..."
 if [ -f vendor/bin/phpunit ]; then
-    vendor/bin/phpunit > test_outputs/phpunit_output.txt 2>&1 || true
+    XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-clover test_outputs/coverage/clover.xml --coverage-html test_outputs/coverage/html > test_outputs/phpunit_output.txt 2>&1
     echo "PHPUnit Output:"
     cat test_outputs/phpunit_output.txt
 else

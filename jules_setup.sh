@@ -38,8 +38,9 @@ sudo apt-get update
 
 # Install PHP 8.1 and extensions
 echo "Installing PHP 8.1 and extensions..."
-sudo apt-get install -y php8.1 php8.1-cli php8.1-common php8.1-curl php8.1-mbstring php8.1-xml php8.1-zip unzip
+sudo apt-get install -y php8.1 php8.1-cli php8.1-common php8.1-curl php8.1-mbstring php8.1-xml php8.1-zip php8.1-xdebug unzip
 # Added php8.1-xml and php8.1-zip as they are common Composer requirements
+# Added php8.1-xdebug for code coverage
 
 # Install Composer
 echo "Installing Composer..."
