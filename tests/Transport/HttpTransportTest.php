@@ -35,9 +35,9 @@ class HttpTransportTest extends TestCase
     private function createTransport(): HttpTransport
     {
         return new HttpTransport(
-            $this->mockRequest,
-            $this->psr17Factory,
-            $this->psr17Factory
+            $this->psr17Factory,      // Corrected: ResponseFactoryInterface
+            $this->psr17Factory,      // Corrected: StreamFactoryInterface
+            $this->mockRequest        // Corrected: ServerRequestInterface
         );
     }
 

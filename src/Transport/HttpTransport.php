@@ -8,6 +8,9 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Laminas\Diactoros\ResponseFactory;      // For default factory
+use Laminas\Diactoros\StreamFactory;       // For default factory
+use Laminas\Diactoros\ServerRequestFactory; // For default request
 
 class HttpTransport extends AbstractTransport
 {
@@ -16,15 +19,19 @@ class HttpTransport extends AbstractTransport
     private ?ResponseInterface $response = null;
     private bool $responsePrepared = false; // To track if send() has been called
 
+    private ServerRequestInterface $request;
+    private ResponseFactoryInterface $responseFactory;
+    private StreamFactoryInterface $streamFactory;
+
     public function __construct(
-        private readonly ServerRequestInterface $request,
-        private readonly ResponseFactoryInterface $responseFactory,
-        private readonly StreamFactoryInterface $streamFactory
+        ?ResponseFactoryInterface $responseFactory = null,
+        ?StreamFactoryInterface $streamFactory = null,
+        ?ServerRequestInterface $request = null
     ) {
-        // Constructor is simplified.
-        // Removed logic:
-        // - Mcp-Session-Id and Last-Event-ID header reading
-        // - Origin validation logic
+        $this->responseFactory = $responseFactory ?? new ResponseFactory();
+        $this->streamFactory = $streamFactory ?? new StreamFactory();
+        $this->request = $request ?? ServerRequestFactory::fromGlobals();
+
         // Initialize a default response object.
         $this->response = $this->responseFactory->createResponse();
     }
@@ -146,7 +153,14 @@ class HttpTransport extends AbstractTransport
                 ->withHeader('Content-Type', 'application/json')
                 ->withBody($this->streamFactory->createStream($jsonPayloadString));
         } else {
-            $this->response = $this->responseFactory->createResponse(200)
+            // Original behavior: always return 200 OK if JSON encoding is successful
+            $httpStatus = 200;
+            // The check for ($payloadToEncode instanceof JsonRpcMessage && $payloadToEncode->error !== null)
+            // was part of the detailed status code mapping. If we revert to always 200 (or 500 on encode failure),
+            // this specific check isn't strictly needed here for status determination but can be kept for clarity
+            // if we want to log errors, etc. For minimal change from "original" simple 200/500, it's not used to change status.
+
+            $this->response = $this->responseFactory->createResponse($httpStatus)
                 ->withHeader('Content-Type', 'application/json')
                 ->withBody($this->streamFactory->createStream($jsonPayloadString));
         }
