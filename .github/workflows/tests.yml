@@ -1,0 +1,110 @@
+name: PHP Unit Tests
+
+# Trigger the workflow on push to any branch and pull requests
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Setup PHP with extensions and Xdebug (matches your VM setup)
+    - name: Setup PHP 8.1
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: cli, common, curl, mbstring, xml, zip
+        tools: composer:v2
+        coverage: xdebug
+        ini-values: memory_limit=2G
+    
+    # Validate composer.json and composer.lock
+    - name: Validate composer files
+      run: composer validate --strict
+    
+    # Get Composer cache directory for caching
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+    
+    # Cache Composer dependencies
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+    
+    # Install dependencies (matches your script)
+    - name: Install dependencies
+      run: composer install --no-interaction --no-ansi --prefer-dist --optimize-autoloader
+    
+    # Create test outputs directory
+    - name: Create test outputs directory
+      run: mkdir -p test_outputs/coverage
+    
+    # Run PHP syntax check
+    - name: Check PHP syntax
+      run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+    
+    # Run PHP CodeSniffer (matches your test script)
+    - name: Run PHP CodeSniffer
+      run: |
+        if [ -f vendor/bin/phpcs ]; then
+          vendor/bin/phpcs -s src/ tests/ > test_outputs/phpcs_output.txt 2>&1
+          echo "PHPCS Output:"
+          cat test_outputs/phpcs_output.txt
+        else
+          echo "PHP CodeSniffer not found. Skipping."
+        fi
+      continue-on-error: true
+    
+    # Run PHPStan (matches your test script)
+    - name: Run PHPStan
+      run: |
+        if [ -f vendor/bin/phpstan ]; then
+          if [ -f phpstan.neon ] || [ -f phpstan.neon.dist ]; then
+            vendor/bin/phpstan analyse --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1
+          else
+            vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1
+          fi
+          echo "PHPStan Output:"
+          cat test_outputs/phpstan_output.txt
+        else
+          echo "PHPStan not found. Skipping."
+        fi
+      continue-on-error: true
+    
+    # Run PHPUnit tests (matches your test script and phpunit.xml)
+    - name: Run PHPUnit tests
+      run: |
+        if [ -f vendor/bin/phpunit ]; then
+          XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-clover test_outputs/coverage/clover.xml --coverage-html test_outputs/coverage/html > test_outputs/phpunit_output.txt 2>&1
+          echo "PHPUnit Output:"
+          cat test_outputs/phpunit_output.txt
+        else
+          echo "PHPUnit not found. Skipping."
+        fi
+    
+    # Upload test results and coverage
+    - name: Upload test outputs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-outputs
+        path: test_outputs/
+        retention-days: 7
+    
+    # Upload test coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./test_outputs/coverage/clover.xml
+        fail_ci_if_error: false
