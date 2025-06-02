@@ -10,7 +10,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Laminas\Diactoros\ResponseFactory;      // For default factory
 use Laminas\Diactoros\StreamFactory;       // For default factory
-use Laminas\Diactoros\ServerRequestFactory; // For default request
+use Laminas\Diactoros\ServerRequestFactory;
+
+// For default request
 
 class HttpTransport extends AbstractTransport
 {
@@ -19,7 +21,7 @@ class HttpTransport extends AbstractTransport
     private ?ResponseInterface $response = null;
     private bool $responsePrepared = false; // To track if send() has been called
 
-    private ServerRequestInterface $request;
+    protected ServerRequestInterface $request;
     private ResponseFactoryInterface $responseFactory;
     private StreamFactoryInterface $streamFactory;
 

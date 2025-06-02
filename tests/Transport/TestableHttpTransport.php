@@ -9,7 +9,9 @@ use MCP\Server\Exception\TransportException;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use MCP\Server\Message\JsonRpcMessage; // For error codes
-use Laminas\Diactoros\ServerRequestFactory; // Moved here
+use Laminas\Diactoros\ServerRequestFactory;
+
+// Moved here
 
 class TestableHttpTransport extends HttpTransport
 {
@@ -72,13 +74,13 @@ class TestableHttpTransport extends HttpTransport
         }
 
         // Our overridden getRequest() will be called here.
-        $currentRequest = $this->getRequest(); 
+        $currentRequest = $this->getRequest();
         $body = $currentRequest->getBody();
         $body->rewind(); // Ensure reading from the start of the stream
         $contents = $body->getContents();
 
         if (empty($contents)) {
-            throw new TransportException('Request body is empty.', TransportException::CODE_EMPTY_REQUEST_BODY);
+            throw new TransportException('Request body is empty.', \MCP\Server\Message\JsonRpcMessage::INVALID_REQUEST);
         }
 
         $decoded = json_decode($contents, true);
@@ -108,11 +110,11 @@ class TestableHttpTransport extends HttpTransport
         } else { // Single request (must be an associative array/JSON object)
             // If $decoded is an empty array [], it means the JSON was "{}"
             // This is an empty object, which is not a valid JSON-RPC request.
-            if (empty($decoded)) { 
+            if (empty($decoded)) {
                 throw new TransportException('Invalid JSON-RPC request: Request object cannot be empty.', JsonRpcMessage::INVALID_REQUEST);
             }
         }
-        
+
         // The Server will further validate 'jsonrpc', 'method', 'params', 'id' fields.
         return $decoded;
     }
@@ -127,12 +129,7 @@ class TestableHttpTransport extends HttpTransport
     {
         // HttpTransport::send() populates $this->response.
         // HttpTransport::getResponse() returns $this->response.
-        $response = $this->getResponse(); 
-        if ($response === null) {
-            // This state should ideally not be reached if Server::runHttpRequestCycle called send().
-            // If send() was called, $this->response (in parent) should be populated.
-            throw new \LogicException('Response was not captured/available. Ensure HttpTransport::send() was successfully called by the Server.');
-        }
-        return $response;
+        // HttpTransport::getResponse() always returns a ResponseInterface, so no null check needed here.
+        return $this->getResponse();
     }
 }
