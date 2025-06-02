@@ -1,11 +1,16 @@
 name: PHP Unit Tests
 
-# Trigger the workflow on push to any branch and pull requests
 on:
   push:
     branches: [ '*' ]
   pull_request:
     branches: [ master ]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  checks: write
 
 jobs:
   test:
@@ -15,7 +20,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    # Setup PHP with extensions and Xdebug (matches your VM setup)
     - name: Setup PHP 8.1
       uses: shivammathur/setup-php@v2
       with:
@@ -25,16 +29,13 @@ jobs:
         coverage: xdebug
         ini-values: memory_limit=2G
     
-    # Validate composer.json and composer.lock
     - name: Validate composer files
       run: composer validate --strict
     
-    # Get Composer cache directory for caching
     - name: Get Composer Cache Directory
       id: composer-cache
       run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
     
-    # Cache Composer dependencies
     - name: Cache Composer dependencies
       uses: actions/cache@v4
       with:
@@ -42,185 +43,213 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         restore-keys: ${{ runner.os }}-composer-
     
-    # Install dependencies (matches your script)
     - name: Install dependencies
       run: composer install --no-interaction --no-ansi --prefer-dist --optimize-autoloader
     
-    # Create test outputs directory
     - name: Create test outputs directory
       run: mkdir -p test_outputs/coverage
     
-    # Run PHP syntax check
     - name: Check PHP syntax
       run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
     
-    # Run PHP CodeSniffer (matches your test script)
+    # Run PHP CodeSniffer and create annotations
     - name: Run PHP CodeSniffer
+      id: phpcs
       run: |
         if [ -f vendor/bin/phpcs ]; then
-          vendor/bin/phpcs -s src/ tests/ > test_outputs/phpcs_output.txt 2>&1
-          echo "PHPCS Output:"
-          cat test_outputs/phpcs_output.txt
+          # Create both human-readable and structured output
+          vendor/bin/phpcs src/ tests/ > test_outputs/phpcs-output.txt 2>&1 || PHPCS_EXIT_CODE=$?
+          vendor/bin/phpcs --report=json --report-file=test_outputs/phpcs.json src/ tests/ || true
+          
+          # Count errors and warnings from JSON
+          if [ -f test_outputs/phpcs.json ]; then
+            ERRORS=$(php -r "
+              \$json = json_decode(file_get_contents('test_outputs/phpcs.json'), true);
+              echo isset(\$json['totals']['errors']) ? \$json['totals']['errors'] : 0;
+            ")
+            WARNINGS=$(php -r "
+              \$json = json_decode(file_get_contents('test_outputs/phpcs.json'), true);
+              echo isset(\$json['totals']['warnings']) ? \$json['totals']['warnings'] : 0;
+            ")
+            echo "errors=${ERRORS}" >> $GITHUB_OUTPUT
+            echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
+          else
+            echo "errors=0" >> $GITHUB_OUTPUT
+            echo "warnings=0" >> $GITHUB_OUTPUT
+          fi
+          
+          # Show results
+          if [ -f test_outputs/phpcs-output.txt ]; then
+            echo "PHPCS Output:"
+            cat test_outputs/phpcs-output.txt
+          fi
         else
           echo "PHP CodeSniffer not found. Skipping."
+          echo "errors=0" >> $GITHUB_OUTPUT
+          echo "warnings=0" >> $GITHUB_OUTPUT
         fi
       continue-on-error: true
     
-    # Run PHPStan (matches your test script)
+    # Run PHPStan with better output
     - name: Run PHPStan
+      id: phpstan
       run: |
         if [ -f vendor/bin/phpstan ]; then
           if [ -f phpstan.neon ] || [ -f phpstan.neon.dist ]; then
-            vendor/bin/phpstan analyse --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1
+            vendor/bin/phpstan analyse --memory-limit=2G > test_outputs/phpstan-output.txt 2>&1
+            PHPSTAN_EXIT_CODE=$?
           else
-            vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G > test_outputs/phpstan_output.txt 2>&1
+            vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G > test_outputs/phpstan-output.txt 2>&1
+            PHPSTAN_EXIT_CODE=$?
           fi
+          
+          # Set status based on exit code
+          if [ $PHPSTAN_EXIT_CODE -eq 0 ]; then
+            echo "status=✅ No errors found" >> $GITHUB_OUTPUT
+          else
+            echo "status=❌ Errors found" >> $GITHUB_OUTPUT
+          fi
+          
+          # Show results
           echo "PHPStan Output:"
-          cat test_outputs/phpstan_output.txt
+          cat test_outputs/phpstan-output.txt
         else
           echo "PHPStan not found. Skipping."
+          echo "status=⚠️ Not run" >> $GITHUB_OUTPUT
         fi
       continue-on-error: true
     
-    # Run PHPUnit tests (matches your test script and phpunit.xml)
+    # Run PHPUnit tests and capture results
     - name: Run PHPUnit tests
+      id: phpunit
       run: |
         if [ -f vendor/bin/phpunit ]; then
-          XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-clover test_outputs/coverage/clover.xml --coverage-html test_outputs/coverage/html --coverage-text > test_outputs/phpunit_output.txt 2>&1
+          # Run tests and capture exit code
+          XDEBUG_MODE=coverage vendor/bin/phpunit \
+            --coverage-clover test_outputs/coverage/clover.xml \
+            --coverage-cobertura test_outputs/coverage/cobertura.xml \
+            --coverage-html test_outputs/coverage/html \
+            --log-junit test_outputs/phpunit.xml \
+            > test_outputs/phpunit_output.txt 2>&1
+          PHPUNIT_EXIT_CODE=$?
+          
+          echo "PHPUnit Exit Code: $PHPUNIT_EXIT_CODE"
+          echo "exit_code=$PHPUNIT_EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          # Show PHPUnit output
           echo "PHPUnit Output:"
           cat test_outputs/phpunit_output.txt
+          
+          # Parse results from output
+          if [ -f test_outputs/phpunit_output.txt ]; then
+            # Extract test summary line
+            TESTS_LINE=$(grep -E "Tests: [0-9]+" test_outputs/phpunit_output.txt | tail -1 || echo "")
+            echo "tests_summary=$TESTS_LINE" >> $GITHUB_OUTPUT
+            
+            # Extract individual counts for better reporting
+            if [ -n "$TESTS_LINE" ]; then
+              TOTAL_TESTS=$(echo "$TESTS_LINE" | grep -oE "Tests: [0-9]+" | grep -oE "[0-9]+")
+              ASSERTIONS=$(echo "$TESTS_LINE" | grep -oE "Assertions: [0-9]+" | grep -oE "[0-9]+")
+              echo "total_tests=${TOTAL_TESTS:-0}" >> $GITHUB_OUTPUT
+              echo "total_assertions=${ASSERTIONS:-0}" >> $GITHUB_OUTPUT
+            fi
+            
+            # Determine status based on exit code and output
+            if [ $PHPUNIT_EXIT_CODE -eq 0 ]; then
+              if grep -q "OK" test_outputs/phpunit_output.txt; then
+                echo "status=✅ All tests passed!" >> $GITHUB_OUTPUT
+              else
+                echo "status=✅ Tests completed successfully" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "status=❌ Tests failed (Exit code: $PHPUNIT_EXIT_CODE)" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "tests_summary=No test output found" >> $GITHUB_OUTPUT
+            echo "status=❌ PHPUnit failed to generate output (Exit code: $PHPUNIT_EXIT_CODE)" >> $GITHUB_OUTPUT
+          fi
         else
           echo "PHPUnit not found. Skipping."
+          echo "exit_code=1" >> $GITHUB_OUTPUT
+          echo "status=⚠️ PHPUnit not found" >> $GITHUB_OUTPUT
+          echo "tests_summary=PHPUnit not available" >> $GITHUB_OUTPUT
         fi
     
-    # Parse test results and coverage for PR comment
-    - name: Parse test results
-      if: github.event_name == 'pull_request'
-      id: test-results
-      run: |
-        # Extract test summary
-        if [ -f test_outputs/phpunit_output.txt ]; then
-          TESTS_LINE=$(grep -E "Tests: [0-9]+" test_outputs/phpunit_output.txt | tail -1 || echo "Tests: Unable to parse")
-          echo "tests_summary=$TESTS_LINE" >> $GITHUB_OUTPUT
-          
-          # Check if tests passed
-          if grep -q "OK (" test_outputs/phpunit_output.txt; then
-            echo "tests_status=✅ All tests passed!" >> $GITHUB_OUTPUT
-          elif grep -q "FAILURES!" test_outputs/phpunit_output.txt || grep -q "ERRORS!" test_outputs/phpunit_output.txt; then
-            echo "tests_status=❌ Some tests failed" >> $GITHUB_OUTPUT
-          else
-            echo "tests_status=⚠️ Unable to determine test status" >> $GITHUB_OUTPUT
-          fi
-        else
-          echo "tests_summary=No test output found" >> $GITHUB_OUTPUT
-          echo "tests_status=⚠️ No test results" >> $GITHUB_OUTPUT
-        fi
-        
-        # Extract coverage percentage from clover.xml
-        if [ -f test_outputs/coverage/clover.xml ]; then
-          COVERAGE=$(php -r "
-            \$xml = simplexml_load_file('test_outputs/coverage/clover.xml');
-            \$metrics = \$xml->project->metrics;
-            \$statements = (int)\$metrics['statements'];
-            \$coveredstatements = (int)\$metrics['coveredstatements'];
-            if (\$statements > 0) {
-              echo round((\$coveredstatements / \$statements) * 100, 2);
-            } else {
-              echo '0';
-            }
-          ")
-          echo "coverage_percentage=$COVERAGE%" >> $GITHUB_OUTPUT
-        else
-          echo "coverage_percentage=Unable to calculate" >> $GITHUB_OUTPUT
-        fi
-        
-        # Extract PHPCS issues count
-        if [ -f test_outputs/phpcs_output.txt ]; then
-          PHPCS_ERRORS=$(grep -c "ERROR" test_outputs/phpcs_output.txt || echo "0")
-          PHPCS_WARNINGS=$(grep -c "WARNING" test_outputs/phpcs_output.txt || echo "0")
-          echo "phpcs_errors=$PHPCS_ERRORS" >> $GITHUB_OUTPUT
-          echo "phpcs_warnings=$PHPCS_WARNINGS" >> $GITHUB_OUTPUT
-        else
-          echo "phpcs_errors=0" >> $GITHUB_OUTPUT
-          echo "phpcs_warnings=0" >> $GITHUB_OUTPUT
-        fi
-        
-        # Extract PHPStan issues
-        if [ -f test_outputs/phpstan_output.txt ]; then
-          if grep -q "No errors found" test_outputs/phpstan_output.txt; then
-            echo "phpstan_status=✅ No errors found" >> $GITHUB_OUTPUT
-          else
-            PHPSTAN_ERRORS=$(grep -oE "[0-9]+ error" test_outputs/phpstan_output.txt | head -1 | grep -oE "[0-9]+" || echo "unknown")
-            echo "phpstan_status=❌ $PHPSTAN_ERRORS errors found" >> $GITHUB_OUTPUT
-          fi
-        else
-          echo "phpstan_status=⚠️ Not run" >> $GITHUB_OUTPUT
-        fi
-    
-    # Comment on PR with test results
-    - name: Comment PR with test results
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
+    # Generate coverage report
+    - name: Code Coverage Report
+      id: coverage
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      if: always()
       with:
-        script: |
-          const testStatus = '${{ steps.test-results.outputs.tests_status }}';
-          const testsSummary = '${{ steps.test-results.outputs.tests_summary }}';
-          const coverage = '${{ steps.test-results.outputs.coverage_percentage }}';
-          const phpcsErrors = '${{ steps.test-results.outputs.phpcs_errors }}';
-          const phpcsWarnings = '${{ steps.test-results.outputs.phpcs_warnings }}';
-          const phpstanStatus = '${{ steps.test-results.outputs.phpstan_status }}';
-          
-          const coverageEmoji = parseFloat(coverage) >= 80 ? '✅' : parseFloat(coverage) >= 60 ? '⚠️' : '❌';
-          const phpcsEmoji = phpcsErrors == '0' && phpcsWarnings == '0' ? '✅' : '⚠️';
-          
-          const body = `## 🧪 Test Results
-          
-          ${testStatus}
-          
-          **📊 Summary:**
-          - **Tests:** ${testsSummary}
-          - **Coverage:** ${coverageEmoji} ${coverage}
-          - **PHPCS:** ${phpcsEmoji} ${phpcsErrors} errors, ${phpcsWarnings} warnings
-          - **PHPStan:** ${phpstanStatus}
-          
-          <details>
-          <summary>📁 Download detailed reports</summary>
-          
-          - [Download test artifacts](${context.payload.pull_request.html_url}/checks) for detailed coverage HTML report
-          - View the "Actions" tab for full test output logs
-          </details>`;
-          
-          // Find existing comment
-          const comments = await github.rest.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-          });
-          
-          const existingComment = comments.data.find(comment => 
-            comment.user.login === 'github-actions[bot]' && 
-            comment.body.includes('🧪 Test Results')
-          );
-          
-          if (existingComment) {
-            // Update existing comment
-            await github.rest.issues.updateComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: existingComment.id,
-              body: body
-            });
-          } else {
-            // Create new comment
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: body
-            });
-          }
+        filename: test_outputs/coverage/cobertura.xml
+        badge: true
+        fail_below_min: false
+        format: markdown
+        hide_branch_rate: false
+        hide_complexity: true
+        indicators: true
+        output: both
+        thresholds: '60 80'
     
-    # Upload test results and coverage
+    # Publish test results
+    - name: Publish Test Results
+      id: test-reporter
+      uses: mikepenz/action-junit-report@v4
+      if: always() && hashFiles('test_outputs/phpunit.xml') != ''
+      with:
+        report_paths: 'test_outputs/phpunit.xml'
+        check_name: 'PHPUnit Test Results'
+        fail_on_failure: false
+        require_tests: false
+    
+    # Comment PR with comprehensive results
+    - name: Add comprehensive test summary to PR
+      if: github.event_name == 'pull_request'
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        recreate: true
+        message: |
+          ## 🧪 Test Results Summary
+          
+          ### PHPUnit Tests
+          ${{ steps.phpunit.outputs.status }}
+          
+          **Details:** ${{ steps.phpunit.outputs.tests_summary || 'Test summary not available' }}
+          
+          ${{ steps.phpunit.outputs.total_tests && format('- **Total Tests:** {0}', steps.phpunit.outputs.total_tests) || '' }}
+          ${{ steps.phpunit.outputs.total_assertions && format('- **Total Assertions:** {0}', steps.phpunit.outputs.total_assertions) || '' }}
+          
+          ### Code Quality
+          - **PHPCS:** ${{ steps.phpcs.outputs.errors == '0' && steps.phpcs.outputs.warnings == '0' && '✅' || '⚠️' }} ${{ steps.phpcs.outputs.errors || '0' }} errors, ${{ steps.phpcs.outputs.warnings || '0' }} warnings
+          - **PHPStan:** ${{ steps.phpstan.outputs.status }}
+          
+          ### 📁 Detailed Reports
+          - **Coverage Report:** Download the `test-outputs` artifact for detailed HTML coverage report
+          - **Test Results:** Check the "Tests" tab above for detailed test results
+          - **Raw Logs:** View the "Actions" tab for complete output logs
+          
+          ---
+          <sub>This comment will update automatically when you push new commits.</sub>
+    
+    # Add coverage details from the generated markdown file
+    - name: Add coverage report to PR comment
+      if: github.event_name == 'pull_request' && hashFiles('code-coverage-results.md') != ''
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        append: true
+        message: |
+          
+          ### Code Coverage
+          
+    
+    - name: Append coverage file to PR comment
+      if: github.event_name == 'pull_request' && hashFiles('code-coverage-results.md') != ''
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        append: true
+        path: code-coverage-results.md
+    
+    # Upload detailed test artifacts
     - name: Upload test outputs
       if: always()
       uses: actions/upload-artifact@v4
@@ -229,10 +258,11 @@ jobs:
         path: test_outputs/
         retention-days: 7
     
-    # Upload test coverage
+    # Upload coverage to Codecov
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
+      if: always()
       with:
-        file: ./test_outputs/coverage/clover.xml
+        files: ./test_outputs/coverage/clover.xml,./test_outputs/coverage/cobertura.xml
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: false
