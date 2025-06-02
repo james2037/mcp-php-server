@@ -116,7 +116,7 @@ jobs:
           echo "tests_status=⚠️ No test results" >> $GITHUB_OUTPUT
         fi
         
-        # Extract coverage percentage from clover.xml
+        # Extract coverage percentage from clover.xml (FIXED)
         if [ -f test_outputs/coverage/clover.xml ]; then
           COVERAGE=$(php -r "
             if (file_exists('test_outputs/coverage/clover.xml')) {
@@ -126,7 +126,8 @@ jobs:
                 \$statements = (int)\$metrics['statements'];
                 \$coveredstatements = (int)\$metrics['coveredstatements'];
                 if (\$statements > 0) {
-                  echo round((\$coveredstatements / \$statements) * 100, 1);
+                  \$percentage = round((\$coveredstatements / \$statements) * 100, 1);
+                  echo number_format(\$percentage, 1, '.', '');
                 } else {
                   echo '0.0';
                 }
