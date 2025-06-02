@@ -1,56 +1,53 @@
-#!/bin/bash
-set -e # Exit immediately if a command exits with a non-zero status.
+# Function to print status messages
+print_status() {
+    echo "[INFO] $1"
+}
 
-echo "Starting VM Setup Script..."
+print_success() {
+    echo "[SUCCESS] $1"
+}
 
-# Update package lists
-echo "Updating package lists..."
-sudo apt-get update
+print_error() {
+    echo "[ERROR] $1"
+}
 
-# Install software-properties-common (for add-apt-repository)
-echo "Installing software-properties-common..."
-sudo apt-get install -y software-properties-common
+# Function to check if command succeeded
+check_status() {
+    if [ $? -eq 0 ]; then
+        print_success "$1"
+    else
+        print_error "$1 failed"
+        exit 1
+    fi
+}
 
-# Install/Reinstall python3-apt (for add-apt-repository dependency apt_pkg)
-echo "Ensuring python3-apt is correctly installed (reinstalling)..."
-sudo apt-get install --reinstall -y python3-apt
+echo "Setting up PHP Development Environment"
+echo "======================================"
+echo
 
-# Add PHP PPA
-echo "Adding PHP PPA (ppa:ondrej/php)..."
-if [ -f /usr/bin/python3.12 ] && /usr/bin/python3.12 -c "import apt_pkg" &>/dev/null; then
-    echo "Attempting to use /usr/bin/python3.12 for add-apt-repository..."
-    sudo /usr/bin/python3.12 /usr/bin/add-apt-repository ppa:ondrej/php -y
-elif [ -f /usr/bin/python3.10 ] && /usr/bin/python3.10 -c "import apt_pkg" &>/dev/null; then
-    echo "Attempting to use /usr/bin/python3.10 for add-apt-repository..."
-    sudo /usr/bin/python3.10 /usr/bin/add-apt-repository ppa:ondrej/php -y
-elif [ -f /usr/bin/python3.8 ] && /usr/bin/python3.8 -c "import apt_pkg" &>/dev/null; then
-    echo "Attempting to use /usr/bin/python3.8 for add-apt-repository..."
-    sudo /usr/bin/python3.8 /usr/bin/add-apt-repository ppa:ondrej/php -y
-else
-    echo "WARNING: Specific Python version (3.12, 3.10, 3.8) with apt_pkg not found or apt_pkg import failed. Falling back to default add-apt-repository."
-    echo "If this fails, the Python environment for add-apt-repository might be misconfigured."
-    sudo add-apt-repository ppa:ondrej/php -y
-fi
+# Set non-interactive mode
+export DEBIAN_FRONTEND=noninteractive
 
-# Update package lists again after adding PPA
-echo "Updating package lists after adding PPA..."
-sudo apt-get update
+# Add PHP repository
+print_status "Adding Ondrej PHP repository"
+sudo -E python3.12 /usr/bin/add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
+check_status "Added PHP repository"
 
-# Install PHP 8.1 and extensions
-echo "Installing PHP 8.1 and extensions..."
-sudo apt-get install -y php8.1 php8.1-cli php8.1-common php8.1-curl php8.1-mbstring php8.1-xml php8.1-zip php8.1-xdebug unzip
-# Added php8.1-xml and php8.1-zip as they are common Composer requirements
-# Added php8.1-xdebug for code coverage
+# Install PHP and extensions
+print_status "Installing PHP 8.1 and extensions"
+sudo -E apt-get install -y php8.1 php8.1-cli php8.1-common php8.1-curl php8.1-mbstring php8.1-xml php8.1-zip php8.1-xdebug unzip > /dev/null 2>&1
+check_status "Installed PHP 8.1 and extensions"
 
-# Install Composer
-echo "Installing Composer..."
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-php -r "unlink('composer-setup.php');"
-echo "Composer installed."
+# Download and install Composer
+print_status "Installing Composer"
+curl -s https://getcomposer.org/installer > composer-setup.php
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --quiet
+rm composer-setup.php
+check_status "Installed Composer"
 
-# Install project dependencies (including dev)
-echo "Installing project dependencies with Composer..."
-composer install --no-interaction --no-ansi
-echo "Composer dependencies installed."
-echo "VM Setup Script completed successfully."
+# Install project dependencies
+print_status "Installing project dependencies"
+composer install --no-interaction --no-ansi --quiet
+check_status "Installed project dependencies"
+
+print_success "Setup complete"
