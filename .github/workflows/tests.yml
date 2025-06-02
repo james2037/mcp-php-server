@@ -101,7 +101,7 @@ jobs:
         # Extract test summary
         if [ -f test_outputs/phpunit_output.txt ]; then
           TESTS_LINE=$(grep -E "Tests: [0-9]+" test_outputs/phpunit_output.txt | tail -1 || echo "Tests: Unable to parse")
-          echo "tests_summary=$TESTS_LINE" >> $GITHUB_OUTPUT
+          echo "tests_summary=${TESTS_LINE}" >> $GITHUB_OUTPUT
           
           # Check if tests passed
           if grep -q "OK (" test_outputs/phpunit_output.txt; then
@@ -119,27 +119,35 @@ jobs:
         # Extract coverage percentage from clover.xml
         if [ -f test_outputs/coverage/clover.xml ]; then
           COVERAGE=$(php -r "
-            \$xml = simplexml_load_file('test_outputs/coverage/clover.xml');
-            \$metrics = \$xml->project->metrics;
-            \$statements = (int)\$metrics['statements'];
-            \$coveredstatements = (int)\$metrics['coveredstatements'];
-            if (\$statements > 0) {
-              echo round((\$coveredstatements / \$statements) * 100, 2);
+            if (file_exists('test_outputs/coverage/clover.xml')) {
+              \$xml = simplexml_load_file('test_outputs/coverage/clover.xml');
+              if (\$xml && \$xml->project && \$xml->project->metrics) {
+                \$metrics = \$xml->project->metrics;
+                \$statements = (int)\$metrics['statements'];
+                \$coveredstatements = (int)\$metrics['coveredstatements'];
+                if (\$statements > 0) {
+                  echo round((\$coveredstatements / \$statements) * 100, 1);
+                } else {
+                  echo '0.0';
+                }
+              } else {
+                echo '0.0';
+              }
             } else {
-              echo '0';
+              echo '0.0';
             }
-          ")
-          echo "coverage_percentage=$COVERAGE%" >> $GITHUB_OUTPUT
+          " 2>/dev/null || echo "0.0")
+          echo "coverage_percentage=${COVERAGE}%" >> $GITHUB_OUTPUT
         else
           echo "coverage_percentage=Unable to calculate" >> $GITHUB_OUTPUT
         fi
         
         # Extract PHPCS issues count
         if [ -f test_outputs/phpcs_output.txt ]; then
-          PHPCS_ERRORS=$(grep -c "ERROR" test_outputs/phpcs_output.txt || echo "0")
-          PHPCS_WARNINGS=$(grep -c "WARNING" test_outputs/phpcs_output.txt || echo "0")
-          echo "phpcs_errors=$PHPCS_ERRORS" >> $GITHUB_OUTPUT
-          echo "phpcs_warnings=$PHPCS_WARNINGS" >> $GITHUB_OUTPUT
+          PHPCS_ERRORS=$(grep -c "ERROR" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")
+          PHPCS_WARNINGS=$(grep -c "WARNING" test_outputs/phpcs_output.txt 2>/dev/null || echo "0")
+          echo "phpcs_errors=${PHPCS_ERRORS}" >> $GITHUB_OUTPUT
+          echo "phpcs_warnings=${PHPCS_WARNINGS}" >> $GITHUB_OUTPUT
         else
           echo "phpcs_errors=0" >> $GITHUB_OUTPUT
           echo "phpcs_warnings=0" >> $GITHUB_OUTPUT
@@ -147,11 +155,15 @@ jobs:
         
         # Extract PHPStan issues
         if [ -f test_outputs/phpstan_output.txt ]; then
-          if grep -q "No errors found" test_outputs/phpstan_output.txt; then
+          if grep -q "No errors found" test_outputs/phpstan_output.txt 2>/dev/null; then
             echo "phpstan_status=✅ No errors found" >> $GITHUB_OUTPUT
           else
-            PHPSTAN_ERRORS=$(grep -oE "[0-9]+ error" test_outputs/phpstan_output.txt | head -1 | grep -oE "[0-9]+" || echo "unknown")
-            echo "phpstan_status=❌ $PHPSTAN_ERRORS errors found" >> $GITHUB_OUTPUT
+            PHPSTAN_ERRORS=$(grep -oE "[0-9]+ error" test_outputs/phpstan_output.txt 2>/dev/null | head -1 | grep -oE "[0-9]+" || echo "unknown")
+            if [ "$PHPSTAN_ERRORS" != "unknown" ] && [ "$PHPSTAN_ERRORS" != "" ]; then
+              echo "phpstan_status=❌ ${PHPSTAN_ERRORS} errors found" >> $GITHUB_OUTPUT
+            else
+              echo "phpstan_status=⚠️ Errors detected" >> $GITHUB_OUTPUT
+            fi
           fi
         else
           echo "phpstan_status=⚠️ Not run" >> $GITHUB_OUTPUT
