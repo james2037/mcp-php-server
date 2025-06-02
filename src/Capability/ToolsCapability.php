@@ -188,8 +188,16 @@ class ToolsCapability implements CapabilityInterface
         // Validate suggestions structure
         // @phpstan-ignore-next-line - Defensive check for tools not adhering to documented return type
         if (!is_array($suggestions) || !isset($suggestions['values']) || !is_array($suggestions['values'])) {
-             error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}'.");
-             $suggestions = ['values' => [], 'total' => 0, 'hasMore' => false];
+            error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}'.");
+            // As per subtask requirements, return a JSON-RPC error.
+            // The tests created in the previous step expect this behavior.
+            return JsonRpcMessage::error(
+                JsonRpcMessage::INTERNAL_ERROR,
+                "Tool '{$toolName}' returned suggestions with invalid structure. 'values' key is missing or not an array.",
+                $message->id
+            );
+            // If we were not to return an error, we might default to this:
+            // $suggestions = ['values' => [], 'total' => 0, 'hasMore' => false];
         }
 
         return JsonRpcMessage::result(['completion' => $suggestions], $message->id);

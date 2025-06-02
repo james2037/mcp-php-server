@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 // MockTool and FailingMockTool are now in separate files.
 use MCP\Server\Tests\Capability\MockTool;
 use MCP\Server\Tests\Capability\FailingMockTool;
+use MCP\Server\Tests\Capability\InvalidSuggestionsTool;
 
 class ToolsCapabilityTest extends TestCase
 {
@@ -140,6 +141,68 @@ class ToolsCapabilityTest extends TestCase
         $this->assertStringContainsString("Unknown argument: unexpected_arg", $response->result['content'][0]['text']);
     }
 
+    public function testHandleCallWithInvalidToolNameType(): void
+    {
+        $invalidToolNames = [null, 123, ['array']];
+
+        foreach ($invalidToolNames as $toolName) {
+            $request = new JsonRpcMessage(
+                'tools/call',
+                ['name' => $toolName, 'arguments' => ['data' => 'test input']],
+                '1'
+            );
+            $response = $this->capability->handleMessage($request);
+
+            $this->assertNotNull($response);
+            $this->assertNull($response->error);
+            $this->assertTrue($response->result['isError']);
+            $this->assertIsArray($response->result['content']);
+            $this->assertCount(1, $response->result['content']);
+            $this->assertEquals('text', $response->result['content'][0]['type']);
+            $this->assertStringContainsString('Invalid or missing tool name.', $response->result['content'][0]['text']);
+        }
+    }
+
+    public function testHandleCallWithEmptyToolName(): void
+    {
+        $request = new JsonRpcMessage(
+            'tools/call',
+            ['name' => '', 'arguments' => ['data' => 'test input']],
+            '1'
+        );
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response);
+        $this->assertNull($response->error);
+        $this->assertTrue($response->result['isError']);
+        $this->assertIsArray($response->result['content']);
+        $this->assertCount(1, $response->result['content']);
+        $this->assertEquals('text', $response->result['content'][0]['type']);
+            $this->assertStringContainsString('Invalid or missing tool name.', $response->result['content'][0]['text']);
+    }
+
+    public function testHandleCallWithInvalidToolArgumentsType(): void
+    {
+        $invalidArguments = ['not an array', 123];
+
+        foreach ($invalidArguments as $arguments) {
+            $request = new JsonRpcMessage(
+                'tools/call',
+                ['name' => 'test', 'arguments' => $arguments],
+                '1'
+            );
+            $response = $this->capability->handleMessage($request);
+
+            $this->assertNotNull($response);
+            $this->assertNull($response->error);
+            $this->assertTrue($response->result['isError']);
+            $this->assertIsArray($response->result['content']);
+            $this->assertCount(1, $response->result['content']);
+            $this->assertEquals('text', $response->result['content'][0]['type']);
+            $this->assertStringContainsString('Invalid arguments format: arguments must be an object/map.', $response->result['content'][0]['text']);
+        }
+    }
+
     public function testToolInitializationAndShutdown(): void
     {
         $initCount = 0;
@@ -242,5 +305,111 @@ class ToolsCapabilityTest extends TestCase
 
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response->error['code']);
         $this->assertStringContainsString('Tool not found for completion: unknownToolForCompletion', $response->error['message']);
+    }
+
+    public function provideHandleCompleteInvalidParamsCases(): array
+    {
+        $baseValidRef = ['type' => 'ref/prompt', 'name' => 'test'];
+        $baseValidArgument = ['name' => 'data', 'value' => 'ap'];
+
+        return [
+            // ref parameter
+            'missing ref' => [['argument' => $baseValidArgument], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref" parameter for completion/complete'],
+            'ref not an array' => [['ref' => 'not-an-array', 'argument' => $baseValidArgument], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref" parameter for completion/complete'],
+            // argument parameter
+            'missing argument' => [['ref' => $baseValidRef], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "argument" parameter for completion/complete'],
+            'argument not an array' => [['ref' => $baseValidRef, 'argument' => 'not-an-array'], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "argument" parameter for completion/complete'],
+            // ref.type
+            'ref missing type' => [['ref' => ['name' => 'test'], 'argument' => $baseValidArgument], JsonRpcMessage::INVALID_PARAMS, 'Invalid "ref.type" for completion/complete'],
+            'ref type not a string' => [['ref' => ['type' => 123, 'name' => 'test'], 'argument' => $baseValidArgument], JsonRpcMessage::INVALID_PARAMS, 'Invalid "ref.type" for completion/complete'],
+            'ref type invalid' => [['ref' => ['type' => 'invalid/type', 'name' => 'test'], 'argument' => $baseValidArgument], JsonRpcMessage::INVALID_PARAMS, 'Unsupported "ref.type" for tool completion: invalid/type'],
+            // ref.name
+            'ref missing name' => [['ref' => ['type' => 'ref/prompt'], 'argument' => $baseValidArgument], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref.name" (tool name) for completion/complete'],
+            'ref name not a string' => [['ref' => ['type' => 'ref/prompt', 'name' => 123], 'argument' => $baseValidArgument], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref.name" (tool name) for completion/complete'],
+            // argument.name
+            'argument missing name' => [['ref' => $baseValidRef, 'argument' => ['value' => 'ap']], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "argument.name" for completion/complete'],
+            'argument name not a string' => [['ref' => $baseValidRef, 'argument' => ['name' => 123, 'value' => 'ap']], JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "argument.name" for completion/complete'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideHandleCompleteInvalidParamsCases
+     */
+    public function testHandleCompleteWithInvalidParams(array $params, int $expectedErrorCode, string $expectedErrorMessageSubstring): void
+    {
+        $request = new JsonRpcMessage('completion/complete', $params, 'comp_invalid');
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response->error, "Expected an error response for params: " . json_encode($params));
+        $this->assertNull($response->result);
+        $this->assertEquals($expectedErrorCode, $response->error['code']);
+        $this->assertStringContainsString($expectedErrorMessageSubstring, $response->error['message']);
+    }
+
+    public function testHandleCompleteWithToolReturningInvalidSuggestionsStructure(): void
+    {
+        // Case: Tool's getSuggestions returns something that is not an array (e.g. null or string)
+        // Note: The Tool abstract class typehints getSuggestions to return array.
+        // This test is more about what happens if the array structure is not as expected.
+        // Let's test for 'suggestions' key missing, which implies an invalid structure.
+        $invalidSuggestionsTool = new InvalidSuggestionsTool(['unexpected_key' => 'instead_of_values']); // Missing 'values'
+        $this->capability->addTool($invalidSuggestionsTool);
+
+        $request = new JsonRpcMessage(
+            'completion/complete',
+            [
+                'ref' => ['type' => 'ref/tool', 'name' => 'invalidSuggestionsTool'],
+                'argument' => ['name' => 'someArg', 'value' => 'a']
+            ],
+            'comp_invalid_structure'
+        );
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response->error);
+        $this->assertNull($response->result);
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
+        $this->assertStringContainsString("Tool 'invalidSuggestionsTool' returned suggestions with invalid structure. 'values' key is missing or not an array.", $response->error['message']);
+    }
+
+    public function testHandleCompleteWithToolReturningInvalidSuggestionsValuesType(): void
+    {
+        // Case: Tool's getSuggestions returns ['values' => 'not-an-array']
+        $invalidSuggestionsTool = new InvalidSuggestionsTool(['values' => 'this should be an array']);
+        $this->capability->addTool($invalidSuggestionsTool);
+
+        $request = new JsonRpcMessage(
+            'completion/complete',
+            [
+                'ref' => ['type' => 'ref/tool', 'name' => 'invalidSuggestionsTool'],
+                'argument' => ['name' => 'someArg', 'value' => 'a']
+            ],
+            'comp_invalid_values_type'
+        );
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response->error);
+        $this->assertNull($response->result);
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
+        $this->assertStringContainsString("Tool 'invalidSuggestionsTool' returned suggestions with invalid structure. 'values' key is missing or not an array.", $response->error['message']);
+    }
+
+    public function testCanHandleMessageWithValidMethods(): void
+    {
+        $validMethods = [
+            'tools/list',
+            'tools/call',
+            'completion/complete',
+        ];
+
+        foreach ($validMethods as $method) {
+            $request = new JsonRpcMessage($method, [], '1');
+            $this->assertTrue($this->capability->canHandleMessage($request), "Failed for method: {$method}");
+        }
+    }
+
+    public function testCanHandleMessageWithInvalidMethod(): void
+    {
+        $request = new JsonRpcMessage('tools/invalid_method', [], '1');
+        $this->assertFalse($this->capability->canHandleMessage($request));
     }
 }
