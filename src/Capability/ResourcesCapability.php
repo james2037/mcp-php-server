@@ -190,14 +190,9 @@ class ResourcesCapability implements CapabilityInterface
                     // of content item arrays. For consistency, an error could
                     // also be structured similarly. For now, sticking to the
                     // specific change requested for the success path.
-                    return JsonRpcMessage::result(
-                        [
-                        'contents' => [[
-                            'type' => 'text',
-                            'text' => $e->getMessage()
-                        ]],
-                        'isError' => true
-                        ],
+                    return JsonRpcMessage::error(
+                        JsonRpcMessage::INTERNAL_ERROR,
+                        "Error reading resource {$uri}: {$e->getMessage()}",
                         $message->id
                     );
                 }
