@@ -52,28 +52,70 @@ jobs:
     - name: Check PHP syntax
       run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
     
-    # Run PHP CodeSniffer
+    # Run PHP CodeSniffer and create annotations
     - name: Run PHP CodeSniffer
+      id: phpcs
       run: |
         if [ -f vendor/bin/phpcs ]; then
-          vendor/bin/phpcs --report=checkstyle --report-file=test_outputs/phpcs-checkstyle.xml src/ tests/ || true
-          vendor/bin/phpcs src/ tests/ || true
+          # Create both human-readable and structured output
+          vendor/bin/phpcs src/ tests/ > test_outputs/phpcs-output.txt 2>&1 || PHPCS_EXIT_CODE=$?
+          vendor/bin/phpcs --report=json --report-file=test_outputs/phpcs.json src/ tests/ || true
+          
+          # Count errors and warnings from JSON
+          if [ -f test_outputs/phpcs.json ]; then
+            ERRORS=$(php -r "
+              \$json = json_decode(file_get_contents('test_outputs/phpcs.json'), true);
+              echo isset(\$json['totals']['errors']) ? \$json['totals']['errors'] : 0;
+            ")
+            WARNINGS=$(php -r "
+              \$json = json_decode(file_get_contents('test_outputs/phpcs.json'), true);
+              echo isset(\$json['totals']['warnings']) ? \$json['totals']['warnings'] : 0;
+            ")
+            echo "errors=${ERRORS}" >> $GITHUB_OUTPUT
+            echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
+          else
+            echo "errors=0" >> $GITHUB_OUTPUT
+            echo "warnings=0" >> $GITHUB_OUTPUT
+          fi
+          
+          # Show results
+          if [ -f test_outputs/phpcs-output.txt ]; then
+            echo "PHPCS Output:"
+            cat test_outputs/phpcs-output.txt
+          fi
         else
           echo "PHP CodeSniffer not found. Skipping."
+          echo "errors=0" >> $GITHUB_OUTPUT
+          echo "warnings=0" >> $GITHUB_OUTPUT
         fi
       continue-on-error: true
     
-    # Run PHPStan
+    # Run PHPStan with better output
     - name: Run PHPStan
+      id: phpstan
       run: |
         if [ -f vendor/bin/phpstan ]; then
           if [ -f phpstan.neon ] || [ -f phpstan.neon.dist ]; then
-            vendor/bin/phpstan analyse --memory-limit=2G --error-format=github
+            vendor/bin/phpstan analyse --memory-limit=2G > test_outputs/phpstan-output.txt 2>&1
+            PHPSTAN_EXIT_CODE=$?
           else
-            vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G --error-format=github
+            vendor/bin/phpstan analyse src/ tests/ --level=5 --memory-limit=2G > test_outputs/phpstan-output.txt 2>&1
+            PHPSTAN_EXIT_CODE=$?
           fi
+          
+          # Set status based on exit code
+          if [ $PHPSTAN_EXIT_CODE -eq 0 ]; then
+            echo "status=✅ No errors found" >> $GITHUB_OUTPUT
+          else
+            echo "status=❌ Errors found" >> $GITHUB_OUTPUT
+          fi
+          
+          # Show results
+          echo "PHPStan Output:"
+          cat test_outputs/phpstan-output.txt
         else
           echo "PHPStan not found. Skipping."
+          echo "status=⚠️ Not run" >> $GITHUB_OUTPUT
         fi
       continue-on-error: true
     
@@ -83,6 +125,7 @@ jobs:
         if [ -f vendor/bin/phpunit ]; then
           XDEBUG_MODE=coverage vendor/bin/phpunit \
             --coverage-clover test_outputs/coverage/clover.xml \
+            --coverage-cobertura test_outputs/coverage/cobertura.xml \
             --coverage-html test_outputs/coverage/html \
             --log-junit test_outputs/phpunit.xml
         else
@@ -91,6 +134,7 @@ jobs:
     
     # Publish test results using dorny/test-reporter
     - name: Publish Test Results
+      id: test-reporter
       uses: dorny/test-reporter@v1
       if: always()
       with:
@@ -101,10 +145,11 @@ jobs:
     
     # Generate code coverage report
     - name: Code Coverage Report
+      id: coverage
       uses: irongut/CodeCoverageSummary@v1.3.0
       if: always()
       with:
-        filename: test_outputs/coverage/clover.xml
+        filename: test_outputs/coverage/cobertura.xml
         badge: true
         fail_below_min: false
         format: markdown
@@ -114,21 +159,32 @@ jobs:
         output: both
         thresholds: '60 80'
     
-    # Post PHPCS results as annotations
-    - name: Annotate PHPCS Results
-      uses: staabm/annotate-pull-request-from-checkstyle@v1
-      if: always()
-      with:
-        files: test_outputs/phpcs-checkstyle.xml
-        notices-as-warnings: true
-    
     # Comment PR with comprehensive results
-    - name: Add Coverage PR Comment
-      uses: marocchino/sticky-pull-request-comment@v2
+    - name: Create comprehensive test summary
       if: github.event_name == 'pull_request'
+      uses: marocchino/sticky-pull-request-comment@v2
       with:
         recreate: true
-        path: code-coverage-results.md
+        message: |
+          ## 🧪 Test Results Summary
+          
+          ### PHPUnit Tests
+          ${{ steps.test-reporter.conclusion == 'success' && '✅ All tests passed!' || '❌ Some tests failed - check the Tests tab for details' }}
+          
+          ### Code Coverage
+          ${{ steps.coverage.outputs.summary-text }}
+          
+          ### Code Quality
+          - **PHPCS:** ${{ steps.phpcs.outputs.errors == '0' && steps.phpcs.outputs.warnings == '0' && '✅' || '⚠️' }} ${{ steps.phpcs.outputs.errors || '0' }} errors, ${{ steps.phpcs.outputs.warnings || '0' }} warnings
+          - **PHPStan:** ${{ steps.phpstan.outputs.status }}
+          
+          ### 📁 Detailed Reports
+          - **Coverage Report:** Download the `test-outputs` artifact for detailed HTML coverage report
+          - **Test Results:** Check the "Tests" tab above for detailed test results
+          - **Raw Logs:** View the "Actions" tab for complete output logs
+          
+          ---
+          <sub>This comment will update automatically when you push new commits.</sub>
     
     # Upload detailed test artifacts
     - name: Upload test outputs
@@ -144,6 +200,6 @@ jobs:
       uses: codecov/codecov-action@v4
       if: always()
       with:
-        file: ./test_outputs/coverage/clover.xml
+        files: ./test_outputs/coverage/clover.xml,./test_outputs/coverage/cobertura.xml
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: false
