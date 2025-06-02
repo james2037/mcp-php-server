@@ -90,6 +90,31 @@ class StdioTransportTest extends TestCase
         $this->assertEmpty($messages);
     }
 
+    public function testReceiveInvalidJsonStructureThrowsException(): void
+    {
+        $this->transport->writeToInput('"just a string"'); // A JSON scalar
+        $this->expectException(\RuntimeException::class);
+        // This specific message comes from the generic catch (\Exception $e) block
+        // that re-throws the initially thrown "Invalid JSON-RPC message structure." exception.
+        $this->expectExceptionMessage('Error parsing JSON-RPC message: Invalid JSON-RPC message structure.');
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST); // Code from the generic catch block
+        $this->transport->receive();
+    }
+
+    public function testReceiveCatchesExceptionFromJsonRpcMessage(): void
+    {
+        // This JSON is an object but is missing the 'method' field,
+        // which JsonRpcMessage::fromJson() will throw an error for.
+        $this->transport->writeToInput('{"jsonrpc": "2.0", "id": 1}');
+        $this->expectException(\RuntimeException::class);
+        // This message comes from the generic catch (\Exception $e) block
+        // re-throwing the exception from JsonRpcMessage::fromJson().
+        // The original InvalidRequestException from JsonRpcMessage has "Missing method"
+        $this->expectExceptionMessage('Error parsing JSON-RPC message: Missing method');
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST); // Code from the generic catch block
+        $this->transport->receive();
+    }
+
     public function testSendSingleMessage(): void
     {
         $message = JsonRpcMessage::result(['foo' => 'bar'], '1');

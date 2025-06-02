@@ -55,15 +55,6 @@ class StdioTransport extends AbstractTransport
             // Attempt to decode as JSON. We need to inspect its structure.
             $decodedInput = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
 
-            if ($decodedInput === null && json_last_error() !== JSON_ERROR_NONE) {
-                // This case should ideally be caught by JSON_THROW_ON_ERROR,
-                // but as a safeguard or for older PHP versions.
-                throw new \RuntimeException(
-                    'JSON Parse Error: ' . json_last_error_msg(),
-                    JsonRpcMessage::PARSE_ERROR
-                );
-            }
-
             // Check for batch request: a non-empty numerically indexed array
             if (
                 is_array($decodedInput)
