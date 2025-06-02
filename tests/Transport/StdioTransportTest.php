@@ -5,9 +5,7 @@ namespace MCP\Server\Tests\Transport;
 use PHPUnit\Framework\TestCase;
 use MCP\Server\Transport\StdioTransport;
 use MCP\Server\Message\JsonRpcMessage;
-use MCP\Server\Tests\Transport\ProtectedAccessorStdioTransport; // Added
-
-// TestableStdioTransport is now in a separate file.
+use MCP\Server\Tests\Transport\ProtectedAccessorStdioTransport;
 
 class StdioTransportTest extends TestCase
 {
