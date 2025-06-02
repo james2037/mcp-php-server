@@ -10,6 +10,15 @@ use MCP\Server\Tests\Transport\TestableStdioTransport;
 // TestCapability is now in a separate file.
 use MCP\Server\Tests\TestCapability;
 use MCP\Server\Capability\ResourcesCapability;
+use MCP\Server\Tests\Transport\TestableHttpTransport;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\StreamFactory;
+use Laminas\Diactoros\ResponseFactory;
+use MCP\Server\Exception\TransportException;
+use MCP\Server\Transport\HttpTransport;
 
 /**
  * @covers \MCP\Server\Server
@@ -374,5 +383,150 @@ class ServerTest extends TestCase
 
         $server->run();
         // PHPUnit automatically verifies mock expectations upon test completion.
+    }
+
+    private function createMockRequest(array|string $jsonData, string $method = 'POST', string $uri = '/'): ServerRequestInterface
+    {
+        $streamFactory = new StreamFactory();
+        $body = is_string($jsonData) ? $jsonData : json_encode($jsonData);
+        $stream = $streamFactory->createStream($body);
+
+        $request = (new ServerRequestFactory())->createServerRequest($method, $uri);
+        return $request->withBody($stream)->withHeader('Content-Type', 'application/json');
+    }
+
+    public function testRunHttpRequestCycle(): void
+    {
+        // Server setup with TestableHttpTransport
+        $httpTransport = new TestableHttpTransport(new ResponseFactory(), new StreamFactory());
+        $server = new Server('test-http-server', '1.0.1');
+        $capability = new TestCapability();
+        $server->addCapability($capability);
+        $server->connect($httpTransport);
+
+        // Mock SAPI functions like headers_sent and http_response_code
+        // This is tricky in unit tests. The SapiEmitter handles this.
+        // For now, we'll focus on the ResponseInterface generated.
+        // We assume SapiEmitter works correctly or is tested elsewhere.
+
+        // Scenario 1: Single valid request (Initialize)
+        $initRequestId = 'init_http_' . uniqid();
+        $initRequestPayload = [
+            'jsonrpc' => '2.0', 'method' => 'initialize',
+            'params' => ['protocolVersion' => '2025-03-26'], 'id' => $initRequestId
+        ];
+        $mockRequest = $this->createMockRequest($initRequestPayload);
+        $httpTransport->setMockRequest($mockRequest);
+        
+        // No actual output is emitted in tests, SapiEmitter is bypassed by not being in SAPI env
+        // or by headers_sent being true (which we can't easily mock here without PECL functions)
+        // The key is that $httpTransport->getResponse() will contain what *would* be emitted.
+        
+        // Suppress output from SapiEmitter if it tries to run
+        // One way is to ensure headers are "sent"
+        // @runInSeparateProcess might be needed if SapiEmitter is hard to control
+        // However, Server::runHttpRequestCycle has a `if (!headers_sent())` guard.
+        // In CLI tests, headers_sent() usually returns true if any output has occurred,
+        // or false if run strictly. Let's assume it allows us to capture.
+
+        $server->run(); // This will execute runHttpRequestCycle
+
+        $capturedResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedResponse);
+        $this->assertEquals(200, $capturedResponse->getStatusCode());
+        $this->assertStringContainsString('application/json', $capturedResponse->getHeaderLine('Content-Type'));
+        $responseBody = json_decode((string) $capturedResponse->getBody(), true);
+        $this->assertEquals($initRequestId, $responseBody['id']);
+        $this->assertArrayHasKey('result', $responseBody);
+        $this->assertEquals('2025-03-26', $responseBody['result']['protocolVersion']);
+
+        // Scenario 2: Batch valid request
+        $capability->resetReceivedMessages();
+        $batchId1 = 'batch_http_1';
+        $batchMethod1 = 'test.methodA'; // Changed
+        $batchId2 = 'batch_http_2';
+        $batchMethod2 = 'test.methodB'; // Changed
+
+        $batchRequestPayload = [
+            ['jsonrpc' => '2.0', 'method' => $batchMethod1, 'params' => ['data' => 'batch1'], 'id' => $batchId1],
+            ['jsonrpc' => '2.0', 'method' => $batchMethod2, 'params' => ['data' => 'batch2'], 'id' => $batchId2],
+        ];
+        // Add expected responses for the new methods
+        $capability->addExpectedResponse($batchMethod1, JsonRpcMessage::result(['received' => 'batch1'], $batchId1));
+        $capability->addExpectedResponse($batchMethod2, JsonRpcMessage::result(['received' => 'batch2'], $batchId2));
+
+        $mockBatchRequest = $this->createMockRequest($batchRequestPayload);
+        $httpTransport->setMockRequest($mockBatchRequest);
+        $server->run();
+        $capturedBatchResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedBatchResponse);
+        $this->assertEquals(200, $capturedBatchResponse->getStatusCode());
+        $batchResponseBody = json_decode((string) $capturedBatchResponse->getBody(), true);
+        $this->assertIsArray($batchResponseBody);
+        $this->assertCount(2, $batchResponseBody);
+        $this->assertEquals($batchId1, $batchResponseBody[0]['id']);
+        $this->assertEquals(['received' => 'batch1'], $batchResponseBody[0]['result']);
+        $this->assertEquals($batchId2, $batchResponseBody[1]['id']);
+        $this->assertEquals(['received' => 'batch2'], $batchResponseBody[1]['result']);
+
+
+        // Scenario 3: Request causing TransportException (e.g., malformed JSON)
+        // The TestableHttpTransport::receive() throws TransportException for malformed JSON.
+        $mockMalformedRequest = $this->createMockRequest("this is not json");
+        $httpTransport->setMockRequest($mockMalformedRequest);
+        // Server's runHttpRequestCycle catches TransportException and creates an error response.
+        $server->run();
+        $capturedMalformedResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedMalformedResponse);
+        // HttpTransport now sends JSON-RPC errors with HTTP 200
+        $this->assertEquals(200, $capturedMalformedResponse->getStatusCode()); 
+        $malformedBody = json_decode((string) $capturedMalformedResponse->getBody(), true);
+        $this->assertEquals(JsonRpcMessage::PARSE_ERROR, $malformedBody['error']['code']);
+        $this->assertNull($malformedBody['id']);
+
+
+        // Scenario 4: Request for a method not found
+        // Need to initialize server first before sending capability messages
+        $httpTransport->setMockRequest($this->createMockRequest($initRequestPayload));
+        $server->run(); // Initialize
+
+        $unknownMethodId = 'unknown_http_' . uniqid();
+        $unknownMethodPayload = ['jsonrpc' => '2.0', 'method' => 'unknown.method', 'id' => $unknownMethodId];
+        $mockUnknownMethodRequest = $this->createMockRequest($unknownMethodPayload);
+        $httpTransport->setMockRequest($mockUnknownMethodRequest);
+        $server->run();
+        $capturedUnknownResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedUnknownResponse);
+        // HttpTransport now sends JSON-RPC errors with HTTP 200
+        $this->assertEquals(200, $capturedUnknownResponse->getStatusCode()); 
+        $unknownBody = json_decode((string) $capturedUnknownResponse->getBody(), true);
+        $this->assertEquals($unknownMethodId, $unknownBody['id']);
+        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $unknownBody['error']['code']);
+
+        // Scenario 5: TransportException set explicitly to be thrown by receive()
+        $transportExceptionId = 'tex_http_' . uniqid();
+        $someValidPayload = ['jsonrpc' => '2.0', 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-03-26'], 'id' => $transportExceptionId];
+        $mockRequestForTransportException = $this->createMockRequest($someValidPayload);
+        $httpTransport->setMockRequest($mockRequestForTransportException);
+        $customTransportException = new TransportException("Custom transport error", 12345);
+        $httpTransport->setExceptionToThrowOnReceive($customTransportException);
+
+        $server->run();
+        $capturedCustomErrorResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedCustomErrorResponse);
+        // The status code will depend on how HttpTransport maps generic TransportException codes.
+        // If the code is non-standard JSON-RPC, it might default to 500 or use the code if it's a valid HTTP code.
+        // Server::runHttpRequestCycle catches TransportException and uses its code for JsonRpcMessage::error
+        // HttpTransport then maps this JsonRpcMessage error code to an HTTP status.
+        // If TransportException code 12345 is used in JsonRpcMessage, and it's not a standard one,
+        // JsonRpcMessage::error would make it the error code.
+        // HttpTransport now sends JSON-RPC errors with HTTP 200
+        $this->assertEquals(200, $capturedCustomErrorResponse->getStatusCode());
+        $customErrorBody = json_decode((string) $capturedCustomErrorResponse->getBody(), true);
+        $this->assertNull($customErrorBody['id']); // ID might be lost if error happens before parsing ID.
+                                                 // Server.php L203 tries to get ID from raw payload for general errors.
+                                                 // TransportException happens before this, so ID is null.
+        $this->assertEquals(12345, $customErrorBody['error']['code']);
+        $this->assertEquals("Custom transport error", $customErrorBody['error']['message']);
     }
 }
