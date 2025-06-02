@@ -31,7 +31,7 @@ class Server
     private bool $capabilitiesAlreadyShutdown = false; // New flag
     private ?TransportInterface $transport = null;
     private ?string $clientSetLogLevel = null;
-    private ?ServerRequestInterface $currentHttpRequest = null; // Add this
+    // private ?ServerRequestInterface $currentHttpRequest = null; // Removed by simplification
 
     // Authorization properties
     private bool $isAuthorizationRequired = false;
@@ -61,19 +61,8 @@ class Server
     ) {
     }
 
-    public function setNextResponsePrefersSse(bool $prefer = true): void
-    {
-        if ($this->transport instanceof TransportInterface) { // Check against interface
-            $this->transport->preferSseStream($prefer);
-        }
-    }
-
-    // Add a method to set the current HTTP request, if passed from an entry point
-    public function setCurrentHttpRequest(ServerRequestInterface $request): void
-    {
-        $this->currentHttpRequest = $request;
-    }
-
+    // setNextResponsePrefersSse method removed
+    // setCurrentHttpRequest method removed
 
     /**
      * Configures server authorization based on a shared token.
@@ -206,113 +195,96 @@ class Server
             $this->logMessage('critical', 'HttpTransport not available in runHttpRequestCycle', 'Server.run');
             return;
         }
-        $httpTransport = $this->transport; // Explicitly typed for PHPStan
+        /** @var HttpTransport $httpTransport */
+        $httpTransport = $this->transport;
 
-        $responseMessages = [];
-        $errorResponse = null;
+        $responsePayload = null;
 
         try {
-            $receivedMessages = $this->transport->receive(); // Can throw TransportException
+            // HttpTransport->receive() returns array (decoded JSON) or throws TransportException.
+            // It ensures the payload is a valid JSON object or array of objects.
+            $rawPayload = $httpTransport->receive();
 
-            if ($receivedMessages === null) {
-                // This case is for GET requests or POSTs with no body/unparsable body not throwing immediately.
-                // If HttpTransport.receive() returns null for GET, it implies no messages to process,
-                // but the connection might be for SSE.
-                // If Origin validation failed in HttpTransport for GET, getResponse() will reflect 403.
-            } elseif (empty($receivedMessages)) {
-                // This means an empty batch "[]" was received from a POST request.
-                // JSON-RPC spec indicates this is invalid.
-                $errorResponse = JsonRpcMessage::error(
-                    JsonRpcMessage::INVALID_REQUEST,
-                    'Empty batch request is invalid.',
-                    null
-                );
-            } else {
-                foreach ($receivedMessages as $currentMessage) {
-                    if (!$currentMessage instanceof JsonRpcMessage) {
-                         $this->logMessage('error', "Received non-JsonRpcMessage object in HTTP batch.", 'Server.runHttpRequestCycle');
-                        // This scenario should ideally result in a parse error at the transport level
-                        // or be part of a general batch error. For now, skip.
-                        continue;
+            $responseMessages = [];
+            // HttpTransport's receive method ensures $rawPayload is either an associative array (single)
+            // or a non-empty list of associative arrays (batch).
+            $isBatchRequest = array_is_list($rawPayload);
+
+            if ($isBatchRequest) {
+                foreach ($rawPayload as $rawMessage) {
+                    // $rawMessage is expected to be an associative array here.
+                    try {
+                        $messageJson = json_encode($rawMessage);
+                        if ($messageJson === false) {
+                            // This should be rare if $rawMessage is a valid array from json_decode
+                            throw new \RuntimeException("Failed to re-encode batch item for parsing.", JsonRpcMessage::PARSE_ERROR);
+                        }
+                        $message = JsonRpcMessage::fromJson($messageJson);
+                        $response = $this->processSingleMessage($message);
+                        if ($response) {
+                            $responseMessages[] = $response;
+                        }
+                    } catch (\Throwable $e) {
+                        $id = is_array($rawMessage) && array_key_exists('id', $rawMessage) ? $rawMessage['id'] : null;
+                        $responseMessages[] = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, "Error processing item in batch: " . $e->getMessage(), $id);
                     }
-                    // Use the refactored processSingleMessage
-                    $response = $this->processSingleMessage($currentMessage);
-                    if ($response) {
-                        $responseMessages[] = $response;
+                }
+                $responsePayload = !empty($responseMessages) ? $responseMessages : null;
+            } else { // Single request (which is an associative array)
+                try {
+                    $messageJson = json_encode($rawPayload);
+                    if ($messageJson === false) {
+                        throw new \RuntimeException("Failed to re-encode single request for parsing.", JsonRpcMessage::PARSE_ERROR);
                     }
+                    $message = JsonRpcMessage::fromJson($messageJson);
+                    $responsePayload = $this->processSingleMessage($message);
+                } catch (\Throwable $e) {
+                    $id = is_array($rawPayload) && array_key_exists('id', $rawPayload) ? $rawPayload['id'] : null;
+                    $errorCode = JsonRpcMessage::INTERNAL_ERROR; // Default
+                    if ($e instanceof \MCP\Server\Exception\MethodNotSupportedException) {
+                        $errorCode = JsonRpcMessage::METHOD_NOT_FOUND;
+                    } elseif ($e instanceof \MCP\Server\Exception\InvalidRequestException) {
+                        $errorCode = JsonRpcMessage::INVALID_REQUEST;
+                    } elseif ($e instanceof \MCP\Server\Exception\InvalidParamsException) {
+                        $errorCode = JsonRpcMessage::INVALID_PARAMS;
+                    } elseif ($e instanceof \RuntimeException && $e->getCode() !== 0 && is_int($e->getCode())) {
+                        $errorCode = $e->getCode();
+                    }
+
+                    $responsePayload = JsonRpcMessage::error($errorCode, "Error processing request: " . $e->getMessage(), $id);
                 }
             }
         } catch (TransportException $e) {
             $this->logMessage('error', 'TransportException in HTTP cycle: ' . $e->getMessage(), 'Server.runHttpRequestCycle', ['code' => $e->getCode()]);
             $errorCode = (is_int($e->getCode()) && $e->getCode() !== 0) ? $e->getCode() : JsonRpcMessage::INTERNAL_ERROR;
-            // Check if it's the specific Origin validation error code from HttpTransport
-            if ($e->getMessage() === 'Origin not allowed.') { // This relies on the exact message
-                 $errorCode = -32001; // The custom code used in HttpTransport
-            }
-            $errorResponse = JsonRpcMessage::error($errorCode, $e->getMessage(), null);
+            $responsePayload = JsonRpcMessage::error($errorCode, $e->getMessage(), null);
         } catch (\Throwable $e) {
             $this->logMessage('critical', "Critical Server Error in HTTP cycle: " . $e->getMessage(), 'Server.runHttpRequestCycle', ['trace' => $e->getTraceAsString()]);
-            $errorResponse = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Internal server error.', null);
+            $responsePayload = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Internal server error.', null);
         }
 
-        // Send the response(s)
-        if ($errorResponse) {
-            $this->transport->send($errorResponse);
-        } elseif (!empty($responseMessages)) {
-            $this->transport->send($responseMessages);
-        } elseif ($this->currentHttpRequest && $this->currentHttpRequest->getMethod() === 'GET') {
-            // For GET requests (SSE stream initiation), if no errors and no specific messages to send,
-            // call send([]) to trigger SSE header emission if not already handled by an Origin error.
-            if (!$httpTransport->getResponse()->getStatusCode() || $httpTransport->getResponse()->getStatusCode() === 200) { // check if not already a 403
-                $httpTransport->send([]);
-            }
-        } else {
-             // For POST with only notifications (HttpTransport handles 202) or other edge cases.
-             // If $responseMessages is empty and no $errorResponse, and it's a POST,
-             // it could be all notifications (handled by HttpTransport's 202) or an issue.
-             // If HttpTransport did not set a 202, and we have no other response,
-             // it might be appropriate to send a 204 or let HttpTransport's default response play out.
-             // This path is less clear without more specific scenarios.
-             // For now, if no error and no messages, and not a GET for SSE, we assume HttpTransport handles it.
-             // One explicit case: POST that was an empty array `[]` which is an error (handled above).
-             // If it was a POST with valid notifications only, HttpTransport.send() would set 202.
-             // If it's a POST that somehow resulted in zero messages and no error, and not all notifications.
-             // This shouldn't happen with current logic.
-        }
+        $httpTransport->send($responsePayload);
+        $httpResponse = $httpTransport->getResponse(); // This will always return a ResponseInterface
 
-        $httpResponse = $httpTransport->getResponse();
-
-        // @phpstan-ignore-next-line - $httpResponse is technically always an object, but this is a defensive check.
-        if ($httpResponse) {
-            // Check if headers have already been sent by HttpTransport (e.g. for early 403 error on SSE GET)
-            if (!headers_sent()) {
-                $emitter = new SapiEmitter();
-                try {
-                    $emitter->emit($httpResponse);
-                } catch (\Exception $e) {
-                    // Catch emitter exceptions, e.g. if headers were already sent due to an error echo
-                    $this->logMessage('critical', 'SapiEmitter failed to emit response: ' . $e->getMessage(), 'Server.runHttpRequestCycle');
-                    // Fallback or ensure script termination if needed
-                    // @phpstan-ignore-next-line - Defensive check in error handling path.
-                    if (!headers_sent()) { // Check again, just in case
-                        http_response_code(500);
-                        echo "Error emitting response.";
-                    }
+        if (!headers_sent()) {
+            $emitter = new SapiEmitter();
+            try {
+                $emitter->emit($httpResponse);
+            } catch (\Exception $e) {
+                $this->logMessage('critical', 'SapiEmitter failed to emit response: ' . $e->getMessage(), 'Server.runHttpRequestCycle');
+                    // If emit() fails, we attempt to send a 500 error, but only if headers haven't been (partially) sent by the failed emit().
+                    // Assuming if headers_sent() was false before emit(), and emit() failed,
+                    // it's safer to assume headers might be in an indeterminate state or not sent.
+                    // The initial check for headers_sent() before calling emit() is the main guard.
+                    // If emit fails, it's unlikely we can reliably send a new response.
+                    // However, if NO headers were sent by emit() before it failed, this is a last resort.
+                if (!headers_sent()) {
+                    http_response_code(500);
+                    echo "Error emitting response.";
                 }
-            } elseif ($this->transport->isStreamOpen()) {
-                 // Headers sent, stream open: this is an SSE stream, SapiEmitter would fail.
-                 // HttpTransport::sendSseEventData handles direct echo.
-                 // The script needs to be kept alive by the entry point for long-running SSE.
-            } else {
-                // Headers sent, but not an SSE stream - likely an error was echoed directly by HttpTransport.
-                $this->logMessage('info', 'Headers already sent, SapiEmitter skipped.', 'Server.runHttpRequestCycle');
             }
         } else {
-            $this->logMessage('critical', 'No PSR-7 response object available to emit.', 'Server.runHttpRequestCycle');
-            if (!headers_sent()) {
-                http_response_code(500); // Internal Server Error
-                echo 'Internal Server Error: No response generated.';
-            }
+            $this->logMessage('info', 'Headers already sent, SapiEmitter skipped.', 'Server.runHttpRequestCycle');
         }
     }
 
@@ -423,17 +395,7 @@ class Server
             return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing protocol version parameter in initialize request.', $message->id);
         }
 
-        // Session ID handling for HttpTransport
-        $clientSessionId = null;
-        if ($this->transport instanceof HttpTransport) {
-            $clientSessionId = $this->transport->getClientSessionId();
-        }
-
-        $serverSessionId = $clientSessionId ?: uniqid('mcp-session-');
-
-        if ($this->transport instanceof HttpTransport) {
-            $this->transport->setServerSessionId($serverSessionId);
-        }
+        // Session ID handling removed as HttpTransport no longer manages these via getClientSessionId/setServerSessionId
 
         try {
             foreach ($this->capabilities as $capability) {

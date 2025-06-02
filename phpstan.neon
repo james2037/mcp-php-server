@@ -1,0 +1,32 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    # phpstan-baseline.neon is removed as we are explicitly ignoring errors.
+
+parameters:
+    level: 5
+    paths:
+        - src
+        - tests
+
+    ignoreErrors:
+        # Ignore undefined 'method()' calls on mock objects in test files
+        -
+            message: '#^Call to an undefined method .*::method\(\)\.$#'
+            paths:
+                - tests/*
+
+        # Ignore the specific "Negated boolean expression is always true" in Server.php
+        -
+            message: '#^Negated boolean expression is always true\.$#'
+            paths:
+                - src/Server.php
+                # Specify line number if needed, but message and path might be specific enough.
+                # Example with line number:
+                # reportUnmatchedIgnoredErrors: false # Add this if you use line numbers and they might shift
+                # lines:
+                #     - 281 # Current line number, may change
+
+    # phpunit_config_file: phpunit.xml.dist
+    # Exclude specific files or directories if needed
+    # excludePaths:
+    #     - src/some_legacy_code_to_ignore.php
