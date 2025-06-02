@@ -113,9 +113,13 @@ jobs:
           # Show results
           echo "PHPStan Output:"
           cat test_outputs/phpstan-output.txt
+          
+          # Store exit code for reference
+          echo "exit_code=$PHPSTAN_EXIT_CODE" >> $GITHUB_OUTPUT
         else
           echo "PHPStan not found. Skipping."
           echo "status=⚠️ Not run" >> $GITHUB_OUTPUT
+          echo "exit_code=0" >> $GITHUB_OUTPUT
         fi
       continue-on-error: true
     
@@ -142,16 +146,33 @@ jobs:
           
           # Parse results from output
           if [ -f test_outputs/phpunit_output.txt ]; then
-            # Extract test summary line
-            TESTS_LINE=$(grep -E "Tests: [0-9]+" test_outputs/phpunit_output.txt | tail -1 || echo "")
+            # Extract test summary line - look for the final summary
+            TESTS_LINE=$(grep -E "OK \([0-9]+ tests?, [0-9]+ assertions?\)" test_outputs/phpunit_output.txt | tail -1 || echo "")
+            
+            # If no OK line found, look for failure summary
+            if [ -z "$TESTS_LINE" ]; then
+              TESTS_LINE=$(grep -E "Tests: [0-9]+," test_outputs/phpunit_output.txt | tail -1 || echo "")
+            fi
+            
             echo "tests_summary=$TESTS_LINE" >> $GITHUB_OUTPUT
             
             # Extract individual counts for better reporting
             if [ -n "$TESTS_LINE" ]; then
-              TOTAL_TESTS=$(echo "$TESTS_LINE" | grep -oE "Tests: [0-9]+" | grep -oE "[0-9]+")
-              ASSERTIONS=$(echo "$TESTS_LINE" | grep -oE "Assertions: [0-9]+" | grep -oE "[0-9]+")
+              # Try to extract from OK format first
+              TOTAL_TESTS=$(echo "$TESTS_LINE" | grep -oE "[0-9]+ tests?" | grep -oE "[0-9]+" | head -1 || echo "")
+              ASSERTIONS=$(echo "$TESTS_LINE" | grep -oE "[0-9]+ assertions?" | grep -oE "[0-9]+" | head -1 || echo "")
+              
+              # If not found, try Tests: format
+              if [ -z "$TOTAL_TESTS" ]; then
+                TOTAL_TESTS=$(echo "$TESTS_LINE" | grep -oE "Tests: [0-9]+" | grep -oE "[0-9]+" || echo "")
+                ASSERTIONS=$(echo "$TESTS_LINE" | grep -oE "Assertions: [0-9]+" | grep -oE "[0-9]+" || echo "")
+              fi
+              
               echo "total_tests=${TOTAL_TESTS:-0}" >> $GITHUB_OUTPUT
               echo "total_assertions=${ASSERTIONS:-0}" >> $GITHUB_OUTPUT
+            else
+              echo "total_tests=0" >> $GITHUB_OUTPUT
+              echo "total_assertions=0" >> $GITHUB_OUTPUT
             fi
             
             # Determine status based on exit code and output
@@ -167,12 +188,16 @@ jobs:
           else
             echo "tests_summary=No test output found" >> $GITHUB_OUTPUT
             echo "status=❌ PHPUnit failed to generate output (Exit code: $PHPUNIT_EXIT_CODE)" >> $GITHUB_OUTPUT
+            echo "total_tests=0" >> $GITHUB_OUTPUT
+            echo "total_assertions=0" >> $GITHUB_OUTPUT
           fi
         else
           echo "PHPUnit not found. Skipping."
           echo "exit_code=1" >> $GITHUB_OUTPUT
           echo "status=⚠️ PHPUnit not found" >> $GITHUB_OUTPUT
           echo "tests_summary=PHPUnit not available" >> $GITHUB_OUTPUT
+          echo "total_tests=0" >> $GITHUB_OUTPUT
+          echo "total_assertions=0" >> $GITHUB_OUTPUT
         fi
     
     # Generate coverage report
@@ -220,8 +245,8 @@ jobs:
           ${{ steps.phpunit.outputs.total_assertions && format('- **Total Assertions:** {0}', steps.phpunit.outputs.total_assertions) || '' }}
           
           ### Code Quality
-          - **PHPCS:** ${{ steps.phpcs.outputs.errors == '0' && steps.phpcs.outputs.warnings == '0' && '✅' || '⚠️' }} ${{ steps.phpcs.outputs.errors || '0' }} errors, ${{ steps.phpcs.outputs.warnings || '0' }} warnings
-          - **PHPStan:** ${{ steps.phpstan.outputs.status }}
+          - **PHPCS:** ${{ (steps.phpcs.outputs.errors == '0' && steps.phpcs.outputs.warnings == '0') && '✅ No issues' || format('⚠️ {0} errors, {1} warnings', steps.phpcs.outputs.errors || '0', steps.phpcs.outputs.warnings || '0') }}
+          - **PHPStan:** ${{ steps.phpstan.outputs.status || '⚠️ Not run' }}
           
           ### 📁 Detailed Reports
           - **Coverage Report:** Download the `test-outputs` artifact for detailed HTML coverage report
@@ -266,3 +291,47 @@ jobs:
         files: ./test_outputs/coverage/clover.xml,./test_outputs/coverage/cobertura.xml
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: false
+    
+    # Fail the job if critical issues are found
+    - name: Check for critical failures
+      if: always()
+      run: |
+        echo "Checking for critical failures..."
+        
+        EXIT_CODE=0
+        
+        # Check PHPUnit - always fail on test failures
+        if [ "${{ steps.phpunit.outputs.exit_code }}" != "0" ]; then
+          echo "❌ PHPUnit tests failed"
+          EXIT_CODE=1
+        else
+          echo "✅ PHPUnit tests passed"
+        fi
+        
+        # Check PHPStan - always fail on errors
+        if [ "${{ steps.phpstan.outputs.exit_code }}" != "0" ]; then
+          echo "❌ PHPStan found issues"
+          EXIT_CODE=1
+        else
+          echo "✅ PHPStan passed"
+        fi
+        
+        # Check PHPCS - always fail on errors
+        if [ "${{ steps.phpcs.outputs.errors }}" != "0" ]; then
+          echo "❌ PHPCS found ${{ steps.phpcs.outputs.errors }} errors"
+          EXIT_CODE=1
+        else
+          echo "✅ PHPCS passed"
+        fi
+        
+        # Summary
+        if [ $EXIT_CODE -eq 0 ]; then
+          echo ""
+          echo "🎉 All code quality checks passed!"
+        else
+          echo ""
+          echo "💥 Build failed due to code quality issues above."
+          echo "Please fix the issues and push again."
+        fi
+        
+        exit $EXIT_CODE
