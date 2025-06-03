@@ -2,21 +2,43 @@
 
 namespace MCP\Server\Message;
 
+/**
+ * Represents a JSON-RPC 2.0 message, which can be a request, a response, or an error.
+ * Implements JsonSerializable for direct use with json_encode.
+ */
 class JsonRpcMessage implements \JsonSerializable
 {
+    /** @var int JSON-RPC Parse error. */
     public const PARSE_ERROR = -32700;
+    /** @var int JSON-RPC Invalid Request error. */
     public const INVALID_REQUEST = -32600;
+    /** @var int JSON-RPC Method Not Found error. */
     public const METHOD_NOT_FOUND = -32601;
+    /** @var int JSON-RPC Invalid Params error. */
     public const INVALID_PARAMS = -32602;
+    /** @var int JSON-RPC Internal error. */
     public const INTERNAL_ERROR = -32603;
 
+    /** @var string The JSON-RPC version. Defaults to "2.0". */
     public string $jsonrpc = '2.0';
+    /** @var string|null An identifier established by the Client. Null for notifications. */
     public ?string $id;
+    /** @var string The name of the method to be invoked. Present in requests. */
     public string $method;
+    /** @var array|null The structured value that holds the parameter values to be used during the invocation of the method. Present in requests. */
     public ?array $params;
+    /** @var array|null The value of this member is determined by the method invoked on the Server. Present in responses. */
     public ?array $result = null;
+    /** @var array|null An Error object if there was an error invoking the method. Present in error responses. */
     public ?array $error = null;
 
+    /**
+     * Constructs a new JsonRpcMessage, typically for a request or notification.
+     *
+     * @param string $method The method name.
+     * @param array|null $params The parameters, if any.
+     * @param string|null $id The message ID. If null, it's a notification.
+     */
     public function __construct(string $method, ?array $params = null, ?string $id = null)
     {
         $this->method = $method;
@@ -24,11 +46,21 @@ class JsonRpcMessage implements \JsonSerializable
         $this->id = $id;
     }
 
+    /**
+     * Checks if the message is a request (i.e., it has an ID).
+     *
+     * @return bool True if the message has an ID, false otherwise.
+     */
     public function isRequest(): bool
     {
         return $this->id !== null;
     }
 
+    /**
+     * Converts the message object to its JSON string representation.
+     *
+     * @return string The JSON string.
+     */
     public function toJson(): string
     {
         $data = ['jsonrpc' => $this->jsonrpc];
@@ -65,40 +97,63 @@ class JsonRpcMessage implements \JsonSerializable
 
         // Handle response messages
         if (isset($data['result']) || isset($data['error'])) {
-            if (!isset($data['id'])) {
-                throw new \RuntimeException('Response must include ID', self::INVALID_REQUEST);
+            // While spec says ID can be null for error responses to certain requests,
+            // our construction requires an ID for responses.
+            // This could be refined if strictly null IDs for errors are needed.
+            if (!array_key_exists('id', $data)) {
+                throw new \RuntimeException('Response must include ID (even if null for some error cases as per spec, this implementation expects it)', self::INVALID_REQUEST);
             }
-            $msg = new self('', null, $data['id']);
+            $msg = new self('', null, $data['id']); // Method and params are not relevant for responses.
             if (isset($data['result'])) {
                 $msg->result = $data['result'];
             } else {
+                // Ensure error is an array (object in JSON)
+                if (!is_array($data['error'])) {
+                    throw new \RuntimeException('Invalid error object in JSON-RPC response', self::INVALID_REQUEST);
+                }
                 $msg->error = $data['error'];
             }
             return $msg;
         }
 
         // Handle request/notification messages
-        if (!isset($data['method'])) {
-            throw new \RuntimeException('Missing method', self::INVALID_REQUEST);
+        if (!isset($data['method']) || !is_string($data['method'])) {
+            throw new \RuntimeException('Missing or invalid method name in JSON-RPC request', self::INVALID_REQUEST);
         }
 
         return new self(
             $data['method'],
-            $data['params'] ?? null,
-            $data['id'] ?? null
+            isset($data['params']) && is_array($data['params']) ? $data['params'] : null,
+            isset($data['id']) && (is_string($data['id']) || is_numeric($data['id'])) ? (string)$data['id'] : null
         );
     }
 
+    /**
+     * Creates a JSON-RPC success response message.
+     *
+     * @param array $result The result of the successful method execution.
+     * @param string $id The ID of the original request.
+     * @return self The created JsonRpcMessage object representing a success response.
+     */
     public static function result(array $result, string $id): self
     {
-        $msg = new self('', null, $id);
+        $msg = new self('', null, $id); // Method and params are not relevant for responses.
         $msg->result = $result;
         return $msg;
     }
 
+    /**
+     * Creates a JSON-RPC error response message.
+     *
+     * @param int $code The error code.
+     * @param string $message A human-readable error message.
+     * @param string|null $id The ID of the original request. Should be null if the error was parsing or an invalid request.
+     * @param mixed|null $data Additional data associated with the error.
+     * @return self The created JsonRpcMessage object representing an error response.
+     */
     public static function error(int $code, string $message, ?string $id, $data = null): self
     {
-        $msg = new self('', null, $id);
+        $msg = new self('', null, $id); // Method and params are not relevant for responses.
         $msg->error = [
             'code' => $code,
             'message' => $message
@@ -177,6 +232,13 @@ class JsonRpcMessage implements \JsonSerializable
         return json_encode($dataArray, JSON_THROW_ON_ERROR);
     }
 
+    /**
+     * Specifies the data which should be serialized to JSON.
+     * Called by json_encode().
+     *
+     * @return array The data to be serialized.
+     * @throws \LogicException If the message state is inconsistent (e.g., result without ID).
+     */
     public function jsonSerialize(): array
     {
         $data = ['jsonrpc' => $this->jsonrpc];

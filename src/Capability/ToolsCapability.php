@@ -6,20 +6,34 @@ use MCP\Server\Exception\MethodNotSupportedException;
 use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Tool\Tool;
 
+/**
+ * Manages the registration and execution of tools available to the server.
+ * It handles listing available tools, calling tools, and providing completion suggestions.
+ */
 class ToolsCapability implements CapabilityInterface
 {
     /**
-     *
-     *
+     * Registered tools, keyed by their name.
      * @var array<string, Tool>
      */
     private array $tools = [];
 
+    /**
+     * Adds a tool to the capability.
+     *
+     * @param Tool $tool The tool to add.
+     */
     public function addTool(Tool $tool): void
     {
         $this->tools[$tool->getName()] = $tool;
     }
 
+    /**
+     * Declares the capabilities provided by this class.
+     *
+     * @return array{tools: array{listChanged: bool}}
+     * An associative array describing the 'tools' capability.
+     */
     public function getCapabilities(): array
     {
         return [
@@ -29,6 +43,12 @@ class ToolsCapability implements CapabilityInterface
         ];
     }
 
+    /**
+     * Checks if this capability can handle the given JSON-RPC message.
+     *
+     * @param JsonRpcMessage $message The message to check.
+     * @return bool True if the method is 'tools/list', 'tools/call', or 'completion/complete', false otherwise.
+     */
     public function canHandleMessage(JsonRpcMessage $message): bool
     {
         return match ($message->method) {
@@ -37,6 +57,13 @@ class ToolsCapability implements CapabilityInterface
         };
     }
 
+    /**
+     * Handles an incoming JSON-RPC request or notification related to tools.
+     *
+     * @param JsonRpcMessage $message The message to handle.
+     * @return JsonRpcMessage|null A response message, or null for notifications.
+     * @throws MethodNotSupportedException if the method is not supported by this capability.
+     */
     public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
     {
         return match ($message->method) {
@@ -47,6 +74,10 @@ class ToolsCapability implements CapabilityInterface
         };
     }
 
+    /**
+     * Initializes all registered tools.
+     * This method is called when the server is initializing.
+     */
     public function initialize(): void
     {
         foreach ($this->tools as $tool) {
@@ -54,6 +85,10 @@ class ToolsCapability implements CapabilityInterface
         }
     }
 
+    /**
+     * Shuts down all registered tools.
+     * This method is called when the server is shutting down.
+     */
     public function shutdown(): void
     {
         foreach ($this->tools as $tool) {
@@ -61,6 +96,13 @@ class ToolsCapability implements CapabilityInterface
         }
     }
 
+    /**
+     * Handles the 'tools/list' method.
+     * Returns a list of all registered tools, including their name, description, input schema, and annotations.
+     *
+     * @param JsonRpcMessage $message The incoming 'tools/list' message.
+     * @return JsonRpcMessage A response message containing the list of tools.
+     */
     private function handleList(JsonRpcMessage $message): JsonRpcMessage
     {
         $tools = [];
@@ -81,11 +123,20 @@ class ToolsCapability implements CapabilityInterface
         return JsonRpcMessage::result(['tools' => $tools], $message->id);
     }
 
+    /**
+     * Handles the 'tools/call' method.
+     * Executes a specified tool with the given arguments.
+     *
+     * @param JsonRpcMessage $message The incoming 'tools/call' message.
+     *                                It expects 'name' (string) and 'arguments' (object|array) in params.
+     * @return JsonRpcMessage A response message containing the tool's output or an error.
+     *                       The result includes 'content' (array of content items) and 'isError' (bool).
+     */
     private function handleCall(JsonRpcMessage $message): JsonRpcMessage
     {
         $params = $message->params;
         $toolName = $params['name'] ?? null;
-        $toolArguments = $params['arguments'] ?? []; // Default to empty array if not provided
+        $toolArguments = $params['arguments'] ?? [];
 
         if (!is_string($toolName) || empty($toolName)) {
             $contentItemsArray = [[
@@ -112,7 +163,7 @@ class ToolsCapability implements CapabilityInterface
             try {
                 // $tool->execute() returns an array of content item arrays
                 $contentItemsArray = $tool->execute($toolArguments);
-                $isError = false; // Explicitly set after successful execution
+                $isError = false;
             } catch (\Throwable $e) {
                 // Optional: Log the full error internally
                 // error_log("Tool execution error for '{$tool->getName()}': " . $e->getMessage() . "\n" . $e->getTraceAsString());
@@ -134,6 +185,15 @@ class ToolsCapability implements CapabilityInterface
         return JsonRpcMessage::result($callToolResultData, $message->id);
     }
 
+    /**
+     * Handles the 'completion/complete' method.
+     * Provides suggestions for a tool argument based on the current input.
+     *
+     * @param JsonRpcMessage $message The incoming 'completion/complete' message.
+     *                                It expects 'ref' (object with 'type' and 'name') and
+     *                                'argument' (object with 'name' and 'value') in params.
+     * @return JsonRpcMessage A response message containing completion suggestions or an error.
+     */
     private function handleComplete(JsonRpcMessage $message): JsonRpcMessage
     {
         if (!isset($message->params['ref']) || !is_array($message->params['ref'])) {

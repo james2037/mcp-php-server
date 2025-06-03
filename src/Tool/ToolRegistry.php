@@ -1,9 +1,5 @@
 <?php
 
-/**
- * This file contains the ToolRegistry class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool;
@@ -13,16 +9,20 @@ use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use ReflectionClass;
 
 /**
- * A registry for tools.
+ * Manages the discovery and registration of Tool instances.
+ * Tools are typically discovered from classes annotated with the Tool attribute.
+ * This registry uses the tool's name as the key for registration.
  */
 class ToolRegistry extends Registry
 {
     /**
-     * Creates a Tool instance from a ReflectionClass.
+     * Creates a Tool instance from its ReflectionClass object.
+     * It expects the class to be a subclass of Tool and have a ToolAttribute.
      *
-     * @param ReflectionClass $reflection The reflection class.
-     * @param array $config Optional configuration for the tool.
-     * @return Tool|null The Tool instance or null if creation fails.
+     * @param ReflectionClass $reflection The reflection object for the tool class.
+     * @param array $config Optional configuration array to pass to the tool's constructor.
+     * @return Tool|null The created Tool instance, or null if the class is not a valid tool
+     *                   (e.g., missing ToolAttribute or not an instance of Tool).
      */
     protected function createFromReflection(
         ReflectionClass $reflection,
@@ -30,36 +30,43 @@ class ToolRegistry extends Registry
     ): ?Tool {
         $toolAttr = $reflection->getAttributes(ToolAttribute::class)[0] ?? null;
         if ($toolAttr !== null) {
-            $tool = new ($reflection->getName())($config);
-            if ($tool instanceof Tool) {
-                return $tool;
+            // Ensure the class is a subclass of Tool before instantiation
+            if (!$reflection->isSubclassOf(Tool::class) && $reflection->getName() !== Tool::class) {
+                // Optionally log this issue or handle as an error
+                return null;
+            }
+            $toolInstance = $reflection->newInstanceArgs([$config]); // Pass config to constructor
+            if ($toolInstance instanceof Tool) {
+                return $toolInstance;
             }
         }
         return null;
     }
 
     /**
-     * Gets the key for a given item.
+     * Gets the name of the Tool as its unique key for registration.
      *
-     * @param object $item The item.
-     * @return string The key for the item.
-     * @throws \InvalidArgumentException If the item is not a Tool.
+     * @param object $item The item, which must be an instance of Tool.
+     * @return string The name of the Tool.
+     * @throws \InvalidArgumentException If the provided item is not an instance of Tool.
      */
     protected function getItemKey(object $item): string
     {
         if (!$item instanceof Tool) {
-            throw new \InvalidArgumentException('Item must be a Tool');
+            throw new \InvalidArgumentException('Item must be an instance of ' . Tool::class);
         }
         return $item->getName();
     }
 
     /**
-     * Gets all registered tools.
+     * Retrieves all registered tools.
      *
-     * @return array<string, Tool>
+     * @return array<string, Tool> An associative array of tools, keyed by their names.
      */
     public function getTools(): array
     {
-        return $this->getItems();
+        /** @var array<string, Tool> $items */
+        $items = $this->getItems();
+        return $items;
     }
 }

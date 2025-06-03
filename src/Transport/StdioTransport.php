@@ -10,12 +10,16 @@ use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Exception\TransportException;
 
 /**
- * Implements a transport using STDIN, STDOUT, and STDERR.
+ * Implements a transport using STDIN, STDOUT, and STDERR for line-based JSON messaging.
+ * Each JSON-RPC message (or batch of messages) is expected to be on a single line.
  */
 class StdioTransport extends AbstractTransport
 {
+    /** @var resource The standard input stream. */
     private $stdin;
+    /** @var resource The standard output stream. */
     private $stdout;
+    /** @var resource The standard error stream. */
     private $stderr;
 
     /**
@@ -30,29 +34,29 @@ class StdioTransport extends AbstractTransport
     }
 
     /**
-     * Receives a message from STDIN.
+     * Receives a line from STDIN and attempts to parse it as one or more JsonRpcMessage objects.
      *
-     * @return JsonRpcMessage[]|null An array of messages, null if no message,
-     *                               or empty array if stream is closed.
-     * @throws \RuntimeException If there is a JSON parsing error or invalid message structure.
+     * Handles single JSON-RPC requests or batch requests (JSON array of requests).
+     *
+     * @return JsonRpcMessage[]|null An array of JsonRpcMessage objects if a line is successfully parsed.
+     *                               Returns an empty array if STDIN is closed (EOF).
+     *                               Returns null if an empty line is read (transport still open).
+     * @throws \RuntimeException If there is a JSON parsing error or an invalid JSON-RPC message structure.
      */
     public function receive(): ?array
     {
         $line = fgets($this->stdin);
 
         if ($line === false) {
-            // Stream closed
-            return [];
+            return []; // Stream closed
         }
 
         $line = trim($line);
         if ($line === '') {
-            // No message received, transport open
-            return null;
+            return null; // No message received, transport open
         }
 
         try {
-            // Attempt to decode as JSON. We need to inspect its structure.
             $decodedInput = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
 
             // Check for batch request: a non-empty numerically indexed array
@@ -63,15 +67,16 @@ class StdioTransport extends AbstractTransport
             ) {
                 if (empty($decodedInput)) {
                     // Empty array received, spec implies it's invalid for batch,
-                    // but we should return empty messages.
-                    return [];
+                    // but JsonRpcMessage::fromJsonArray will handle this (likely an error or empty messages).
+                    // For consistency, we let fromJsonArray parse it.
+                    return JsonRpcMessage::fromJsonArray($line);
                 }
                 // It's a batch, let fromJsonArray handle full parsing
                 // and validation from original string
                 return JsonRpcMessage::fromJsonArray($line);
             } elseif (
-                is_object($decodedInput)
-                || (is_array($decodedInput) && !empty($decodedInput))
+                is_object($decodedInput) // Decoded as object if not assoc=true
+                || (is_array($decodedInput) && !empty($decodedInput)) // Decoded as non-empty assoc array
             ) {
                 // It's a single request (object) or potentially an associative
                 // array representing a single request.
@@ -82,7 +87,7 @@ class StdioTransport extends AbstractTransport
                 // Invalid structure that is not explicitly an empty array
                 // or a valid single/batch candidate
                 throw new \RuntimeException(
-                    'Invalid JSON-RPC message structure.',
+                    'Invalid JSON-RPC message structure. Expected object or array of objects.',
                     JsonRpcMessage::PARSE_ERROR
                 );
             }
@@ -94,23 +99,23 @@ class StdioTransport extends AbstractTransport
             );
         } catch (\Exception $e) {
             // Catch other exceptions from JsonRpcMessage::fromJson or fromJsonArray
-            $this->log("Error processing message: " . $e->getMessage());
+            $this->log("Error processing received message: " . $e->getMessage());
             // Depending on desired behavior, re-throw or return error specific message
             // For now, let's re-throw as a runtime exception consistent with parse errors
             throw new \RuntimeException(
                 'Error parsing JSON-RPC message: ' . $e->getMessage(),
-                JsonRpcMessage::INVALID_REQUEST,
+                JsonRpcMessage::INVALID_REQUEST, // Or PARSE_ERROR if more appropriate
                 $e
             );
         }
     }
 
     /**
-     * Sends a JSON-RPC message or batch of messages to STDOUT.
+     * Sends a JSON-RPC message or batch of messages to STDOUT, followed by a newline.
      *
-     * @param JsonRpcMessage|JsonRpcMessage[] $message The message or messages to send.
-     * @return void
-     * @throws TransportException If the message contains newlines or fails to write.
+     * @param JsonRpcMessage|JsonRpcMessage[] $message The JsonRpcMessage object or array of JsonRpcMessage objects to send.
+     * @throws TransportException If the message contains internal newlines (which would break line-based transport)
+     *                            or if writing to STDOUT fails.
      */
     public function send(JsonRpcMessage|array $message): void
     {
@@ -122,31 +127,31 @@ class StdioTransport extends AbstractTransport
         }
 
         if (strpos($json, "\n") !== false) {
-            throw new TransportException("Message contains newlines");
+            throw new TransportException("Message to be sent contains internal newlines, which is not allowed for StdioTransport.");
         }
 
-        $written = fwrite($this->stdout, $json . "\n");  // Now using the stored stream
-        if ($written === false || $written !== strlen($json) + 1) {
-            throw new TransportException("Failed to write complete message");
+        $written = fwrite($this->stdout, $json . "\n");
+        if ($written === false || $written < strlen($json) + 1) { // Check if less than expected was written
+            throw new TransportException("Failed to write complete message to STDOUT.");
         }
 
         fflush($this->stdout);
     }
 
     /**
-     * Logs a message to STDERR.
+     * Logs a message to STDERR, followed by a newline.
      *
      * @param string $message The message to log.
-     * @return void
      */
     public function log(string $message): void
     {
-        fwrite($this->stderr, $message . "\n");  // Now using the stored stream
+        fwrite($this->stderr, $message . "\n");
         fflush($this->stderr);
     }
 
     /**
-     * Gets the input stream (STDIN).
+     * Gets the input stream, defaulting to STDIN.
+     * Protected to allow overriding in tests.
      *
      * @return resource The input stream.
      */
@@ -156,7 +161,8 @@ class StdioTransport extends AbstractTransport
     }
 
     /**
-     * Gets the output stream (STDOUT).
+     * Gets the output stream, defaulting to STDOUT.
+     * Protected to allow overriding in tests.
      *
      * @return resource The output stream.
      */
@@ -166,7 +172,8 @@ class StdioTransport extends AbstractTransport
     }
 
     /**
-     * Gets the error stream (STDERR).
+     * Gets the error stream, defaulting to STDERR.
+     * Protected to allow overriding in tests.
      *
      * @return resource The error stream.
      */

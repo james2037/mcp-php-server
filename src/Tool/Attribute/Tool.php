@@ -1,19 +1,16 @@
 <?php
 
-/**
- * This file contains the Tool class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Attribute;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_CLASS)]
 /**
- * Represents a tool.
+ * PHP attribute to define a class as a Tool.
+ * It allows specifying the tool's name and description directly on the class.
  */
+#[Attribute(Attribute::TARGET_CLASS)]
 final class Tool
 {
     /**

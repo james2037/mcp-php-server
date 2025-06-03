@@ -12,19 +12,43 @@ use Laminas\Diactoros\ResponseFactory;      // For default factory
 use Laminas\Diactoros\StreamFactory;       // For default factory
 use Laminas\Diactoros\ServerRequestFactory;
 
-// For default request
-
+/**
+ * Implements the TransportInterface for HTTP communication.
+ *
+ * This transport handles JSON-RPC messages over HTTP POST requests.
+ * It uses PSR-7 interfaces (ServerRequestInterface, ResponseInterface,
+ * ResponseFactoryInterface, StreamFactoryInterface) for request and response handling,
+ * making it compatible with various PSR-7 implementations and middleware.
+ *
+ * Note: This class has been simplified. All SSE, specific GET/DELETE handling,
+ * Origin checks, complex ACK logic, and related session properties have been removed.
+ * It primarily focuses on basic JSON-RPC via POST.
+ */
 class HttpTransport extends AbstractTransport
 {
-    // All SSE, DELETE, Origin, complex ACK logic, and related session properties are removed.
     // Kept essential properties for basic POST JSON-RPC.
+    /** @var ResponseInterface|null The PSR-7 response object being prepared. */
     private ?ResponseInterface $response = null;
+    /** @var bool Flag to track if the send() method has been called and the response is ready. */
     private bool $responsePrepared = false; // To track if send() has been called
 
+    /** @var ServerRequestInterface The current PSR-7 server request. */
     protected ServerRequestInterface $request;
+    /** @var ResponseFactoryInterface Factory for creating PSR-7 response objects. */
     private ResponseFactoryInterface $responseFactory;
+    /** @var StreamFactoryInterface Factory for creating PSR-7 stream objects. */
     private StreamFactoryInterface $streamFactory;
 
+    /**
+     * Constructs an HttpTransport instance.
+     *
+     * @param ResponseFactoryInterface|null $responseFactory Optional PSR-7 response factory.
+     *                                                       Defaults to Laminas Diactoros ResponseFactory.
+     * @param StreamFactoryInterface|null $streamFactory Optional PSR-7 stream factory.
+     *                                                     Defaults to Laminas Diactoros StreamFactory.
+     * @param ServerRequestInterface|null $request Optional PSR-7 server request.
+     *                                             Defaults to a request created from globals.
+     */
     public function __construct(
         ?ResponseFactoryInterface $responseFactory = null,
         ?StreamFactoryInterface $streamFactory = null,
@@ -38,6 +62,20 @@ class HttpTransport extends AbstractTransport
         $this->response = $this->responseFactory->createResponse();
     }
 
+    /**
+     * Receives and decodes the JSON-RPC request payload from the HTTP request.
+     *
+     * Expects a POST request with 'application/json' Content-Type.
+     * Validates the JSON structure (must be a JSON object or an array of JSON objects).
+     * This method does not parse into JsonRpcMessage objects itself but returns the
+     * raw associative array(s) decoded from the JSON payload.
+     *
+     * @return array Returns an associative array for a single JSON-RPC request,
+     *               or a list of associative arrays for a batch request.
+     * @throws TransportException If the request method is not POST, Content-Type is not JSON,
+     *                            the body is empty, JSON is malformed, or the JSON structure
+     *                            is not a valid JSON-RPC request object or batch.
+     */
     public function receive(): array
     {
         if ($this->request->getMethod() !== 'POST') {
@@ -60,7 +98,6 @@ class HttpTransport extends AbstractTransport
             // Basic validation for JSON-RPC structure (object or array of objects).
             // json_decode($body, true) turns JSON objects into associative arrays.
             $isAssocArray = function (array $arr): bool {
- // Type hint for $arr
                 // An empty array is not an associative array in JSON-RPC object context.
                 // An associative array has string keys or non-sequential integer keys.
                 // array_is_list() checks for sequential, 0-indexed integer keys.
@@ -102,6 +139,19 @@ class HttpTransport extends AbstractTransport
         // Removed: catch (\Exception $e) for JsonRpcMessage parsing, as it's no longer done here.
     }
 
+    /**
+     * Prepares the PSR-7 response with the JSON-RPC payload.
+     *
+     * This method takes a single JsonRpcMessage, an array of JsonRpcMessages (for batch),
+     * or a pre-formatted payload array, encodes it to a JSON string, and sets it
+     * as the body of the PSR-7 response object. The response is typically a 200 OK,
+     * or a 500 Internal Server Error if encoding fails.
+     *
+     * @param JsonRpcMessage|array<mixed>|null $messageOrPayload The message(s) or pre-formatted payload to send.
+     *        If JsonRpcMessage, it will be serialized. If array, it's assumed to be a batch
+     *        of JsonRpcMessage objects or a ready-to-encode payload. Null means no specific
+     *        payload (though usually an error or empty response would be structured).
+     */
     public function send(JsonRpcMessage|array|null $messageOrPayload): void
     {
         // SSE, GET/DELETE, Origin validation, and complex ack-only (202) logic is removed.
@@ -118,6 +168,11 @@ class HttpTransport extends AbstractTransport
             // If it's a plain array (e.g. batch response), it's used as is.
             $payloadToEncode = $messageOrPayload;
         } elseif ($messageOrPayload === null) {
+            // If payload is null, an empty JSON response might be intended (e.g. "[]" for empty batch, or "" which becomes "null").
+            // For JSON-RPC, a response to a request usually has 'result' or 'error'.
+            // A notification expects no response. If this is for a request expecting a response,
+            // it might result in a parsing error on the client if it's not valid JSON-RPC (e.g. just "null").
+            // For now, allow encoding null, which results in JSON "null".
             $payloadToEncode = null;
         } else {
             // Should not be reached due to type hints. Internal error if it does.
@@ -133,7 +188,7 @@ class HttpTransport extends AbstractTransport
             $jsonErrorString = json_encode($errorPayload);
             $this->response = $this->responseFactory->createResponse(500)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($jsonErrorString));
+                ->withBody($this->streamFactory->createStream($jsonErrorString ?? '')); // Fallback for json_encode failure
             $this->responsePrepared = true;
             return;
         }
@@ -153,7 +208,7 @@ class HttpTransport extends AbstractTransport
             $jsonPayloadString = json_encode($errorPayload); // This should not fail.
             $this->response = $this->responseFactory->createResponse(500)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($jsonPayloadString));
+                ->withBody($this->streamFactory->createStream($jsonPayloadString ?? '')); // Fallback for json_encode failure
         } else {
             // Original behavior: always return 200 OK if JSON encoding is successful
             $httpStatus = 200;

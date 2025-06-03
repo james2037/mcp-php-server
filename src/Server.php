@@ -1,20 +1,13 @@
 <?php
 
-/**
- * This file contains the Server class.
- */
-
 namespace MCP\Server;
 
 use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Transport\TransportInterface;
 use MCP\Server\Capability\CapabilityInterface;
 use MCP\Server\Transport\HttpTransport;
-use Laminas\HttpHandlerRunner\Emitter\SapiEmitter; // Add this
-use Psr\Http\Message\ServerRequestInterface; // For type hinting if needed
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use MCP\Server\Exception\TransportException;
-
-// Ensure this is used if thrown by HttpTransport
 
 /**
  * Represents the MCP Server.
@@ -24,20 +17,26 @@ use MCP\Server\Exception\TransportException;
  */
 class Server
 {
-    /** @var array<int, CapabilityInterface> $capabilities Stores registered capabilities. */
+    /** @var array<int, CapabilityInterface> Registered capabilities. */
     private array $capabilities = [];
+    /** Flag indicating if the server has been initialized. */
     private bool $initialized = false;
+    /** Flag indicating if the server is in the process of shutting down. */
     private bool $shuttingDown = false;
-    private bool $capabilitiesAlreadyShutdown = false; // New flag
+    /** Flag to prevent shutting down capabilities multiple times. */
+    private bool $capabilitiesAlreadyShutdown = false;
+    /** The transport layer used for communication. */
     private ?TransportInterface $transport = null;
+    /** The log level set by the client via 'logging/setLevel'. */
     private ?string $clientSetLogLevel = null;
     // private ?ServerRequestInterface $currentHttpRequest = null; // Removed by simplification
 
-    // Authorization properties
+    /** Whether client authorization is required. */
     private bool $isAuthorizationRequired = false;
+    /** The expected authorization token value if authorization is required. */
     private ?string $expectedAuthTokenValue = null;
 
-    // PSR-3 Log Levels (RFC 5424)
+    /** Mapping of PSR-3 log levels to system log priorities. */
     private static array $logLevelPriorities = [
         'emergency' => LOG_EMERG, // 0
         'alert'     => LOG_ALERT,   // 1
@@ -52,8 +51,8 @@ class Server
     /**
      * Constructs a new Server instance.
      *
-     * @param string $name The name of the server.
-     * @param string $version The version of the server.
+     * @param string $name The name of the server. (Readonly property)
+     * @param string $version The version of the server. (Readonly property)
      */
     public function __construct(
         private readonly string $name,
@@ -128,8 +127,7 @@ class Server
 
         // Existing StdioTransport loop
         while (!$this->shuttingDown) {
-            // To keep it in scope for outer catch if needed
-            $receivedMessages = null;
+            $receivedMessages = null; // To keep it in scope for outer catch if needed
             try {
                 $receivedMessages = $this->transport->receive(); // Expects ?array
 
@@ -144,7 +142,7 @@ class Server
                     if ($this->transport->isClosed()) {
                         break; // Closed, exit loop
                     }
-                    break;
+                    break; // Assume empty batch means end or error, exit.
                 }
 
                 $responseMessages = [];
@@ -157,8 +155,7 @@ class Server
                         );
                         continue;
                     }
-                    // Use processSingleMessage for cleaner loop
-                    $response = $this->processSingleMessage($currentMessage);
+                    $response = $this->processSingleMessage($currentMessage); // Use processSingleMessage for cleaner loop
                     if ($response) {
                         $responseMessages[] = $response;
                     }
@@ -183,12 +180,17 @@ class Server
                     );
                     $this->shuttingDown = true; // Force shutdown
                 }
+                // For stdio, we might not be able to send a JSON-RPC error if transport is broken.
             }
         }
         $this->shutdown();
     }
 
-
+    /**
+     * Handles the request-response cycle for HTTP transport.
+     * It receives a payload, processes it (single or batch),
+     * sends the response(s), and emits the HTTP response.
+     */
     private function runHttpRequestCycle(): void
     {
         if (!($this->transport instanceof HttpTransport)) {
@@ -226,6 +228,8 @@ class Server
                         }
                     } catch (\Throwable $e) {
                         $id = is_array($rawMessage) && array_key_exists('id', $rawMessage) ? $rawMessage['id'] : null;
+                        // Ensure ID is string or null for JsonRpcMessage::error
+                        $id = is_scalar($id) ? (string)$id : null;
                         $responseMessages[] = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, "Error processing item in batch: " . $e->getMessage(), $id);
                     }
                 }
@@ -240,6 +244,8 @@ class Server
                     $responsePayload = $this->processSingleMessage($message);
                 } catch (\Throwable $e) {
                     $id = is_array($rawPayload) && array_key_exists('id', $rawPayload) ? $rawPayload['id'] : null;
+                    // Ensure ID is string or null for JsonRpcMessage::error
+                    $id = is_scalar($id) ? (string)$id : null;
                     $errorCode = JsonRpcMessage::INTERNAL_ERROR; // Default
                     if ($e instanceof \MCP\Server\Exception\MethodNotSupportedException) {
                         $errorCode = JsonRpcMessage::METHOD_NOT_FOUND;
@@ -250,20 +256,19 @@ class Server
                     } elseif ($e instanceof \RuntimeException && $e->getCode() !== 0 && is_int($e->getCode())) {
                         $errorCode = $e->getCode();
                     }
-
                     $responsePayload = JsonRpcMessage::error($errorCode, "Error processing request: " . $e->getMessage(), $id);
                 }
             }
         } catch (TransportException $e) {
             $this->logMessage('error', 'TransportException in HTTP cycle: ' . $e->getMessage(), 'Server.runHttpRequestCycle', ['code' => $e->getCode()]);
             $errorCode = (is_int($e->getCode()) && $e->getCode() !== 0) ? $e->getCode() : JsonRpcMessage::INTERNAL_ERROR;
-            $responsePayload = JsonRpcMessage::error($errorCode, $e->getMessage(), null);
-        } catch (\Throwable $e) {
+            $responsePayload = JsonRpcMessage::error($errorCode, $e->getMessage(), null); // ID is null for transport errors not tied to a specific request ID
+        } catch (\Throwable $e) { // Catchall for unexpected errors
             $this->logMessage('critical', "Critical Server Error in HTTP cycle: " . $e->getMessage(), 'Server.runHttpRequestCycle', ['trace' => $e->getTraceAsString()]);
-            $responsePayload = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Internal server error.', null);
+            $responsePayload = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Internal server error.', null); // ID is null
         }
 
-        $httpTransport->send($responsePayload);
+        $httpTransport->send($responsePayload); // $responsePayload could be single JsonRpcMessage or array of them, or null for no response
         $httpResponse = $httpTransport->getResponse(); // This will always return a ResponseInterface
 
         if (!headers_sent()) {
@@ -417,17 +422,31 @@ class Server
         );
     }
 
+    /**
+     * Gathers capabilities from all registered modules and formats them for the 'initialize' response.
+     * Also adds standard 'logging' and 'completions' capabilities.
+     *
+     * @return array<string, mixed> Associative array of server capabilities.
+     */
     private function getServerCapabilitiesArray(): array
     {
         $serverCapabilities = [];
         foreach ($this->capabilities as $capability) {
             $serverCapabilities = array_merge($serverCapabilities, $capability->getCapabilities());
         }
-        $serverCapabilities['logging'] = new \stdClass();
-        $serverCapabilities['completions'] = new \stdClass();
+        $serverCapabilities['logging'] = new \stdClass(); // Indicates presence of logging/setLevel
+        $serverCapabilities['completions'] = new \stdClass(); // Indicates presence of completion/complete
         return $serverCapabilities;
     }
 
+    /**
+     * Processes a single JsonRpcMessage.
+     * This method encapsulates the logic for handling a message and catching exceptions,
+     * converting them to JSON-RPC error responses if the message was a request.
+     *
+     * @param JsonRpcMessage $currentMessage The message to process.
+     * @return JsonRpcMessage|null The response message, or null if it's a notification or an error occurs for a notification.
+     */
     private function processSingleMessage(JsonRpcMessage $currentMessage): ?JsonRpcMessage
     {
         try {
@@ -438,17 +457,20 @@ class Server
         } catch (\Throwable $e) {
             $logCtx = ['id' => $currentMessage->id, 'trace' => $e->getTraceAsString()];
             $this->logMessage('error', "Error processing individual message: " . $e->getMessage(), 'Server.processSingleMessage', $logCtx);
-            if ($currentMessage->isRequest()) {
-                $code = JsonRpcMessage::INTERNAL_ERROR;
+
+            if ($currentMessage->isRequest()) { // Only generate error responses for requests
+                $code = JsonRpcMessage::INTERNAL_ERROR; // Default error code
                 if ($e instanceof \MCP\Server\Exception\MethodNotSupportedException) {
                     $code = JsonRpcMessage::METHOD_NOT_FOUND;
-                } elseif ($e instanceof \MCP\Server\Exception\InvalidRequestException) { // Assuming this exists or similar
+                } elseif ($e instanceof \MCP\Server\Exception\InvalidRequestException) {
                     $code = JsonRpcMessage::INVALID_REQUEST;
-                } elseif ($e instanceof \MCP\Server\Exception\InvalidParamsException) { // Assuming this exists
+                } elseif ($e instanceof \MCP\Server\Exception\InvalidParamsException) {
                     $code = JsonRpcMessage::INVALID_PARAMS;
                 } elseif ($e instanceof \RuntimeException && $e->getCode() !== 0 && is_int($e->getCode())) {
+                    // Use the code from RuntimeException if it's a valid JSON-RPC error code
                     $code = $e->getCode();
                 } elseif (is_int($e->getCode()) && $e->getCode() !== 0) {
+                    // Use any other valid integer exception code
                     $code = $e->getCode();
                 }
                 // The following check was deemed always false by PHPStan because $code should always be a valid non-zero integer here.
@@ -458,9 +480,8 @@ class Server
                 return JsonRpcMessage::error($code, $e->getMessage(), $currentMessage->id);
             }
         }
-        return null;
+        return null; // No response for notifications or if an error occurs processing a notification
     }
-
 
     /**
      * Handles the 'shutdown' message.

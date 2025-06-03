@@ -1,21 +1,24 @@
 <?php
 
-/**
- * This file contains the ToolAnnotations class.
- */
-
 namespace MCP\Server\Tool\Attribute;
 
-#[\Attribute(\Attribute::TARGET_CLASS)]
 /**
- * Represents annotations for a tool.
+ * PHP attribute to define various annotations for a Tool class,
+ * such as title, read-only hint, destructive hint, idempotent hint, and open-world hint.
+ * These annotations provide metadata about the tool's behavior and characteristics.
  */
+#[\Attribute(\Attribute::TARGET_CLASS)]
 final class ToolAnnotations
 {
+    /** Optional title for the tool. */
     public ?string $title = null;
+    /** Hint indicating if the tool is read-only (i.e., does not change state). */
     public ?bool $readOnlyHint = null;
+    /** Hint indicating if the tool has destructive effects (e.g., deletes data). */
     public ?bool $destructiveHint = null;
+    /** Hint indicating if the tool is idempotent (i.e., multiple identical calls have the same effect as one). */
     public ?bool $idempotentHint = null;
+    /** Hint indicating if the tool operates with open-world assumptions (i.e., its knowledge of the world is incomplete). */
     public ?bool $openWorldHint = null;
 
     /**

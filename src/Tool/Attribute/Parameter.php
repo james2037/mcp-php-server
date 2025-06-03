@@ -1,19 +1,17 @@
 <?php
 
-/**
- * This file contains the Parameter class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Attribute;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
 /**
- * Represents a parameter for a tool.
+ * PHP attribute to define a parameter for a Tool method.
+ * It allows specifying the parameter's name, type, description, and whether it's required.
+ * This attribute is repeatable for methods that have multiple annotated parameters.
  */
+#[Attribute(Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
 final class Parameter
 {
     /**
