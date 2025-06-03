@@ -255,7 +255,16 @@ class ToolsCapability implements CapabilityInterface
         // For now, Tool::getCompletionSuggestions will receive only arg name and its value.
         $allCurrentArguments = $message->params['arguments'] ?? []; // Pass other arguments if available under 'arguments' key, like in tools/call
 
-        $suggestions = $tool->getCompletionSuggestions($argumentName, $currentValue, $allCurrentArguments);
+        try {
+            $suggestions = $tool->getCompletionSuggestions($argumentName, $currentValue, $allCurrentArguments);
+        } catch (\TypeError $e) {
+            // If a TypeError occurs because a tool's getCompletionSuggestions method violates its declared
+            // array return type (e.g., returns a string or null directly).
+            // We set $suggestions to a non-array type (e.g. null) to trigger the error handling below.
+            // Optionally, log the error for server-side diagnostics:
+            // error_log("TypeError in tool '{$toolName}' for getCompletionSuggestions: " . $e->getMessage());
+            $suggestions = null; // This will then be caught by the !is_array($suggestions) check.
+        }
 
         // Validate suggestions structure
         // Based on PHPStan's analysis of the documented return type for $suggestions:
@@ -290,8 +299,7 @@ class ToolsCapability implements CapabilityInterface
             // considers them redundant if the keys are present, due to the strict PHPDoc type.
         }
 
-        // Restore the error handling block
-        // @phpstan-ignore-next-line This block ensures error messages potentially set by prior logic are returned.
+        // This block ensures error messages potentially set by prior logic are returned.
         if ($errorMessage !== null) {
             // Intentionally not logging the $errorMessage here in production,
             // but it was useful for debugging. The client receives it.

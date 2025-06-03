@@ -63,6 +63,15 @@ class ToolsCapabilityTest extends TestCase
         $this->assertEquals('Input data', $toolData['inputSchema']['properties']->data->description);
     }
 
+    public function testHandleListWithNullIdIsNotification(): void
+    {
+        $request = new JsonRpcMessage('tools/list', [], null); // ID is null
+        $capability = new ToolsCapability(); // Fresh instance, no tools needed for this test
+        $response = $capability->handleMessage($request);
+
+        $this->assertNull($response, "handleMessage should return null for a notification (null id)");
+    }
+
     public function testHandleCall(): void
     {
         $request = new JsonRpcMessage(
@@ -80,6 +89,19 @@ class ToolsCapabilityTest extends TestCase
         $this->assertCount(1, $response->result['content']);
         // Asserting the structure created by createTextContent(...)->toArray()
         $this->assertEquals(['type' => 'text', 'text' => 'Result: test input'], $response->result['content'][0]);
+    }
+
+    public function testHandleCallWithNullIdIsNotification(): void
+    {
+        $request = new JsonRpcMessage(
+            'tools/call',
+            ['name' => 'test', 'arguments' => ['data' => 'test input']],
+            null // ID is null
+        );
+        // Use the capability instance from setUp, which has MockTool registered
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNull($response, "handleMessage should return null for a tools/call notification (null id)");
     }
 
     public function testHandleCallWithUnknownTool(): void
@@ -271,6 +293,22 @@ class ToolsCapabilityTest extends TestCase
         $this->assertFalse($response->result['completion']['hasMore']);
     }
 
+    public function testHandleCompleteWithNullIdIsNotification(): void
+    {
+        $request = new JsonRpcMessage(
+            'completion/complete',
+            [
+                'ref' => ['type' => 'ref/prompt', 'name' => 'test'],
+                'argument' => ['name' => 'data', 'value' => 'ap']
+            ],
+            null // ID is null
+        );
+        // Use the capability instance from setUp, which has MockTool registered
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNull($response, "handleMessage should return null for a completion/complete notification (null id)");
+    }
+
     public function testHandleCompleteDefaultSuggestions(): void
     {
         $basicTool = new #[ToolAttribute('basic', 'Basic Tool')] class extends Tool {
@@ -438,6 +476,48 @@ class ToolsCapabilityTest extends TestCase
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
         self::assertIsString($response->error['message']); // Ensure message is a string
         $this->assertStringContainsString("Tool 'customBadValuesTool' returned suggestions where 'values' contains non-string elements.", $response->error['message']);
+    }
+
+    public function testHandleCompleteWithToolReturningNonArraySuggestions(): void
+    {
+        $nonArraySuggestionsTool = new #[ToolAttribute('nonArraySuggestionsTool', 'Tool returning non-array suggestions')] class extends Tool {
+            protected function doExecute(array $arguments): array
+            {
+                return []; // Not called in this test path
+            }
+
+            // Declare as returning array to satisfy PHP's inheritance rules,
+            // but actually return a string to test the error handling in ToolsCapability.
+            public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allCurrentArguments = []): array
+            {
+                // @phpstan-ignore-next-line Deliberately returning a non-array to test error handling
+                return "invalid_suggestions_not_an_array"; // @phpstan-ignore-line
+            }
+        };
+
+        $capability = new ToolsCapability();
+        $capability->addTool($nonArraySuggestionsTool);
+
+        $request = new JsonRpcMessage(
+            'completion/complete',
+            [
+                'ref' => ['type' => 'ref/tool', 'name' => 'nonArraySuggestionsTool'],
+                'argument' => ['name' => 'someArg', 'value' => 'a']
+            ],
+            'comp_non_array_sugg'
+        );
+
+        $response = $capability->handleMessage($request);
+
+        $this->assertNotNull($response, "Response should not be null for a request with an ID.");
+        $this->assertNotNull($response->error, "Error should be populated when suggestions are not an array.");
+        $this->assertNull($response->result, "Result should be null when an error occurs.");
+
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
+        $this->assertStringContainsString(
+            "Tool 'nonArraySuggestionsTool' returned suggestions that is not an array.",
+            $response->error['message']
+        );
     }
 
     public function testCanHandleMessageWithValidMethods(): void
