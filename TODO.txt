@@ -1,0 +1,10 @@
+# TODO List
+
+## Potential SDK Bugs
+
+- **Method Resolution After Initialize:**
+  Observed an issue where `Tools/*` or `Resources/*` methods return a "Method not found" error (JSON-RPC error -32601) if called immediately after a successful `initialize` method within the same logical session or batch.
+  - **STDIO Transport:** When `initialize` is sent, followed by a method like `Tools/echo` in the same piped stdin stream, the `Tools/echo` call fails.
+  - **HTTP Transport (Batched Requests):** When a batch request is sent (e.g., `[initialize_request, tools_echo_request]`), the `initialize` part succeeds, but the subsequent `Tools/echo` in the same batch fails.
+  - This suggests that capabilities (tools, resources) might be correctly registered and reported during `initialize`, but the server's dispatcher or capability registries fail to locate them for subsequent calls within that same initialized context.
+  - Individual HTTP requests for tools/resources (each in its own script execution) work if `initialize` was also part of that specific request, or fail with "Server not initialized" if it wasn't (which is expected for stateless HTTP handling without external session persistence).

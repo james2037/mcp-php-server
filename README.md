@@ -4,6 +4,20 @@ This project provides a PHP implementation of the Model Context Protocol (MCP), 
 
 MCP is an open protocol that standardizes how applications interact with LLMs. For more information about MCP, please visit the official website: [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 
+## Features
+
+This PHP MCP SDK provides the following core features:
+
+*   **Server Implementation**: Easily create MCP compliant servers.
+*   **Capabilities**:
+    *   `Tools`: Expose functionalities for LLMs to execute.
+    *   `Resources`: Provide data and content to LLMs.
+*   **Transports**:
+    *   `StdioTransport`: For command-line based MCP servers.
+    *   `HttpTransport`: For exposing MCP servers over HTTP (compatible with standard PHP web server environments like Apache/Nginx with PHP-FPM/mod_php).
+*   **JSON-RPC Handling**: Manages request parsing and response formatting.
+*   **Attribute-Based Configuration**: Use PHP attributes to define tools, resources, and their parameters.
+
 ## Getting Started
 
 This guide will walk you through creating simple MCP servers using this SDK.
@@ -63,15 +77,9 @@ use MCP\Server\Resource\ResourceContents;
 #[ToolAttribute(name: "echo", description: "Echoes back the provided message.")]
 class EchoTool extends BaseTool
 {
-    protected function doExecute(
-        #[Parameter(name: "message", type: "string", description: "The message to echo.", required: true)]
-        string $message // Note: SDK will pass arguments as an array to doExecute.
-                       // For direct typed parameters, the method signature should be:
-                       // protected function doExecute(array $arguments): array
-                       // and you would access $arguments['message']
-    ): array {
-        // For this example, assuming $message is directly available.
-        // A more robust implementation would use $arguments['message'].
+    protected function doExecute(array $arguments): array {
+        // Access parameters from the $arguments array
+        $message = $arguments['message'] ?? 'Default message if not provided';
         return [$this->createTextContent("Echo: " . $message)];
     }
 }
@@ -109,12 +117,11 @@ $transport = new StdioTransport();
 $server->connect($transport);
 
 // 7. Run the Server
-fwrite(STDERR, "STDIO Server listening...
-"); // Optional: message to stderr
+fwrite(STDERR, "STDIO Server listening...\n"); // Optional: message to stderr
 $server->run();
 
 ```
-*(Note: The `EchoTool::doExecute` signature in the snippet above is simplified for illustration. The actual `examples/stdio_server.php` uses `string $message` directly, but for strictness with the base class it should be `array $arguments` and access `$arguments['message']`.)*
+*(Note: The `EchoTool::doExecute` method uses `array $arguments` as its parameter. This is because the base `Tool` class passes all arguments as an associative array to this method. Your tool logic should then access specific parameters from this array, e.g., `$arguments['message']`.)*
 
 
 **Running the STDIO Server:**
@@ -155,13 +162,12 @@ use Nyholm\Psr7Server\ServerRequestCreator;
 // --- Assume EchoTool is defined as in the STDIO example ---
 use MCP\Server\Tool\Tool as BaseTool;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
-use MCP\Server\Tool\Attribute\Parameter;
+// Parameter attribute is on the actual class, not repeated in every snippet.
+// use MCP\Server\Tool\Attribute\Parameter;
 #[ToolAttribute(name: "echo", description: "Echoes back the provided message.")]
 class EchoTool extends BaseTool {
-    protected function doExecute(
-        #[Parameter(name: "message", type: "string", description: "The message to echo.", required: true)]
-        string $message
-    ): array {
+    protected function doExecute(array $arguments): array { // Changed signature
+        $message = $arguments['message'] ?? 'Default message if not provided'; // Added logic
         return [$this->createTextContent("Echo: " . $message)];
     }
 }
@@ -232,6 +238,54 @@ curl -X POST -H "Content-Type: application/json"      -d '{"jsonrpc":"2.0","meth
 ```json
 {"jsonrpc":"2.0","result":[{"type":"text","text":"Echo: Hello HTTP"}],"id":1}
 ```
+
+### Using with PHP-FPM or mod_php
+
+The `examples/http_server.php` script is designed to be compatible with common PHP web server setups like Apache or Nginx using PHP-FPM or `mod_php`.
+
+**Key Points:**
+
+*   **Single Request Processing:** The script, particularly `(new HttpTransport(...))->run()`, processes a single HTTP request and then exits. This model fits perfectly with how PHP-FPM and `mod_php` handle PHP requests. Each incoming HTTP request to your web server that's routed to this script will be a fresh execution.
+*   **PSR-7 `fromGlobals()`:** The use of `ServerRequestCreator::fromGlobals()` correctly populates the PSR-7 request object from PHP's global variables (e.g., `$_SERVER`, `$_POST`), which are populated by the web server.
+*   **Output Handling:** The SDK's `HttpTransport` uses a SAPI emitter (like `Laminas\HttpHandlerRunner\Emitter\SapiEmitter`) internally, which correctly sends headers and body content to the web server for transmission to the client.
+
+**Conceptual Webserver Configuration:**
+
+You would configure your web server (e.g., Nginx or Apache) to pass requests to your `http_server.php` script.
+
+*   **Nginx Example (conceptual):**
+    ```nginx
+    server {
+        listen 80;
+        server_name your-mcp-server.example.com;
+        root /path/to/your/project/examples; # Or wherever http_server.php is
+
+        location / {
+            try_files $uri /http_server.php$is_args$args;
+        }
+
+        location ~ \.php$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass unix:/var/run/php/php8.1-fpm.sock; # Adjust to your PHP-FPM version/socket
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+        }
+    }
+    ```
+
+*   **Apache Example (conceptual, using `.htaccess` in the `examples` directory if `AllowOverride` is enabled):**
+    ```apacheconf
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ http_server.php [L,QSA]
+    ```
+    Ensure `mod_rewrite` is enabled. Your Apache VirtualHost would also need to be configured to execute PHP scripts.
+
+**Running the Server:**
+Unlike the `php -S localhost:8000 examples/http_server.php` command (which runs PHP's built-in development server), in a PHP-FPM/mod_php setup, your main web server (Nginx/Apache) is responsible for receiving the request and passing it to the PHP interpreter. You don't run a separate PHP command to "start" the server in the same way.
+
+The `curl` commands provided earlier for testing the HTTP server would remain the same, targeting the URL configured in your web server (e.g., `http://your-mcp-server.example.com/`).
 
 ## Further Information
 
