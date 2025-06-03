@@ -653,7 +653,7 @@ class ServerTest extends TestCase
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertNotEmpty($rawOutput, "Server produced no output.");
-        $errorResponse = $rawOutput[0][0];
+        $errorResponse = $rawOutput[0]; // Corrected: A single error response is expected, not a batch.
         self::assertIsArray($errorResponse);
 
         $this->assertNotNull($errorResponse, "Error response for null ID init not found.");
@@ -675,7 +675,7 @@ class ServerTest extends TestCase
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertCount(2, $rawOutput, "Expected init and shutdown responses. Got: " . json_encode($rawOutput));
-        $errorResponse = $rawOutput[1][0];
+        $errorResponse = $rawOutput[1]; // Corrected: A single error response is expected, not a batch.
         self::assertIsArray($errorResponse);
 
         $this->assertNotNull($errorResponse, "Error response for null ID shutdown not found.");
@@ -700,7 +700,7 @@ class ServerTest extends TestCase
 
         $this->assertCount(4, $rawOutput, "Expected init, logging notification, setLevel error, and shutdown responses. Got: " . json_encode($rawOutput));
 
-        $setLevelErrorResponse = $rawOutput[2][0];
+        $setLevelErrorResponse = $rawOutput[2]; // Corrected: A single error response is expected, not a batch.
         self::assertIsArray($setLevelErrorResponse);
 
         $this->assertNotNull($setLevelErrorResponse, "Error response for null ID setLevel not found. Raw output: " . json_encode($rawOutput));

@@ -44,7 +44,8 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
-        $this->assertIsArray($response->result['resources']);
+        self::assertIsArray($response->result); // Ensure result is an array when error is null
+        $this->assertIsArray($response->result['resources']); // This was the target for "Offset 'resources' does not exist on array|null" if $response->result was not confirmed as array
         $this->assertCount(1, $response->result['resources']);
         $resourceData = $response->result['resources'][0];
 
@@ -69,7 +70,8 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
-        $this->assertArrayHasKey('contents', $response->result);
+        self::assertIsArray($response->result); // Ensure result is an array when error is null (Corrected: remove duplicate)
+        $this->assertArrayHasKey('contents', $response->result); // Target for "Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, array|null given."
         $this->assertIsArray($response->result['contents']);
         $this->assertCount(1, $response->result['contents']);
 
@@ -93,7 +95,8 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNull($response->error);
-        $this->assertArrayHasKey('contents', $response->result);
+        self::assertIsArray($response->result); // Ensure result is an array when error is null
+        $this->assertArrayHasKey('contents', $response->result); // Target for "Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, array|null given."
         $this->assertIsArray($response->result['contents']);
         $this->assertCount(1, $response->result['contents']);
 
@@ -120,6 +123,9 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object.");
+        self::assertIsArray($response->error);
+        self::assertArrayHasKey('message', $response->error);
+        self::assertIsString($response->error['message']); // Target for "Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given."
         $this->assertEquals(JsonRpcMessage::INVALID_PARAMS, $response->error['code']); // Or a more specific not_found
         $this->assertStringContainsString('Resource not found', $response->error['message']);
     }
@@ -131,6 +137,9 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object.");
+        self::assertIsArray($response->error);
+        self::assertArrayHasKey('message', $response->error);
+        self::assertIsString($response->error['message']); // Target for "Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given."
         $this->assertEquals(JsonRpcMessage::INVALID_PARAMS, $response->error['code']);
         $this->assertStringContainsString('Missing uri parameter', $response->error['message']);
     }
@@ -190,6 +199,9 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object.");
+        self::assertIsArray($response->error);
+        self::assertArrayHasKey('message', $response->error);
+        self::assertIsString($response->error['message']); // Target for "Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given."
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
         $this->assertStringContainsString('Error reading resource test://erroronread: Mock error reading resource', $response->error['message']);
     }
@@ -201,6 +213,9 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object.");
+        self::assertIsArray($response->error);
+        self::assertArrayHasKey('message', $response->error);
+        self::assertIsString($response->error['message']); // Target for "Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsStringIgnoringCase() expects string, mixed given."
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error["code"]);
         $this->assertStringContainsStringIgnoringCase("request id is missing", $response->error["message"]);
         $this->assertNull($response->id);
@@ -217,6 +232,9 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object.");
+        self::assertIsArray($response->error);
+        self::assertArrayHasKey('message', $response->error);
+        self::assertIsString($response->error['message']); // Target for "Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsStringIgnoringCase() expects string, mixed given."
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error["code"]);
         $this->assertStringContainsStringIgnoringCase("request id is missing", $response->error["message"]);
         $this->assertNull($response->id);
@@ -233,6 +251,9 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object for non-string URI.");
+        self::assertIsArray($response->error);
+        self::assertArrayHasKey('message', $response->error);
+        self::assertIsString($response->error['message']); // Target for "Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given."
         $this->assertEquals(JsonRpcMessage::INVALID_PARAMS, $response->error["code"]);
         $this->assertStringContainsString("URI parameter must be a string", $response->error["message"]);
     }
@@ -248,6 +269,9 @@ class ResourcesCapabilityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertNotNull($response->error, "Response should be an error object for array URI.");
+        self::assertIsArray($response->error);
+        self::assertArrayHasKey('message', $response->error);
+        self::assertIsString($response->error['message']); // Target for "Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given."
         $this->assertEquals(JsonRpcMessage::INVALID_PARAMS, $response->error["code"]);
         $this->assertStringContainsString("URI parameter must be a string", $response->error["message"]);
     }

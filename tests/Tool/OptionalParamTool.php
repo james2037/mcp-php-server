@@ -14,7 +14,13 @@ class OptionalParamTool extends Tool
         #[ParameterAttribute('title', type: 'string', description: 'Optional title', required: false)]
         array $arguments
     ): array {
-        $title = $arguments['title'] ?? 'friend';
-        return [$this->createTextContent("Hello {$title} {$arguments['name']}")];
+        $nameValue = $arguments['name'] ?? ''; // Default to empty if not provided, though 'name' is required by schema
+        $titleValue = $arguments['title'] ?? 'friend';
+
+        // Ensure they are strings before interpolation for PHPStan
+        $nameStr = is_scalar($nameValue) ? (string)$nameValue : '';
+        $titleStr = is_scalar($titleValue) ? (string)$titleValue : 'friend'; // title can default to 'friend'
+
+        return [$this->createTextContent("Hello {$titleStr} {$nameStr}")];
     }
 }

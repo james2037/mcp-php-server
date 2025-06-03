@@ -17,7 +17,13 @@ class ExtendedToolTest extends TestCase
 
         // Test schema includes optional parameter
         $schema = $tool->getInputSchema();
-        $this->assertTrue(isset($schema['properties']->title));
+        self::assertArrayHasKey('properties', $schema);
+        self::assertIsObject($schema['properties']);
+        self::assertObjectHasProperty('title', $schema['properties']); // Check property existence
+        $this->assertTrue(isset($schema['properties']->title)); // Keep original logic if it's about isset specifically
+
+        self::assertArrayHasKey('required', $schema);
+        self::assertIsArray($schema['required']);
         $this->assertContains('name', $schema['required']);
         $this->assertNotContains('title', $schema['required']);
 
@@ -45,8 +51,16 @@ class ExtendedToolTest extends TestCase
 
         // Test schema types
         $schema = $tool->getInputSchema();
-        $this->assertEquals('array', $schema['properties']->numbers->type);
-        $this->assertEquals('boolean', $schema['properties']->enabled->type);
+        self::assertArrayHasKey('properties', $schema);
+        self::assertIsObject($schema['properties']);
+
+        self::assertObjectHasProperty('numbers', $schema['properties']);
+        self::assertIsArray($schema['properties']->numbers); // It's an array from jsonSerialize()
+        $this->assertEquals('array', $schema['properties']->numbers['type']); // Array access
+
+        self::assertObjectHasProperty('enabled', $schema['properties']);
+        self::assertIsArray($schema['properties']->enabled); // It's an array
+        $this->assertEquals('boolean', $schema['properties']->enabled['type']); // Array access
 
         // Test array processing
         $result = $tool->execute(
@@ -118,7 +132,15 @@ class ExtendedToolTest extends TestCase
         $tool = new OptionalParamTool();
         $schema = $tool->getInputSchema();
 
-        $this->assertEquals('Name to greet', $schema['properties']->name->description);
-        $this->assertEquals('Optional title', $schema['properties']->title->description);
+        self::assertArrayHasKey('properties', $schema);
+        self::assertIsObject($schema['properties']);
+
+        self::assertObjectHasProperty('name', $schema['properties']);
+        self::assertIsArray($schema['properties']->name); // It's an array
+        $this->assertEquals('Name to greet', $schema['properties']->name['description']); // Array access
+
+        self::assertObjectHasProperty('title', $schema['properties']);
+        self::assertIsArray($schema['properties']->title); // It's an array
+        $this->assertEquals('Optional title', $schema['properties']->title['description']); // Array access
     }
 }

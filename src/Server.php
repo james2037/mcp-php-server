@@ -126,21 +126,20 @@ class Server
         }
 
         // Existing StdioTransport loop
-        $transport = $this->transport; // Assign to local variable for PHPStan
         while (!$this->shuttingDown) {
             $receivedMessages = null; // To keep it in scope for outer catch if needed
             try {
-                $receivedMessages = $transport->receive(); // Expects ?array
+                $receivedMessages = $this->transport->receive(); // Expects ?array
 
                 if ($receivedMessages === null) { // No message, transport open
-                    if ($transport->isClosed()) {
+                    if ($this->transport->isClosed()) {
                         break;
                     }
                     continue;
                 }
 
                 if (empty($receivedMessages)) { // Transport closed or empty batch
-                    if ($transport->isClosed()) {
+                    if ($this->transport->isClosed()) {
                         break; // Closed, exit loop
                     }
                     break; // Assume empty batch means end or error, exit.
@@ -163,7 +162,7 @@ class Server
                 }
 
                 if (!empty($responseMessages)) {
-                    $transport->send($responseMessages);
+                    $this->transport->send($responseMessages);
                 }
             } catch (\Throwable $e) {
                 $logCtx = ['trace' => $e->getTraceAsString()];
