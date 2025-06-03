@@ -9,17 +9,19 @@ use MCP\Server\Capability\ToolsCapability;
 use MCP\Server\Capability\ResourcesCapability;
 use MCP\Server\Tool\Tool as BaseTool;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
-use MCP\Server\Tool\Attribute\Parameter;
 use MCP\Server\Resource\Resource as BaseResource;
 use MCP\Server\Resource\Attribute\ResourceUri;
 use MCP\Server\Resource\ResourceContents;
 
+use MCP\Server\Tool\Attribute\Parameter; // Ensure Parameter is imported
+
 #[ToolAttribute(name: "echo", description: "Echoes back the provided message.")]
 class EchoTool extends BaseTool
 {
-    protected function doExecute(array $arguments): array {
-        // The Parameter attribute is on the base class, so we don't redefine it here.
-        // We just need to ensure the method signature is compatible.
+    protected function doExecute(
+        #[Parameter(name: 'message', type: 'string', description: 'The message to echo.')]
+        array $arguments
+    ): array {
         $message = $arguments['message'] ?? 'Default message if not provided';
         return [$this->createTextContent("Echo: " . $message)];
     }

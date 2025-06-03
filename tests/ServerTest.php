@@ -19,6 +19,8 @@ use Laminas\Diactoros\StreamFactory;
 use Laminas\Diactoros\ResponseFactory;
 use MCP\Server\Exception\TransportException;
 use MCP\Server\Transport\HttpTransport;
+use MCP\Server\Capability\ToolsCapability;
+use MCP\Server\Tests\Capability\MockTool;
 
 /**
  * @covers \MCP\Server\Server
@@ -558,5 +560,70 @@ class ServerTest extends TestCase
         self::assertIsArray($customErrorBody['error']);
         $this->assertEquals(12345, $customErrorBody['error']['code']);
         $this->assertEquals("Custom transport error", $customErrorBody['error']['message']);
+    }
+
+    public function testInitializeAndToolCallInSameStream(): void
+    {
+        $server = new Server('test-stream-server', '1.0.0');
+        $transport = new TestableStdioTransport();
+        $toolsCapability = new ToolsCapability();
+        $mockTool = new MockTool(); // Name 'test' and args are defined by attributes
+        $toolsCapability->addTool($mockTool);
+        $server->addCapability($toolsCapability);
+        $server->connect($transport);
+
+        $initId = 'init_stream_' . uniqid();
+        $toolCallId = 'tool_call_stream_' . uniqid();
+
+        $initRequest = [
+            'jsonrpc' => '2.0',
+            'method' => 'initialize',
+            'params' => ['protocolVersion' => '2025-03-26'],
+            'id' => $initId
+        ];
+
+        $toolCallRequest = [
+            'jsonrpc' => '2.0',
+            'method' => 'tools/call',
+            'params' => ['name' => 'test', 'arguments' => ['data' => 'stream_data']],
+            'id' => $toolCallId
+        ];
+
+        $inputStream = json_encode($initRequest) . "\n" . json_encode($toolCallRequest) . "\n";
+
+        $transport->writeToInput($inputStream);
+        // We also need a shutdown request, otherwise the server might loop indefinitely
+        // waiting for more input or a shutdown signal, depending on its run loop implementation.
+        $shutdownId = 'shutdown_stream_' . uniqid();
+        $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
+        $transport->writeToInput(json_encode($shutdownRequest) . "\n");
+
+
+        $server->run(); // This will process all messages in the input buffer
+
+        $rawOutput = $transport->readMultipleJsonOutputs();
+
+        // Expect 3 responses: init, tool call, shutdown
+        $this->assertCount(3, $rawOutput, "Expected 3 responses (init, tool_call, shutdown). Got: " . json_encode($rawOutput));
+
+        $initResponse = $this->findResponseById($rawOutput, $initId);
+        $this->assertNotNull($initResponse, "Initialize response not found. Raw output: " . json_encode($rawOutput));
+        self::assertIsArray($initResponse['result']);
+        $this->assertArrayHasKey('protocolVersion', $initResponse['result'], "Initialize response should have protocolVersion.");
+
+        $toolCallResponse = $this->findResponseById($rawOutput, $toolCallId);
+        $this->assertNotNull($toolCallResponse, "Tool call response not found. Raw output: " . json_encode($rawOutput));
+        $this->assertArrayNotHasKey('error', $toolCallResponse, "Tool call response should not have a top-level error field.");
+        $this->assertArrayHasKey('result', $toolCallResponse, "Tool call response should have a result field.");
+        self::assertIsArray($toolCallResponse['result']);
+        $this->assertArrayHasKey('isError', $toolCallResponse['result'], "Tool call result should have 'isError' field.");
+        $this->assertFalse($toolCallResponse['result']['isError'], "Tool call 'isError' should be false.");
+        $this->assertArrayHasKey('content', $toolCallResponse['result'], "Tool call result should have 'content' field.");
+        self::assertIsArray($toolCallResponse['result']['content']);
+        $this->assertCount(1, $toolCallResponse['result']['content'], "Tool call content should have one item.");
+        $this->assertEquals(['type' => 'text', 'text' => 'Result: stream_data'], $toolCallResponse['result']['content'][0], "Tool call content mismatch.");
+
+        $shutdownResponse = $this->findResponseById($rawOutput, $shutdownId);
+        $this->assertNotNull($shutdownResponse, "Shutdown response not found. Raw output: " . json_encode($rawOutput));
     }
 }
