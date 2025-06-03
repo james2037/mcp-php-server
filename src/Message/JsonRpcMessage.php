@@ -83,8 +83,6 @@ class JsonRpcMessage implements \JsonSerializable
 
         $encoded = json_encode($data);
         if ($encoded === false) {
-            // This should ideally not happen with the current structure,
-            // but good practice to handle potential json_encode failure.
             throw new \RuntimeException('Failed to encode JSON-RPC message.', self::INTERNAL_ERROR);
         }
         return $encoded;
@@ -93,7 +91,6 @@ class JsonRpcMessage implements \JsonSerializable
     public static function fromJson(string $json): self
     {
         $data = json_decode($json, true);
-        // Ensure $data is an array before proceeding
         if (!is_array($data)) {
             throw new \RuntimeException('Invalid JSON: Decoded data is not an array.', self::PARSE_ERROR);
         }
@@ -114,7 +111,6 @@ class JsonRpcMessage implements \JsonSerializable
             if (isset($data['result'])) {
                 $msg->result = $data['result'];
             } else {
-                // Ensure error is an array (object in JSON)
                 if (!is_array($data['error'])) {
                     throw new \RuntimeException('Invalid error object in JSON-RPC response', self::INVALID_REQUEST);
                 }
