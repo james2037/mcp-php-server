@@ -4,6 +4,7 @@ namespace MCP\Server\Tests\Message;
 
 use MCP\Server\Message\JsonRpcMessage;
 use PHPUnit\Framework\TestCase;
+use LogicException; // Added for explicit use
 
 /**
  * @covers \MCP\Server\Message\JsonRpcMessage
@@ -40,6 +41,43 @@ class JsonRpcMessageTest extends TestCase
         $this->assertEquals('123', $message->id);
     }
 
+    public function testFromJsonWithNonArrayData(): void
+    {
+        $json = '"not an object"'; // Decodes to a string, not an array/object
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::PARSE_ERROR);
+        $this->expectExceptionMessage('Invalid JSON: Decoded data is not an array.');
+        JsonRpcMessage::fromJson($json);
+    }
+
+    public function testFromJsonMissingJsonRpcVersion(): void
+    {
+        $json = '{"method": "test", "id": "1"}';
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        $this->expectExceptionMessage('Invalid JSON-RPC version');
+        JsonRpcMessage::fromJson($json);
+    }
+
+    public function testFromJsonIncorrectJsonRpcVersion(): void
+    {
+        $json = '{"jsonrpc": "1.0", "method": "test", "id": "1"}';
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        $this->expectExceptionMessage('Invalid JSON-RPC version');
+        JsonRpcMessage::fromJson($json);
+    }
+
+    public function testFromJsonResponseMissingResultAndError(): void
+    {
+        $json = '{"jsonrpc": "2.0", "id": "1"}'; // Lacks result and error
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        // This falls through to request parsing, then fails on missing method
+        $this->expectExceptionMessage('Missing or invalid method name in JSON-RPC request');
+        JsonRpcMessage::fromJson($json);
+    }
+
     public function testToJson(): void
     {
         $message = new JsonRpcMessage('test.method', ['param' => 'value'], '123');
@@ -50,6 +88,18 @@ class JsonRpcMessageTest extends TestCase
         $this->assertEquals('test.method', $decoded['method']);
         $this->assertEquals(['param' => 'value'], $decoded['params']);
         $this->assertEquals('123', $decoded['id']);
+    }
+
+    public function testToJsonHandlesJsonEncodeFailure(): void
+    {
+        // Deliberately include invalid UTF-8 characters
+        $message = new JsonRpcMessage('test.method', ['data' => "\xB1\x31"], '123'); // Invalid UTF-8 for ±1
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INTERNAL_ERROR);
+        $this->expectExceptionMessage('Failed to encode JSON-RPC message.');
+
+        $message->toJson();
     }
 
     public function testCreateErrorResponse(): void
@@ -67,6 +117,83 @@ class JsonRpcMessageTest extends TestCase
         $this->assertEquals('123', $decoded['id']);
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $decoded['error']['code']);
         $this->assertEquals('Method not found', $decoded['error']['message']);
+        $this->assertArrayNotHasKey('data', $decoded['error']); // Ensure data is not present when not provided
+    }
+
+    public function testCreateErrorResponseWithData(): void
+    {
+        $errorData = ['debug_info' => 'Additional details about the error.'];
+        $message = JsonRpcMessage::error(
+            JsonRpcMessage::INTERNAL_ERROR,
+            'Internal error',
+            'err-987',
+            $errorData
+        );
+
+        $json = $message->toJson();
+        $decoded = json_decode($json, true);
+
+        $this->assertEquals('2.0', $decoded['jsonrpc']);
+        $this->assertEquals('err-987', $decoded['id']);
+        $this->assertArrayHasKey('error', $decoded);
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $decoded['error']['code']);
+        $this->assertEquals('Internal error', $decoded['error']['message']);
+        $this->assertArrayHasKey('data', $decoded['error']);
+        $this->assertEquals($errorData, $decoded['error']['data']);
+    }
+
+    // Tests for jsonSerialize behavior (invoked by json_encode)
+    public function testJsonSerializeResultWithNullIdThrowsException(): void
+    {
+        $message = new JsonRpcMessage('placeholderMethod'); // Method needed for constructor
+        $message->result = ['data' => 'success'];
+        $message->id = null; // Explicitly set ID to null for a result message
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Result message must have an ID.');
+        json_encode($message);
+    }
+
+    public function testJsonSerializeRequestMissingMethodThrowsException(): void
+    {
+        $message = new JsonRpcMessage(''); // Start with empty method
+        $message->method = ''; // Ensure method is empty
+        $message->id = '123'; // Make it a request
+        $message->result = null;
+        $message->error = null;
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Request message must have a method.');
+        json_encode($message);
+    }
+
+    public function testJsonSerializeNotificationMissingMethodThrowsException(): void
+    {
+        $message = new JsonRpcMessage(''); // Start with empty method
+        $message->method = ''; // Ensure method is empty
+        $message->id = null; // Make it a notification
+        $message->result = null;
+        $message->error = null;
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Request message must have a method.');
+        json_encode($message);
+    }
+
+    public function testJsonSerializeNotificationWithNullIdInOutput(): void
+    {
+        // Constructor sets id to null if not provided or explicitly null.
+        $message = new JsonRpcMessage('notify.method', ['param' => 'value'], null);
+
+        $json = json_encode($message);
+        $this->assertIsString($json); // Ensure json_encode didn't fail
+        $decoded = json_decode($json, true);
+
+        $this->assertIsArray($decoded);
+        $this->assertArrayNotHasKey('id', $decoded, 'ID should not be present for notifications.');
+        $this->assertEquals('notify.method', $decoded['method']);
+        $this->assertEquals(['param' => 'value'], $decoded['params']);
+        $this->assertEquals('2.0', $decoded['jsonrpc']);
     }
 
     // New test methods for fromJsonArray
