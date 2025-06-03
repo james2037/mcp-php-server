@@ -165,6 +165,7 @@ class JsonRpcMessageTest extends TestCase
         $messages = [JsonRpcMessage::result([], '1'), new \stdClass()];
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('All items in the array must be JsonRpcMessage objects.');
+        // @phpstan-ignore-next-line Test expects this to fail due to mixed types.
         JsonRpcMessage::toJsonArray($messages);
     }
 

@@ -21,7 +21,9 @@ class StdioTransportTest extends TestCase
     public function testReceiveSingleRequest(): void
     {
         $request = ['jsonrpc' => '2.0', 'method' => 'test', 'id' => 1];
-        $this->transport->writeToInput(json_encode($request));
+        $jsonRequest = json_encode($request);
+        $this->assertIsString($jsonRequest);
+        $this->transport->writeToInput($jsonRequest);
 
         $messages = $this->transport->receive();
         $this->assertIsArray($messages);
@@ -37,7 +39,9 @@ class StdioTransportTest extends TestCase
             ['jsonrpc' => '2.0', 'method' => 'notify1', 'params' => ['p1' => 'v1']],
             ['jsonrpc' => '2.0', 'method' => 'req1', 'id' => 'abc']
         ];
-        $this->transport->writeToInput(json_encode($batch));
+        $jsonBatch = json_encode($batch);
+        $this->assertIsString($jsonBatch);
+        $this->transport->writeToInput($jsonBatch);
 
         $messages = $this->transport->receive();
         $this->assertIsArray($messages);

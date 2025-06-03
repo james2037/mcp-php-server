@@ -27,7 +27,7 @@ class InvalidSuggestionsTool extends Tool
     // Signature must match Tool::getCompletionSuggestions
     /**
      * @param array<string, mixed> $allCurrentArguments
-     * @return array{values: string[], total?: int, hasMore?: bool}
+     * @return array<string, mixed>
      */
     public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allCurrentArguments = []): array
     {
