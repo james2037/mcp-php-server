@@ -55,12 +55,14 @@ class ExtendedToolTest extends TestCase
         self::assertIsObject($schema['properties']);
 
         self::assertObjectHasProperty('numbers', $schema['properties']);
-        self::assertIsArray($schema['properties']->numbers); // It's an array from jsonSerialize()
-        $this->assertEquals('array', $schema['properties']->numbers['type']); // Array access
+        self::assertIsObject($schema['properties']->numbers);
+        $this->assertTrue(property_exists($schema['properties']->numbers, 'type'));
+        $this->assertEquals('array', $schema['properties']->numbers->type);
 
         self::assertObjectHasProperty('enabled', $schema['properties']);
-        self::assertIsArray($schema['properties']->enabled); // It's an array
-        $this->assertEquals('boolean', $schema['properties']->enabled['type']); // Array access
+        self::assertIsObject($schema['properties']->enabled);
+        $this->assertTrue(property_exists($schema['properties']->enabled, 'type'));
+        $this->assertEquals('boolean', $schema['properties']->enabled->type);
 
         // Test array processing
         $result = $tool->execute(
@@ -136,11 +138,13 @@ class ExtendedToolTest extends TestCase
         self::assertIsObject($schema['properties']);
 
         self::assertObjectHasProperty('name', $schema['properties']);
-        self::assertIsArray($schema['properties']->name); // It's an array
-        $this->assertEquals('Name to greet', $schema['properties']->name['description']); // Array access
+        self::assertIsObject($schema['properties']->name);
+        $this->assertTrue(property_exists($schema['properties']->name, 'description'));
+        $this->assertEquals('Name to greet', $schema['properties']->name->description);
 
         self::assertObjectHasProperty('title', $schema['properties']);
-        self::assertIsArray($schema['properties']->title); // It's an array
-        $this->assertEquals('Optional title', $schema['properties']->title['description']); // Array access
+        self::assertIsObject($schema['properties']->title);
+        $this->assertTrue(property_exists($schema['properties']->title, 'description'));
+        $this->assertEquals('Optional title', $schema['properties']->title->description);
     }
 }

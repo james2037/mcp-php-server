@@ -2,20 +2,32 @@
 
 namespace MCP\Server\Tests\Capability;
 
-use MCP\Server\Tool\Tool;
-use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
+use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\ToolAnnotations;
+use MCP\Server\Tool\Content\TextContent;
+use MCP\Server\Tool\Tool;
 
 #[ToolAnnotations(title: 'Mock Test Tool', readOnlyHint: true)]
 #[ToolAttribute('test', 'Test Tool')]
 class MockTool extends Tool
 {
-    protected function doExecute(
-        #[ParameterAttribute('data', type: 'string', description: 'Input data')]
-        array $arguments
+    /**
+     * Executes the mock tool logic.
+     * @param string $data Input data.
+     * @return TextContent[]
+     */
+    protected function executeTool(
+        #[ParameterAttribute('data', type: 'string', description: 'Input data', required: true)]
+        string $data
     ): array {
-        return [$this->createTextContent('Result: ' . $arguments['data'])];
+        return [$this->createTextContent('Result: ' . $data)];
+    }
+
+    protected function doExecute(array $arguments): array
+    {
+        // Base validateArguments ensures 'data' is present and is a string.
+        return $this->executeTool($arguments['data']);
     }
 
     /**

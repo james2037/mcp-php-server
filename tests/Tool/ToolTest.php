@@ -107,7 +107,7 @@ class ToolTest extends TestCase
         $calculator = new CalculatorTool();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid type for argument a: expected number');
+        $this->expectExceptionMessage('Invalid type for argument a: expected number, got string');
 
         $calculator->execute(
             [

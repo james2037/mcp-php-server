@@ -61,6 +61,8 @@ class ToolsCapabilityTest extends TestCase
         $this->assertArrayHasKey('properties', $toolData['inputSchema']);
         $this->assertObjectHasProperty('data', $toolData['inputSchema']['properties']);
         $this->assertEquals('Input data', $toolData['inputSchema']['properties']->data->description);
+        $this->assertArrayHasKey('required', $toolData['inputSchema'], "Schema should have a 'required' array.");
+        $this->assertContains('data', $toolData['inputSchema']['required'], "'data' parameter should be in 'required' array.");
     }
 
     public function testHandleCall(): void
@@ -231,9 +233,14 @@ class ToolsCapabilityTest extends TestCase
             {
                 $this->shutdownCountRef++;
             }
-            protected function doExecute(array $arguments): array
+            /** @return \MCP\Server\Tool\Content\TextContent[] */
+            protected function executeTool(): array // Renamed
             {
                 return [$this->createTextContent('done')];
+            }
+            protected function doExecute(array $arguments): array // Added
+            {
+                return $this->executeTool();
             }
         };
 
@@ -274,9 +281,14 @@ class ToolsCapabilityTest extends TestCase
     public function testHandleCompleteDefaultSuggestions(): void
     {
         $basicTool = new #[ToolAttribute('basic', 'Basic Tool')] class extends Tool {
-            protected function doExecute(array $arguments): array
+            /** @return \MCP\Server\Tool\Content\TextContent[] */
+            protected function executeTool(): array // Renamed
             {
                 return [$this->createTextContent('done')];
+            }
+            protected function doExecute(array $arguments): array // Added
+            {
+                return $this->executeTool();
             }
         };
         $this->capability->addTool($basicTool); // Add to the existing capability instance
@@ -409,9 +421,14 @@ class ToolsCapabilityTest extends TestCase
         // if constructor validation is robust.
         $customBadTool = new #[ToolAttribute('customBadValuesTool', 'Tool with bad values type')] class extends Tool
         {
-            protected function doExecute(array $arguments): array
+            /** @return \MCP\Server\Tool\Content\ContentItemInterface[] */
+            protected function executeTool(): array // Renamed
             {
-                return [];
+                return []; // Empty array of ContentItemInterface
+            }
+            protected function doExecute(array $arguments): array // Added
+            {
+                return $this->executeTool();
             }
             public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allCurrentArguments = []): array
             {

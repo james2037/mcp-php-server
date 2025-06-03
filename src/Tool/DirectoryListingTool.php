@@ -11,15 +11,20 @@ use MCP\Server\Tool\Content\TextContent;
 #[ToolAttribute(name: "directory/list", description: "Lists the contents of a directory.")]
 class DirectoryListingTool extends Tool
 {
-    protected function doExecute(
+    /**
+     * Lists the contents of a specified directory.
+     *
+     * @param string $directoryPath The path to the directory.
+     * @return TextContent[] An array containing a single TextContent item with the directory listing.
+     * @throws \InvalidArgumentException If the directory is not found or path is invalid.
+     * @throws \RuntimeException If the directory is not readable or scandir fails.
+     */
+    protected function executeTool(
         #[ParameterAttribute(name: "directory_path", type: "string", description: "The path to the directory.", required: true)]
-        array $arguments
+        string $directoryPath
     ): array {
-        $directoryPath = $arguments['directory_path'];
-
-        if (!is_string($directoryPath)) {
-            throw new \InvalidArgumentException("Directory path must be a string.");
-        }
+        // Type validation (is_string) is handled by PHP type hinting and base class validation.
+        // Required validation is handled by base class validation.
 
         if (!is_dir($directoryPath)) {
             throw new \InvalidArgumentException("Directory not found at path: " . $directoryPath);
@@ -41,5 +46,19 @@ class DirectoryListingTool extends Tool
         });
 
         return [$this->createTextContent(implode("\n", $files))];
+    }
+
+    protected function doExecute(array $arguments): array
+    {
+        $directoryPath = $arguments['directory_path'] ?? null;
+
+        if ($directoryPath === null) {
+            // This should be caught by validateArguments due to 'required: true'
+            throw new \InvalidArgumentException("Missing required argument: directory_path");
+        }
+        // Type validation for $directoryPath (ensuring it's a string) will be handled by
+        // Tool::validateArguments based on the Parameter attribute.
+
+        return $this->executeTool((string)$directoryPath);
     }
 }

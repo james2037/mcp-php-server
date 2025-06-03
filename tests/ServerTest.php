@@ -660,7 +660,8 @@ class ServerTest extends TestCase
         $this->assertArrayHasKey("error", $errorResponse);
         self::assertIsArray($errorResponse["error"]);
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $errorResponse["error"]["code"]);
-        $this->assertStringContainsStringIgnoringCase("request is missing an id", $errorResponse["error"]["message"]);
+        $this->assertStringContainsStringIgnoringCase("Initialize request is missing an ID.", $errorResponse["error"]["message"]);
+        $this->assertStringContainsStringIgnoringCase("Shutdown request is missing an ID.", $errorResponse["error"]["message"]);
         $this->assertNull($errorResponse["id"]);
     }
 
@@ -682,7 +683,7 @@ class ServerTest extends TestCase
         $this->assertArrayHasKey("error", $errorResponse);
         self::assertIsArray($errorResponse["error"]);
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $errorResponse["error"]["code"]);
-        $this->assertStringContainsStringIgnoringCase("request is missing an id", $errorResponse["error"]["message"]);
+        $this->assertStringContainsStringIgnoringCase("Shutdown request is missing an ID.", $errorResponse["error"]["message"]);
         $this->assertNull($errorResponse["id"]);
     }
 
