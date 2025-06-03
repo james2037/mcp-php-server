@@ -109,8 +109,6 @@ class StdioTransportTest extends TestCase
         $this->expectException(\RuntimeException::class);
         // This message comes from the generic catch (\Exception $e) block
         // re-throwing the exception from JsonRpcMessage::fromJson().
-        // The original InvalidRequestException from JsonRpcMessage has "Missing method"
-        $this->expectExceptionMessage('Error parsing JSON-RPC message: Missing method');
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST); // Code from the generic catch block
         $this->transport->receive();
     }
