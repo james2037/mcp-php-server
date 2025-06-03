@@ -55,6 +55,10 @@ class ServerTest extends TestCase
         return $initRequestId;
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $responsesToSearch
+     * @return array<string, mixed>|null
+     */
     private function findResponseById(array $responsesToSearch, string $idToFind): ?array
     {
         $idToFindStr = (string)$idToFind;
@@ -229,6 +233,7 @@ class ServerTest extends TestCase
         if ($batchResponseArray) {
             $this->assertCount(2, $batchResponseArray, "Batch response should contain 2 items (1 result, 1 error)");
 
+            /** @var array<int, array<string, mixed>> $batchResponseArray */
             $response1 = $this->findResponseById($batchResponseArray, $batchId1);
             $this->assertNotNull($response1, "Response for $batchId1 not found in batch. Batch array: " . json_encode($batchResponseArray));
             if ($response1) {
@@ -236,6 +241,7 @@ class ServerTest extends TestCase
                 $this->assertEquals(['received' => 'batch1'], $response1['result']);
             }
 
+            /** @var array<int, array<string, mixed>> $batchResponseArray */
             $response2 = $this->findResponseById($batchResponseArray, $batchId2);
             $this->assertNotNull($response2, "Response for $batchId2 not found in batch. Batch array: " . json_encode($batchResponseArray));
             if ($response2) {
@@ -385,7 +391,10 @@ class ServerTest extends TestCase
         // PHPUnit automatically verifies mock expectations upon test completion.
     }
 
-    private function createMockRequest(array|string $jsonData, string $method = 'POST', string $uri = '/'): ServerRequestInterface
+    /**
+     * @param mixed $jsonData
+     */
+    private function createMockRequest(mixed $jsonData, string $method = 'POST', string $uri = '/'): ServerRequestInterface
     {
         $streamFactory = new StreamFactory();
         $body = is_string($jsonData) ? $jsonData : json_encode($jsonData);

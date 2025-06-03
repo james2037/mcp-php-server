@@ -24,6 +24,7 @@ class ServerErrorHandlingTest extends TestCase
     public function testHandlesCapabilityInitializationFailure(): void
     {
         $failingCap = new class implements CapabilityInterface {
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['failing_cap' => new \stdClass()];
@@ -68,6 +69,7 @@ class ServerErrorHandlingTest extends TestCase
     public function testHandlesShutdownFailure(): void
     {
         $failingCap = new class implements CapabilityInterface {
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['failing_shutdown_cap' => new \stdClass()];
@@ -143,6 +145,7 @@ class ServerErrorHandlingTest extends TestCase
             {
                 $this->orderRef[] = $this->nameRef;
             }
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['cap1_feature' => new \stdClass()];
@@ -168,6 +171,7 @@ class ServerErrorHandlingTest extends TestCase
             {
                 $this->orderRef[] = $this->nameRef;
             }
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['cap2_feature' => new \stdClass()];

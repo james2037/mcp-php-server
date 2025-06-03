@@ -23,7 +23,7 @@ abstract class Registry
      * and uses the abstract `createFromReflection` method to instantiate items.
      *
      * @param string $directory The directory to scan for PHP files.
-     * @param array $config Optional configuration to pass to `createFromReflection`.
+     * @param array<string, mixed> $config Optional configuration to pass to `createFromReflection`.
      */
     public function discover(string $directory, array $config = []): void
     {
@@ -118,8 +118,8 @@ abstract class Registry
      * This method must be implemented by subclasses to define how items are instantiated
      * (e.g., Tools, Resources) and configured.
      *
-     * @param ReflectionClass $reflection The reflection class of the item to create.
-     * @param array $config Optional configuration data for the item.
+     * @param ReflectionClass<object> $reflection The reflection class of the item to create.
+     * @param array<string, mixed> $config Optional configuration data for the item.
      * @return object|null The created item, or null if it should not be registered.
      */
     abstract protected function createFromReflection(ReflectionClass $reflection, array $config): ?object;

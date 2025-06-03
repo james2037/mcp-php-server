@@ -64,6 +64,7 @@ class TestableHttpTransport extends HttpTransport
     /**
      * Override receive to use the mock request's body or throw a predefined exception.
      * This method is called by Server::runHttpRequestCycle().
+     * @return array<int|string, mixed>
      */
     public function receive(): array
     {

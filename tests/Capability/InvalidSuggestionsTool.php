@@ -8,9 +8,11 @@ use MCP\Server\Tool\Tool;
 #[ToolAttribute('invalidSuggestionsTool', 'Tool that returns invalid suggestions')]
 class InvalidSuggestionsTool extends Tool
 {
-    private $suggestionsToReturn;
+    /** @var array{values: string[], total?: int, hasMore?: bool} */
+    private array $suggestionsToReturn;
 
-    public function __construct($suggestionsToReturn)
+    /** @param array{values: string[], total?: int, hasMore?: bool} $suggestionsToReturn */
+    public function __construct(array $suggestionsToReturn)
     {
         parent::__construct();
         $this->suggestionsToReturn = $suggestionsToReturn;
@@ -23,7 +25,11 @@ class InvalidSuggestionsTool extends Tool
     }
 
     // Signature must match Tool::getCompletionSuggestions
-    public function getCompletionSuggestions(string $argumentName, $currentValue, array $allCurrentArguments = []): array
+    /**
+     * @param array<string, mixed> $allCurrentArguments
+     * @return array{values: string[], total?: int, hasMore?: bool}
+     */
+    public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allCurrentArguments = []): array
     {
         // $allCurrentArguments is unused in this mock but part of the signature.
         return $this->suggestionsToReturn;

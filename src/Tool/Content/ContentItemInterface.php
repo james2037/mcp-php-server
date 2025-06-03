@@ -14,7 +14,7 @@ interface ContentItemInterface
     /**
      * Converts the content item to an array.
      *
-     * @return array The array representation of the content item.
+     * @return array<string, mixed> The array representation of the content item.
      */
     public function toArray(): array;
 }

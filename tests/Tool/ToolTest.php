@@ -217,8 +217,10 @@ class ToolTest extends TestCase
 
     /**
      * Simple JSON Schema validator
+     * @param mixed $data
+     * @param array<string, mixed> $schema
      */
-    private function validateAgainstSchema($data, array $schema): bool
+    private function validateAgainstSchema(mixed $data, array $schema): bool
     {
         if (isset($schema['type'])) {
             switch ($schema['type']) {

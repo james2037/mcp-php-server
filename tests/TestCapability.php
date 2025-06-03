@@ -7,7 +7,9 @@ use MCP\Server\Message\JsonRpcMessage;
 
 class TestCapability implements CapabilityInterface
 {
+    /** @var array<string, ?JsonRpcMessage> */
     private array $expectedResponses = [];
+    /** @var array<int, JsonRpcMessage> */
     private array $receivedMessages = [];
 
     public function addExpectedResponse(string $method, ?JsonRpcMessage $response): void
@@ -15,6 +17,7 @@ class TestCapability implements CapabilityInterface
         $this->expectedResponses[$method] = $response;
     }
 
+    /** @return array<int, JsonRpcMessage> */
     public function getReceivedMessages(): array
     {
         return $this->receivedMessages;
@@ -25,6 +28,7 @@ class TestCapability implements CapabilityInterface
         $this->receivedMessages = [];
     }
 
+    /** @return array<string, array<string, bool>> */
     public function getCapabilities(): array
     {
         return ['test' => ['enabled' => true]];

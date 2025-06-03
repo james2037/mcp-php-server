@@ -70,7 +70,7 @@ class HttpTransport extends AbstractTransport
      * This method does not parse into JsonRpcMessage objects itself but returns the
      * raw associative array(s) decoded from the JSON payload.
      *
-     * @return array Returns an associative array for a single JSON-RPC request,
+     * @return array<int|string, mixed> Returns an associative array for a single JSON-RPC request,
      *               or a list of associative arrays for a batch request.
      * @throws TransportException If the request method is not POST, Content-Type is not JSON,
      *                            the body is empty, JSON is malformed, or the JSON structure

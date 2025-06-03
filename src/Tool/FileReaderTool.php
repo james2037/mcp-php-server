@@ -21,7 +21,7 @@ class FileReaderTool extends Tool
      *
      * This method reads the content of the file specified in the 'filepath' argument.
      *
-     * @param array $arguments An associative array containing the arguments for the tool.
+     * @param array<string, mixed> $arguments An associative array containing the arguments for the tool.
      *                         Expected to have a 'filepath' key with a string value,
      *                         as defined by the ParameterAttribute.
      * @return array<int, ContentItemInterface> An array containing a single TextContent item

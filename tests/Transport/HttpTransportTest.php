@@ -41,7 +41,7 @@ class HttpTransportTest extends TestCase
         );
     }
 
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $transport = $this->createTransport();
         $this->assertInstanceOf(HttpTransport::class, $transport);
@@ -52,7 +52,7 @@ class HttpTransportTest extends TestCase
 
     // --- Tests for receive() ---
 
-    public function testReceiveValidSinglePostRequestSimplified()
+    public function testReceiveValidSinglePostRequestSimplified(): void
     {
         $jsonRpcPayload = ['jsonrpc' => '2.0', 'method' => 'test', 'id' => 1];
         $jsonRpcString = json_encode($jsonRpcPayload);
@@ -67,7 +67,7 @@ class HttpTransportTest extends TestCase
         $this->assertEquals($jsonRpcPayload, $receivedData);
     }
 
-    public function testReceiveValidBatchPostRequestSimplified()
+    public function testReceiveValidBatchPostRequestSimplified(): void
     {
         $jsonRpcPayload = [
             ['jsonrpc' => '2.0', 'method' => 'test1', 'id' => 1],
@@ -85,7 +85,7 @@ class HttpTransportTest extends TestCase
         $this->assertEquals($jsonRpcPayload, $receivedData);
     }
 
-    public function testReceivePostRequestInvalidJsonSyntaxSimplified()
+    public function testReceivePostRequestInvalidJsonSyntaxSimplified(): void
     {
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(JsonRpcMessage::PARSE_ERROR);
@@ -99,7 +99,7 @@ class HttpTransportTest extends TestCase
         $transport->receive();
     }
 
-    public function testReceivePostRequestInvalidJsonRpcStructureSimplified()
+    public function testReceivePostRequestInvalidJsonRpcStructureSimplified(): void
     {
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
@@ -113,7 +113,7 @@ class HttpTransportTest extends TestCase
         $transport->receive();
     }
 
-    public function testReceivePostRequestEmptyBodySimplified()
+    public function testReceivePostRequestEmptyBodySimplified(): void
     {
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
@@ -127,7 +127,7 @@ class HttpTransportTest extends TestCase
         $transport->receive();
     }
 
-    public function testReceivePostRequestIncorrectContentTypeSimplified()
+    public function testReceivePostRequestIncorrectContentTypeSimplified(): void
     {
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
@@ -141,7 +141,7 @@ class HttpTransportTest extends TestCase
         $transport->receive();
     }
 
-    public function testReceivePostRequestMissingContentTypeSimplified()
+    public function testReceivePostRequestMissingContentTypeSimplified(): void
     {
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
@@ -155,7 +155,7 @@ class HttpTransportTest extends TestCase
         $transport->receive();
     }
 
-    public function testReceiveNonPostRequestSimplified()
+    public function testReceiveNonPostRequestSimplified(): void
     {
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
@@ -169,7 +169,7 @@ class HttpTransportTest extends TestCase
 
     // --- Tests for send() ---
 
-    public function testSendSingleMessageSimplified()
+    public function testSendSingleMessageSimplified(): void
     {
         $transport = $this->createTransport();
         // Create a real JsonRpcMessage, assuming JsonRpcMessage class is available and works
@@ -187,7 +187,7 @@ class HttpTransportTest extends TestCase
         $this->assertJsonStringEqualsJsonString($expectedJson, (string) $response->getBody());
     }
 
-    public function testSendBatchMessageSimplified()
+    public function testSendBatchMessageSimplified(): void
     {
         $transport = $this->createTransport();
         $rpcResponses = [
@@ -204,7 +204,7 @@ class HttpTransportTest extends TestCase
         $this->assertJsonStringEqualsJsonString($expectedJson, (string) $response->getBody());
     }
 
-    public function testSendNullMessageSimplified()
+    public function testSendNullMessageSimplified(): void
     {
         $transport = $this->createTransport();
         $transport->send(null);
@@ -215,7 +215,7 @@ class HttpTransportTest extends TestCase
         $this->assertEquals('null', (string) $response->getBody());
     }
 
-    public function testSendEmptyBatchMessageSimplified()
+    public function testSendEmptyBatchMessageSimplified(): void
     {
         $transport = $this->createTransport();
         $transport->send([]); // Empty batch
@@ -226,7 +226,7 @@ class HttpTransportTest extends TestCase
         $this->assertEquals('[]', (string) $response->getBody());
     }
 
-    public function testSendHandlesJsonEncodeFailureSimplified()
+    public function testSendHandlesJsonEncodeFailureSimplified(): void
     {
         $transport = $this->createTransport();
         $problematicData = fopen('php://memory', 'r');

@@ -20,8 +20,8 @@ class ResourceRegistry extends Registry
      * compatible with `Resource::__construct`. The resource name is derived
      * from the class's short name.
      *
-     * @param ReflectionClass $reflection The reflection class of the Resource.
-     * @param array $config Optional configuration for the Resource.
+     * @param ReflectionClass<Resource> $reflection The reflection class of the Resource.
+     * @param array<string, mixed> $config Optional configuration for the Resource.
      * @return Resource|null The created Resource, or null if it cannot be created.
      */
     protected function createFromReflection(ReflectionClass $reflection, array $config = []): ?Resource

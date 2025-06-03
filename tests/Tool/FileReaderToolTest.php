@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 
 class FileReaderToolTest extends TestCase
 {
-    private $toolsCapability;
-    private $fileReaderTool;
+    private ToolsCapability $toolsCapability;
+    private FileReaderTool $fileReaderTool;
 
     protected function setUp(): void
     {
@@ -19,7 +19,7 @@ class FileReaderToolTest extends TestCase
         $this->toolsCapability->addTool($this->fileReaderTool);
     }
 
-    public function testFileReaderToolReadsExistingFile()
+    public function testFileReaderToolReadsExistingFile(): void
     {
         $testFilePath = tempnam(sys_get_temp_dir(), 'test_file_');
         file_put_contents($testFilePath, "Hello, world!");
@@ -37,7 +37,7 @@ class FileReaderToolTest extends TestCase
         unlink($testFilePath);
     }
 
-    public function testFileReaderToolThrowsExceptionForNonExistentFile()
+    public function testFileReaderToolThrowsExceptionForNonExistentFile(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("File not found at path: /non/existent/file.txt");
@@ -45,7 +45,7 @@ class FileReaderToolTest extends TestCase
         $this->fileReaderTool->execute(['filepath' => '/non/existent/file.txt']);
     }
 
-    public function testFileReaderToolThrowsExceptionForUnreadableFile()
+    public function testFileReaderToolThrowsExceptionForUnreadableFile(): void
     {
         // Create a temporary file and make it unreadable
         $testFilePath = tempnam(sys_get_temp_dir(), 'test_file_');

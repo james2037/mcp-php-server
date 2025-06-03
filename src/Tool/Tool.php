@@ -128,7 +128,7 @@ abstract class Tool
     /**
      * Gets the annotations of the tool.
      *
-     * @return array|null The annotations of the tool.
+     * @return array<string, string|bool>|null The annotations of the tool.
      */
     public function getAnnotations(): ?array
     {
@@ -138,7 +138,7 @@ abstract class Tool
     /**
      * Gets the input schema for the tool.
      *
-     * @return array The JSON schema for the tool's input.
+     * @return array<string, mixed> The JSON schema for the tool's input.
      */
     public function getInputSchema(): array
     {
@@ -352,7 +352,7 @@ abstract class Tool
      * Creates a new EmbeddedResource item.
      * This is a convenience method for subclasses to embed resource data directly in the output.
      *
-     * @param array $resourceData The resource data, conforming to TextResourceContents or BlobResourceContents structure.
+     * @param array{uri: string, text?: string, blob?: string, mimeType?: string} $resourceData The resource data, conforming to TextResourceContents or BlobResourceContents structure.
      *                            Example: `['uri' => '/my/data', 'text' => 'hello', 'mimeType' => 'text/plain']`
      * @param Content\Annotations|null $annotations Optional annotations for the embedded resource.
      * @return Content\EmbeddedResource The created EmbeddedResource item.
@@ -372,7 +372,7 @@ abstract class Tool
      *
      * @param string $argumentName The name of the argument being completed.
      * @param mixed  $currentValue The current partial value of the argument.
-     * @param array  $allArguments All arguments provided so far.
+     * @param array<string, mixed>  $allArguments All arguments provided so far.
      * @return array{values: string[], total?: int, hasMore?: bool}
      *               An array matching the 'completion' object structure.
      */

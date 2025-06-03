@@ -18,6 +18,10 @@ class MockTool extends Tool
         return [$this->createTextContent('Result: ' . $arguments['data'])];
     }
 
+    /**
+     * @param array<string, mixed> $allArguments
+     * @return array{values: string[], total: int, hasMore: bool}
+     */
     public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allArguments = []): array
     {
         if ($argumentName === 'data') {

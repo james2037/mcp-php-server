@@ -20,7 +20,7 @@ final class Annotations
     /**
      * Constructs a new Annotations instance.
      *
-     * @param array|null $audience The audience for the annotation.
+     * @param array<int, string>|null $audience The audience for the annotation.
      *                             Each role must be 'user' or 'assistant'.
      * @param float|null $priority The priority of the annotation (0.0 to 1.0).
      * @throws InvalidArgumentException If audience or priority is invalid.
@@ -48,7 +48,7 @@ final class Annotations
     /**
      * Converts the annotations to an array.
      *
-     * @return array The array representation of the annotations.
+     * @return array<string, mixed> The array representation of the annotations.
      */
     public function toArray(): array
     {
