@@ -39,6 +39,13 @@ class ServerTest extends TestCase
         $this->server->connect($this->transport);
     }
 
+    private function encodeAndAssert(mixed $data): string
+    {
+        $encoded = json_encode($data);
+        self::assertIsString($encoded, 'JSON encoding failed for: ' . var_export($data, true));
+        return $encoded;
+    }
+
     private function queueInitializeRequest(string $protocolVersion = '2025-03-26'): string
     {
         $initRequestId = 'init_id_' . uniqid();
@@ -51,21 +58,21 @@ class ServerTest extends TestCase
             ],
             'id' => $initRequestId
         ];
-        $this->transport->writeToInput(json_encode($initRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($initRequest));
         return $initRequestId;
     }
 
     /**
-     * @param array<int, array<string, mixed>> $responsesToSearch
+     * @param list<array<string, mixed>|list<array<string, mixed>>> $responsesToSearch Can be a list of single responses, or a list containing batch arrays.
      * @return array<string, mixed>|null
      */
     private function findResponseById(array $responsesToSearch, string $idToFind): ?array
     {
-        $idToFindStr = (string)$idToFind;
+        // $idToFind is already a string, so no cast needed for $idToFindStr
         foreach ($responsesToSearch as $item) { // $item is typically a decoded JSON line
             // Case 1: $item is a single response object e.g. {'jsonrpc': ..., 'id': ...}
             if (is_array($item) && isset($item['jsonrpc']) && isset($item['id'])) {
-                if ((string)$item['id'] === $idToFindStr) {
+                if ((string)$item['id'] === $idToFind) { // Use $idToFind directly
                     return $item;
                 }
             } elseif (is_array($item)) { // Case 2: $item is an array of response objects (a batch response)
@@ -73,7 +80,7 @@ class ServerTest extends TestCase
 // Or if $responsesToSearch contains a mix of single responses and batch arrays (though less common for $responsesToSearch itself)
                 foreach ($item as $subItem) {
                     if (is_array($subItem) && isset($subItem['jsonrpc']) && isset($subItem['id'])) {
-                        if ((string)$subItem['id'] === $idToFindStr) {
+                        if ((string)$subItem['id'] === $idToFind) { // Use $idToFind directly
                             return $subItem;
                         }
                     }
@@ -88,7 +95,7 @@ class ServerTest extends TestCase
         $initId = $this->queueInitializeRequest();
         $shutdownId = 'shutdown_' . uniqid();
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
@@ -96,16 +103,20 @@ class ServerTest extends TestCase
 
         $initResponse = $this->findResponseById($actualResponses, $initId);
 
-        $this->assertNotNull($initResponse, "Initialize response not found. Got: " . json_encode($rawOutput));
-        // ... (rest of assertions remain the same)
+        $this->assertNotNull($initResponse, "Initialize response not found. Got: " . $this->encodeAndAssert($rawOutput));
+        // $initResponse is now known to be non-null, PHPStan should infer its type as array<string, mixed>
+        // from findResponseById's return type when not null.
         $this->assertEquals('2.0', $initResponse['jsonrpc']);
         $this->assertEquals($initId, $initResponse['id']);
         $this->assertArrayHasKey('result', $initResponse);
+        self::assertIsArray($initResponse['result']); // Ensure result is an array before accessing its keys
         $this->assertArrayHasKey('protocolVersion', $initResponse['result']);
         $this->assertEquals('2025-03-26', $initResponse['result']['protocolVersion']);
         $this->assertArrayHasKey('serverInfo', $initResponse['result']);
+        self::assertIsArray($initResponse['result']['serverInfo']); // Ensure serverInfo is an array
         $this->assertEquals('test-server', $initResponse['result']['serverInfo']['name']);
         $this->assertArrayHasKey('capabilities', $initResponse['result']);
+        self::assertIsArray($initResponse['result']['capabilities']); // Ensure capabilities is an array
         $this->assertArrayHasKey('test', $initResponse['result']['capabilities']);
         $this->assertEquals(['enabled' => true], $initResponse['result']['capabilities']['test']);
         $this->assertArrayHasKey('logging', $initResponse['result']['capabilities']);
@@ -126,22 +137,21 @@ class ServerTest extends TestCase
         $testRequest = ['jsonrpc' => '2.0', 'method' => 'test.method', 'params' => ['test' => true], 'id' => $capTestId];
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_cap_handling_' . uniqid()];
 
-        $this->transport->writeToInput(json_encode($testRequest));
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($testRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
         $actualResponses = $rawOutput;
 
         $initResponse = $this->findResponseById($actualResponses, $initId);
-        $this->assertNotNull($initResponse, "Init response missing in capability test run. Raw: " . json_encode($rawOutput));
+        $this->assertNotNull($initResponse, "Init response missing in capability test run. Raw: " . $this->encodeAndAssert($rawOutput));
 
         $testMethodResponse = $this->findResponseById($actualResponses, $capTestId);
-        $this->assertNotNull($testMethodResponse, "Test method response not found. Raw: " . json_encode($rawOutput));
-        if ($testMethodResponse) {
-            $this->assertEquals($capTestId, $testMethodResponse['id']);
-            $this->assertEquals(['success' => true], $testMethodResponse['result']);
-        }
+        $this->assertNotNull($testMethodResponse, "Test method response not found. Raw: " . $this->encodeAndAssert($rawOutput));
+        // $testMethodResponse is now non-null array
+        $this->assertEquals($capTestId, $testMethodResponse['id']);
+        $this->assertEquals(['success' => true], $testMethodResponse['result']);
 
         $receivedCapabilityMessages = $this->capability->getReceivedMessages();
         $this->assertCount(1, $receivedCapabilityMessages, "Capability should have received one message for 'test.method'.");
@@ -155,20 +165,20 @@ class ServerTest extends TestCase
         $unknownMethodRequest = ['jsonrpc' => '2.0', 'method' => 'unknown.method', 'params' => [], 'id' => $unknownId];
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_method_not_found_' . uniqid()];
 
-        $this->transport->writeToInput(json_encode($unknownMethodRequest));
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($unknownMethodRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
         $actualResponses = $rawOutput;
 
         $errorResponse = $this->findResponseById($actualResponses, $unknownId);
-        $this->assertNotNull($errorResponse, "Error response for unknown method not found. Got: " . json_encode($rawOutput));
-        if ($errorResponse) {
-            $this->assertEquals($unknownId, $errorResponse['id']);
-            $this->assertArrayHasKey('error', $errorResponse);
-            $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorResponse['error']['code']);
-        }
+        $this->assertNotNull($errorResponse, "Error response for unknown method not found. Got: " . $this->encodeAndAssert($rawOutput));
+        // $errorResponse is now non-null array
+        $this->assertEquals($unknownId, $errorResponse['id']);
+        $this->assertArrayHasKey('error', $errorResponse);
+        self::assertIsArray($errorResponse['error']);
+        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorResponse['error']['code']);
     }
 
     private function setEnvVar(string $name, string $value): void
@@ -202,9 +212,9 @@ class ServerTest extends TestCase
         ];
         $this->capability->addExpectedResponse('test.method', JsonRpcMessage::result(['received' => 'batch1'], $batchId1));
 
-        $this->transport->writeToInput(json_encode($batchRequests));
+        $this->transport->writeToInput($this->encodeAndAssert($batchRequests));
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => 'shutdown_batch_id_' . uniqid()];
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
@@ -220,35 +230,33 @@ class ServerTest extends TestCase
         // So, the batch_array_response should be $serverResponses[1]
 
         $initResp = $this->findResponseById($serverResponses, $initId); // Ensure init is found
-        $this->assertNotNull($initResp, "Init response missing in batch test. Output: " . json_encode($serverResponses));
+        $this->assertNotNull($initResp, "Init response missing in batch test. Output: " . $this->encodeAndAssert($serverResponses));
 
         $batchResponseArray = null;
-        // Ensure serverResponses[1] exists, is an array, and is not a single JSON-RPC response object (i.e., it's a batch)
-        if (isset($serverResponses[1]) && is_array($serverResponses[1]) && !isset($serverResponses[1]['jsonrpc'])) {
+        if (isset($serverResponses[1])) {
+            self::assertIsArray($serverResponses[1], "serverResponses[1] should be an array (batch response).");
             $batchResponseArray = $serverResponses[1];
         }
 
-        $this->assertNotNull($batchResponseArray, "Batch response array not found as serverResponses[1] or is not a batch. Output: " . json_encode($serverResponses));
+        $this->assertNotNull($batchResponseArray, "Batch response array not found as serverResponses[1] or is not a batch. Output: " . $this->encodeAndAssert($serverResponses));
+        // $batchResponseArray is now known to be a non-null array (of responses)
 
-        if ($batchResponseArray) {
-            $this->assertCount(2, $batchResponseArray, "Batch response should contain 2 items (1 result, 1 error)");
+        $this->assertCount(2, $batchResponseArray, "Batch response should contain 2 items (1 result, 1 error)");
 
-            /** @var array<int, array<string, mixed>> $batchResponseArray */
-            $response1 = $this->findResponseById($batchResponseArray, $batchId1);
-            $this->assertNotNull($response1, "Response for $batchId1 not found in batch. Batch array: " . json_encode($batchResponseArray));
-            if ($response1) {
-                $this->assertArrayHasKey('result', $response1);
-                $this->assertEquals(['received' => 'batch1'], $response1['result']);
-            }
+        /** @var list<array<string, mixed>> $batchResponseArray Ensure PHPStan knows this is a list of response objects. */
+        $response1 = $this->findResponseById($batchResponseArray, $batchId1);
+        $this->assertNotNull($response1, "Response for $batchId1 not found in batch. Batch array: " . $this->encodeAndAssert($batchResponseArray));
+        // $response1 is non-null array
+        $this->assertArrayHasKey('result', $response1);
+        $this->assertEquals(['received' => 'batch1'], $response1['result']);
 
-            /** @var array<int, array<string, mixed>> $batchResponseArray */
-            $response2 = $this->findResponseById($batchResponseArray, $batchId2);
-            $this->assertNotNull($response2, "Response for $batchId2 not found in batch. Batch array: " . json_encode($batchResponseArray));
-            if ($response2) {
-                $this->assertArrayHasKey('error', $response2);
-                $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response2['error']['code']);
-            }
-        }
+        /** @var list<array<string, mixed>> $batchResponseArray Ensure PHPStan knows this is a list of response objects for the next call too. */
+        $response2 = $this->findResponseById($batchResponseArray, $batchId2);
+        $this->assertNotNull($response2, "Response for $batchId2 not found in batch. Batch array: " . $this->encodeAndAssert($batchResponseArray));
+        // $response2 is non-null array
+        $this->assertArrayHasKey('error', $response2);
+        self::assertIsArray($response2['error']);
+        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response2['error']['code']);
     }
 
     public function testAuthorizationRequiredAndSuccessful(): void
@@ -259,14 +267,15 @@ class ServerTest extends TestCase
         $initId = $this->queueInitializeRequest();
         $shutdownId = 'shutdown_auth_ok_' . uniqid();
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
         $actualResponses = $rawOutput;
 
         $initResponse = $this->findResponseById($actualResponses, $initId);
-        $this->assertNotNull($initResponse, "Initialize response not found. Raw: " . json_encode($rawOutput));
+        $this->assertNotNull($initResponse, "Initialize response not found. Raw: " . $this->encodeAndAssert($rawOutput));
+        // $initResponse is non-null array
         $this->assertArrayHasKey('result', $initResponse, "Initialization should succeed with correct token.");
         $this->assertEquals($initId, $initResponse['id']);
 
@@ -281,21 +290,21 @@ class ServerTest extends TestCase
         $initId = $this->queueInitializeRequest();
         $shutdownId = 'shutdown_auth_missing_' . uniqid();
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertNotEmpty($rawOutput, "No raw output from server.");
         $actualResponses = $rawOutput;
-        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
+        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . $this->encodeAndAssert($rawOutput));
 
         $errorResponse = $this->findResponseById($actualResponses, $initId);
-        $this->assertNotNull($errorResponse, "Error response for missing token not found. Got: " . json_encode($actualResponses));
-        if ($errorResponse) {
-            $this->assertArrayHasKey('error', $errorResponse);
-            $this->assertEquals(-32000, $errorResponse['error']['code']);
-        }
+        $this->assertNotNull($errorResponse, "Error response for missing token not found. Got: " . $this->encodeAndAssert($actualResponses));
+        // $errorResponse is non-null array
+        $this->assertArrayHasKey('error', $errorResponse);
+        self::assertIsArray($errorResponse['error']);
+        $this->assertEquals(-32000, $errorResponse['error']['code']);
 
         $this->clearEnvVar('MCP_AUTHORIZATION_TOKEN');
     }
@@ -308,22 +317,22 @@ class ServerTest extends TestCase
         $initId = $this->queueInitializeRequest();
         $shutdownId = 'shutdown_auth_invalid_' . uniqid();
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownId];
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertNotEmpty($rawOutput, "No raw output from server.");
         $actualResponses = $rawOutput;
-        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
+        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . $this->encodeAndAssert($rawOutput));
 
 
         $errorResponse = $this->findResponseById($actualResponses, $initId);
-        $this->assertNotNull($errorResponse, "Error response for invalid token not found. Got: " . json_encode($actualResponses));
-        if ($errorResponse) {
-            $this->assertArrayHasKey('error', $errorResponse);
-            $this->assertEquals(-32001, $errorResponse['error']['code']);
-        }
+        $this->assertNotNull($errorResponse, "Error response for invalid token not found. Got: " . $this->encodeAndAssert($actualResponses));
+        // $errorResponse is non-null array
+        $this->assertArrayHasKey('error', $errorResponse);
+        self::assertIsArray($errorResponse['error']);
+        $this->assertEquals(-32001, $errorResponse['error']['code']);
 
         $this->clearEnvVar('MCP_AUTHORIZATION_TOKEN');
     }
@@ -334,26 +343,25 @@ class ServerTest extends TestCase
 
         $setLevelRequestId = 'set_level_id_' . uniqid();
         $setLevelRequest = ['jsonrpc' => '2.0', 'method' => 'logging/setLevel', 'params' => ['level' => 'debug'], 'id' => $setLevelRequestId];
-        $this->transport->writeToInput(json_encode($setLevelRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($setLevelRequest));
 
         $shutdownRequestId = 'shutdown_set_level_' . uniqid();
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownRequestId];
-        $this->transport->writeToInput(json_encode($shutdownRequest));
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $this->server->run();
         $rawOutput = $this->transport->readMultipleJsonOutputs();
 
         $this->assertNotEmpty($rawOutput, "No raw output from server.");
         $actualResponses = $rawOutput;
-        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . json_encode($rawOutput));
+        $this->assertNotEmpty($actualResponses, "Server did not produce any responses. Raw: " . $this->encodeAndAssert($rawOutput));
 
 
         $setLevelResponse = $this->findResponseById($actualResponses, $setLevelRequestId);
-        $this->assertNotNull($setLevelResponse, "SetLevel response not found. Got: " . json_encode($actualResponses));
-        if ($setLevelResponse) {
-            $this->assertArrayHasKey('result', $setLevelResponse);
-            $this->assertEquals([], $setLevelResponse['result']);
-        }
+        $this->assertNotNull($setLevelResponse, "SetLevel response not found. Got: " . $this->encodeAndAssert($actualResponses));
+        // $setLevelResponse is non-null array
+        $this->assertArrayHasKey('result', $setLevelResponse);
+        $this->assertEquals([], $setLevelResponse['result']);
     }
 
     public function testServerCallsLifecycleMethodsOnCapabilities(): void
@@ -381,11 +389,11 @@ class ServerTest extends TestCase
             ],
             'id' => $initRequestId
         ];
-        $transport->writeToInput(json_encode($initRequest));
+        $transport->writeToInput($this->encodeAndAssert($initRequest));
 
         $shutdownRequestId = 'shutdown_lifecycle_id_' . uniqid();
         $shutdownRequest = ['jsonrpc' => '2.0', 'method' => 'shutdown', 'id' => $shutdownRequestId];
-        $transport->writeToInput(json_encode($shutdownRequest));
+        $transport->writeToInput($this->encodeAndAssert($shutdownRequest));
 
         $server->run();
         // PHPUnit automatically verifies mock expectations upon test completion.
@@ -397,7 +405,7 @@ class ServerTest extends TestCase
     private function createMockRequest(mixed $jsonData, string $method = 'POST', string $uri = '/'): ServerRequestInterface
     {
         $streamFactory = new StreamFactory();
-        $body = is_string($jsonData) ? $jsonData : json_encode($jsonData);
+        $body = is_string($jsonData) ? $jsonData : $this->encodeAndAssert($jsonData);
         $stream = $streamFactory->createStream($body);
 
         $request = (new ServerRequestFactory())->createServerRequest($method, $uri);
@@ -445,8 +453,10 @@ class ServerTest extends TestCase
         $this->assertEquals(200, $capturedResponse->getStatusCode());
         $this->assertStringContainsString('application/json', $capturedResponse->getHeaderLine('Content-Type'));
         $responseBody = json_decode((string) $capturedResponse->getBody(), true);
+        self::assertIsArray($responseBody); // Ensure $responseBody is an array
         $this->assertEquals($initRequestId, $responseBody['id']);
         $this->assertArrayHasKey('result', $responseBody);
+        self::assertIsArray($responseBody['result']); // Ensure result is an array
         $this->assertEquals('2025-03-26', $responseBody['result']['protocolVersion']);
 
         // Scenario 2: Batch valid request
@@ -471,10 +481,12 @@ class ServerTest extends TestCase
         $this->assertNotNull($capturedBatchResponse);
         $this->assertEquals(200, $capturedBatchResponse->getStatusCode());
         $batchResponseBody = json_decode((string) $capturedBatchResponse->getBody(), true);
-        $this->assertIsArray($batchResponseBody);
+        self::assertIsArray($batchResponseBody); // Ensure $batchResponseBody is an array
         $this->assertCount(2, $batchResponseBody);
+        self::assertIsArray($batchResponseBody[0]); // Ensure element is an array
         $this->assertEquals($batchId1, $batchResponseBody[0]['id']);
         $this->assertEquals(['received' => 'batch1'], $batchResponseBody[0]['result']);
+        self::assertIsArray($batchResponseBody[1]); // Ensure element is an array
         $this->assertEquals($batchId2, $batchResponseBody[1]['id']);
         $this->assertEquals(['received' => 'batch2'], $batchResponseBody[1]['result']);
 
@@ -490,6 +502,9 @@ class ServerTest extends TestCase
         // HttpTransport now sends JSON-RPC errors with HTTP 200
         $this->assertEquals(200, $capturedMalformedResponse->getStatusCode());
         $malformedBody = json_decode((string) $capturedMalformedResponse->getBody(), true);
+        self::assertIsArray($malformedBody); // Ensure $malformedBody is an array
+        $this->assertArrayHasKey('error', $malformedBody);
+        self::assertIsArray($malformedBody['error']);
         $this->assertEquals(JsonRpcMessage::PARSE_ERROR, $malformedBody['error']['code']);
         $this->assertNull($malformedBody['id']);
 
@@ -509,7 +524,10 @@ class ServerTest extends TestCase
         // HttpTransport now sends JSON-RPC errors with HTTP 200
         $this->assertEquals(200, $capturedUnknownResponse->getStatusCode());
         $unknownBody = json_decode((string) $capturedUnknownResponse->getBody(), true);
+        self::assertIsArray($unknownBody); // Ensure $unknownBody is an array
         $this->assertEquals($unknownMethodId, $unknownBody['id']);
+        $this->assertArrayHasKey('error', $unknownBody);
+        self::assertIsArray($unknownBody['error']);
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $unknownBody['error']['code']);
 
         // Scenario 5: TransportException set explicitly to be thrown by receive()
@@ -532,9 +550,12 @@ class ServerTest extends TestCase
         // HttpTransport now sends JSON-RPC errors with HTTP 200
         $this->assertEquals(200, $capturedCustomErrorResponse->getStatusCode());
         $customErrorBody = json_decode((string) $capturedCustomErrorResponse->getBody(), true);
+        self::assertIsArray($customErrorBody); // Ensure $customErrorBody is an array
         $this->assertNull($customErrorBody['id']); // ID might be lost if error happens before parsing ID.
                                                  // Server.php L203 tries to get ID from raw payload for general errors.
                                                  // TransportException happens before this, so ID is null.
+        $this->assertArrayHasKey('error', $customErrorBody);
+        self::assertIsArray($customErrorBody['error']);
         $this->assertEquals(12345, $customErrorBody['error']['code']);
         $this->assertEquals("Custom transport error", $customErrorBody['error']['message']);
     }
