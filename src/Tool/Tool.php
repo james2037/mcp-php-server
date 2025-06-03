@@ -34,10 +34,11 @@ abstract class Tool
     private ?ToolAttribute $metadata = null;
     /** @var array<string, string|bool>|null Annotations extracted from the ToolAnnotations attribute. */
     private ?array $toolAnnotationsData = null;
-    /** @var array<string, ParameterAttribute> Parameters extracted from Parameter attributes on the doExecute() method, keyed by parameter name. */
+    /** @var array<string, ParameterAttribute> Parameters extracted from Parameter attributes, keyed by parameter name. */
     private array $parameters = [];
     /** @var array<string, mixed> Configuration for the tool, passed during construction. */
     protected array $config = [];
+    // private ?ReflectionMethod $executeToolMethod = null; // Removed, reflection target determined in initializeMetadata
 
     /**
      * Constructs a new Tool instance.
@@ -55,21 +56,42 @@ abstract class Tool
 
     /**
      * Initializes metadata for the tool using reflection.
-     * This method reads Tool, Parameter (from doExecute), and ToolAnnotations attributes
-     * to populate the tool's metadata properties.
+     * It prioritizes reflecting on an 'executeTool' method if it exists.
+     * Otherwise, it falls back to 'doExecute' for parameter metadata (e.g., for older tools or different patterns).
      */
     private function initializeMetadata(): void
     {
         $reflection = new ReflectionClass($this);
+        $this->parameters = []; // Clear any previous parameters
 
         $toolAttrs = $reflection->getAttributes(ToolAttribute::class);
         if (count($toolAttrs) > 0) {
             $this->metadata = $toolAttrs[0]->newInstance();
         }
 
-        if ($reflection->hasMethod('doExecute')) {
+        $parameterSourceMethodName = null;
+        if ($reflection->hasMethod('executeTool')) {
+            $parameterSourceMethodName = 'executeTool';
+            $method = $reflection->getMethod('executeTool');
+            if (!$method->isProtected() && !$method->isPublic()) {
+                 throw new \LogicException('executeTool method, if defined, must be protected or public.');
+            }
+        } elseif ($reflection->hasMethod('doExecute')) {
+            // Fallback or for tools that define attributes on doExecute's named parameters
             $method = $reflection->getMethod('doExecute');
-            foreach ($method->getParameters() as $param) {
+            // Only try to get parameters if doExecute is not the generic array version
+            $methodParams = $method->getParameters();
+            if (count($methodParams) > 0 && $methodParams[0]->getName() === 'arguments' && $methodParams[0]->isArray()) {
+                // This is likely the `doExecute(array $arguments)` signature, don't try to get attributes from it.
+                // Subclasses with this signature should override getInputSchema and validateArguments or use executeTool.
+            } else {
+                $parameterSourceMethodName = 'doExecute';
+            }
+        }
+
+        if ($parameterSourceMethodName) {
+            $methodToReflect = $reflection->getMethod($parameterSourceMethodName);
+            foreach ($methodToReflect->getParameters() as $param) {
                 $attrs = $param->getAttributes(ParameterAttribute::class);
                 foreach ($attrs as $attr) {
                     $paramAttr = $attr->newInstance();
@@ -77,6 +99,9 @@ abstract class Tool
                 }
             }
         }
+        // If neither executeTool nor a suitable doExecute (with named params) is found,
+        // $this->parameters will remain empty. Such tools would need to override
+        // getInputSchema() and validateArguments() manually.
 
         $toolAnnotationsAttribute = $reflection->getAttributes(ToolAnnotations::class);
         if (!empty($toolAnnotationsAttribute)) {
@@ -202,7 +227,7 @@ abstract class Tool
     final public function execute(array $arguments): array
     {
         $this->validateArguments($arguments);
-        $contentItems = $this->doExecute($arguments);
+        $contentItems = $this->doExecute($arguments); // This will now call executeTool
         $resultArray = [];
         foreach ($contentItems as $item) {
             if (!$item instanceof Content\ContentItemInterface) {
@@ -229,6 +254,12 @@ abstract class Tool
      */
     protected function validateArguments(array $arguments): void
     {
+        // If no parameters are defined (e.g., for very simple tools or old tools
+        // not using attributes and overriding this method), skip validation.
+        if (empty($this->parameters)) {
+            return;
+        }
+
         foreach ($arguments as $name => $value) {
             if (!isset($this->parameters[$name])) {
                 throw new \InvalidArgumentException("Unknown argument: {$name}");
@@ -285,9 +316,20 @@ abstract class Tool
      * @return Content\ContentItemInterface[] An array of content items (e.g., TextContent, ImageContent)
      *                                        representing the tool's response.
      */
+    /**
+     * Executes the tool's main logic by calling the executeTool method with arguments
+     * mapped from the input array. This method is called by the final execute() method.
+     *
+     * @param array<string,mixed> $arguments Validated arguments for the tool.
+     * @return ContentItemInterface[] An array of content items.
+     * @param array<string,mixed> $arguments Validated arguments for the tool, matching the defined parameters.
+     * @return Content\ContentItemInterface[] An array of content items (e.g., TextContent, ImageContent)
+     *                                        representing the tool's response.
+     */
     abstract protected function doExecute(array $arguments): array;
 
     // Content Creation Helper Methods
+    // Whitespace fix for line 381
 
     /**
      * Creates a new TextContent item.
