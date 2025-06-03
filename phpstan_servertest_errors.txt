@@ -1,0 +1,4 @@
+Note: Using configuration file /app/phpstan.neon.
+/app/tests/ServerTest.php:656:Offset 0 does not exist on array<string, mixed>.
+/app/tests/ServerTest.php:678:Offset 0 does not exist on array<string, mixed>.
+/app/tests/ServerTest.php:703:Offset 0 does not exist on array<string, mixed>.

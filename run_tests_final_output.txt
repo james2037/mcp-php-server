@@ -1,0 +1,52 @@
+Running linters and tests...
+Running PHP CodeSniffer (phpcs)...
+PHPCS Output:
+Running PHPStan...
+PHPStan Output:
+Note: Using configuration file /app/phpstan.neon.
+  0/70 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 20/70 [▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░]  28%[1G[2K 40/70 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░]  57%[1G[2K 60/70 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░]  85%[1G[2K 70/70 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+ ------ --------------------------------------------------
+  Line   tests/ServerTest.php
+ ------ --------------------------------------------------
+  656    Offset 0 does not exist on array<string, mixed>.
+  678    Offset 0 does not exist on array<string, mixed>.
+  703    Offset 0 does not exist on array<string, mixed>.
+ ------ --------------------------------------------------
+
+
+ [ERROR] Found 3 errors
+
+Running PHPUnit tests...
+PHPUnit Output:
+PHPUnit 10.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.1.32 with Xdebug 3.4.2
+Configuration: /app/phpunit.xml.dist
+
+...............................................................  63 / 148 ( 42%)
+............[2025-06-03 07:20:44] [INFO] Client log level set to: debug
+[2025-06-03 07:20:44] [DEBUG] test-logger: test client log message | Data: {"extra":"data"}
+.....[2025-06-03 07:20:44] [INFO] Server.Authorization: Client successfully authorized via MCP_AUTHORIZATION_TOKEN.
+.[2025-06-03 07:20:44] [ERROR] Server.Authorization: Client failed to provide MCP_AUTHORIZATION_TOKEN during initialization.
+.[2025-06-03 07:20:44] [ERROR] Server.Authorization: Client provided an invalid MCP_AUTHORIZATION_TOKEN during initialization.
+.[2025-06-03 07:20:44] [INFO] Client log level set to: debug
+..[2025-06-03 07:20:44] [CRITICAL] Server.runHttpRequestCycle: SapiEmitter failed to emit response: Output has been emitted previously; cannot emit response
+[2025-06-03 07:20:44] [ERROR] Server.runHttpRequestCycle: TransportException in HTTP cycle: JSON decode error: Syntax error | Data: {"code":-32700}
+[2025-06-03 07:20:44] [CRITICAL] Server.runHttpRequestCycle: SapiEmitter failed to emit response: Output has been emitted previously; cannot emit response
+[2025-06-03 07:20:44] [CRITICAL] Server.runHttpRequestCycle: SapiEmitter failed to emit response: Output has been emitted previously; cannot emit response
+[2025-06-03 07:20:44] [CRITICAL] Server.runHttpRequestCycle: SapiEmitter failed to emit response: Output has been emitted previously; cannot emit response
+[2025-06-03 07:20:44] [ERROR] Server.runHttpRequestCycle: TransportException in HTTP cycle: Custom transport error | Data: {"code":12345}
+[2025-06-03 07:20:44] [CRITICAL] Server.runHttpRequestCycle: SapiEmitter failed to emit response: Output has been emitted previously; cannot emit response
+{"jsonrpc":"2.0","result":{"protocolVersion":"2025-03-26","capabilities":{"test":{"enabled":true},"logging":{},"completions":{}},"serverInfo":{"name":"test-http-server","version":"1.0.1"},"instructions":"This server implements the Model Context Protocol (MCP) and provides the following capabilities:"},"id":"init_http_683ea24ca949c"}Error emitting response.Error emitting response.Error emitting response.Error emitting response.Error emitting response.....[2025-06-03 07:20:44] [INFO] Client log level set to: debug
+..................................... 126 / 148 ( 85%)
+......................                                          148 / 148 (100%)
+
+Time: 00:00.782, Memory: 14.00 MB
+
+OK (148 tests, 791 assertions)
+
+Generating code coverage report in Clover XML format ... done [00:00.021]
+
+Generating code coverage report in HTML format ... done [00:00.244]
+Linters and tests completed.

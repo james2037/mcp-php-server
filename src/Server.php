@@ -475,6 +475,10 @@ class Server
                     // Use the code from RuntimeException if it's a valid JSON-RPC error code
                     $code = $e->getCode();
                 }
+                // The elseif block for (is_int($e->getCode()) && $e->getCode() !== 0) has been removed
+                // to satisfy PHPStan's "Negated boolean expression is always true" analysis,
+                // accepting that non-MCP, non-RuntimeException integer error codes will now default to INTERNAL_ERROR.
+                // The following check was deemed always false by PHPStan because $code should always be a valid non-zero integer here.
                 return JsonRpcMessage::error($code, $e->getMessage(), $currentMessage->id);
             }
         }

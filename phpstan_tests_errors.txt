@@ -1,0 +1,75 @@
+Note: Using configuration file /app/phpstan.neon.
+?:?:Ignored error pattern ~StreamFactoryInterface::createStream\(\).*expects string, string\|false given~ in path /app/src/Transport/HttpTransport.php was not matched in reported errors.
+?:?:Ignored error pattern #Negated boolean expression is always true.# in path /app/src/Server.php was not matched in reported errors.
+/app/tests/Capability/MockTool.php:29:Cannot cast mixed to string.
+/app/tests/Capability/ResourcesCapabilityTest.php:47:Offset 'resources' does not exist on array|null.
+/app/tests/Capability/ResourcesCapabilityTest.php:72:Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, array|null given.
+/app/tests/Capability/ResourcesCapabilityTest.php:96:Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, array|null given.
+/app/tests/Capability/ResourcesCapabilityTest.php:124:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given.
+/app/tests/Capability/ResourcesCapabilityTest.php:135:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given.
+/app/tests/Capability/ResourcesCapabilityTest.php:194:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given.
+/app/tests/Capability/ResourcesCapabilityTest.php:205:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsStringIgnoringCase() expects string, mixed given.
+/app/tests/Capability/ResourcesCapabilityTest.php:221:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsStringIgnoringCase() expects string, mixed given.
+/app/tests/Capability/ResourcesCapabilityTest.php:237:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given.
+/app/tests/Capability/ResourcesCapabilityTest.php:252:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given.
+/app/tests/Message/JsonRpcMessageTest.php:49:Cannot access offset 'jsonrpc' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:50:Cannot access offset 'method' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:51:Cannot access offset 'params' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:52:Cannot access offset 'id' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:66:Cannot access offset 'jsonrpc' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:67:Cannot access offset 'id' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:68:Cannot access offset 'code' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:68:Cannot access offset 'error' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:69:Cannot access offset 'error' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:69:Cannot access offset 'message' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:191:Cannot access offset 'code' on mixed.
+/app/tests/Message/JsonRpcMessageTest.php:192:Cannot access offset 'message' on mixed.
+/app/tests/ServerErrorHandlingTest.php:64:Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, mixed given.
+/app/tests/ServerErrorHandlingTest.php:127:Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, mixed given.
+/app/tests/ServerInitializationTest.php:37:Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, mixed given.
+/app/tests/ServerInitializationTest.php:62:Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, mixed given.
+/app/tests/ServerInitializationTest.php:93:Parameter #2 $id of static method MCP\Server\Message\JsonRpcMessage::result() expects string, string|null given.
+/app/tests/ServerInitializationTest.php:121:Parameter #2 $id of static method MCP\Server\Message\JsonRpcMessage::result() expects string, string|null given.
+/app/tests/ServerInitializationTest.php:253:Parameter #2 $array of method PHPUnit\Framework\Assert::assertArrayHasKey() expects array|ArrayAccess, mixed given.
+/app/tests/ServerInitializationTest.php:302:Offset 'level' does not exist on array|null.
+/app/tests/ServerInitializationTest.php:303:Offset 'message' does not exist on array|null.
+/app/tests/ServerInitializationTest.php:304:Offset 'logger' does not exist on array|null.
+/app/tests/ServerInitializationTest.php:305:Offset 'data' does not exist on array|null.
+/app/tests/ServerTest.php:645:Offset 0 on array<string, mixed> in isset() does not exist.
+/app/tests/ServerTest.php:645:Result of && is always false.
+/app/tests/ServerTest.php:645:Right side of && is always true.
+/app/tests/ServerTest.php:647:Call to method PHPUnit\Framework\Assert::assertNotNull() with null and 'Error response for…' will always evaluate to false.
+/app/tests/ServerTest.php:666:Offset 0 on array<string, mixed> in isset() does not exist.
+/app/tests/ServerTest.php:666:Result of && is always false.
+/app/tests/ServerTest.php:666:Right side of && is always true.
+/app/tests/ServerTest.php:668:Call to method PHPUnit\Framework\Assert::assertNotNull() with null and 'Error response for…' will always evaluate to false.
+/app/tests/ServerTest.php:690:Offset 0 on array<string, mixed> in isset() does not exist.
+/app/tests/ServerTest.php:690:Result of && is always false.
+/app/tests/ServerTest.php:690:Right side of && is always true.
+/app/tests/ServerTest.php:692:Call to method PHPUnit\Framework\Assert::assertNotNull() with null and non-falsy-string will always evaluate to false.
+/app/tests/Tool/ArrayParamTool.php:20:Parameter #1 $array of function array_sum expects array, mixed given.
+/app/tests/Tool/ExtendedToolTest.php:20:Cannot access property $title on mixed.
+/app/tests/Tool/ExtendedToolTest.php:21:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertContains() expects iterable, mixed given.
+/app/tests/Tool/ExtendedToolTest.php:48:Cannot access property $numbers on mixed.
+/app/tests/Tool/ExtendedToolTest.php:49:Cannot access property $enabled on mixed.
+/app/tests/Tool/ExtendedToolTest.php:121:Cannot access property $name on mixed.
+/app/tests/Tool/ExtendedToolTest.php:122:Cannot access property $title on mixed.
+/app/tests/Tool/OptionalParamTool.php:18:Part $arguments['name'] (mixed) of encapsed string cannot be cast to string.
+/app/tests/Tool/OptionalParamTool.php:18:Part $title (mixed) of encapsed string cannot be cast to string.
+/app/tests/Tool/ToolTest.php:56:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertContains() expects iterable, mixed given.
+/app/tests/Tool/ToolTest.php:235:Argument of an invalid type mixed supplied for foreach, only iterables are supported.
+/app/tests/Tool/ToolTest.php:238:Parameter #2 $haystack of function in_array expects array, mixed given.
+/app/tests/Tool/ToolTest.php:239:Parameter #1 $key of function array_key_exists expects int|string, mixed given.
+/app/tests/Tool/ToolTest.php:239:Parameter #2 $property of function property_exists expects string, mixed given.
+/app/tests/Tool/ToolTest.php:243:Parameter #1 $key of function array_key_exists expects int|string, mixed given.
+/app/tests/Tool/ToolTest.php:243:Parameter #2 $property of function property_exists expects string, mixed given.
+/app/tests/Tool/ToolTest.php:252:Parameter #2 $schema of method MCP\Server\Tests\Tool\ToolTest::validateAgainstSchema() expects array<string, mixed>, mixed given.
+/app/tests/Tool/ToolTest.php:265:Parameter #2 $schema of method MCP\Server\Tests\Tool\ToolTest::validateAgainstSchema() expects array<string, mixed>, mixed given.
+/app/tests/Transport/HttpTransportTest.php:250:Cannot access offset 'jsonrpc' on mixed.
+/app/tests/Transport/HttpTransportTest.php:251:Cannot access offset 'id' on mixed.
+/app/tests/Transport/HttpTransportTest.php:252:Cannot access offset 'code' on mixed.
+/app/tests/Transport/HttpTransportTest.php:252:Cannot access offset 'error' on mixed.
+/app/tests/Transport/HttpTransportTest.php:253:Cannot access offset 'error' on mixed.
+/app/tests/Transport/HttpTransportTest.php:253:Cannot access offset 'message' on mixed.
+/app/tests/Transport/HttpTransportTest.php:253:Parameter #2 $haystack of method PHPUnit\Framework\Assert::assertStringContainsString() expects string, mixed given.
+/app/tests/Transport/TestableStdioTransport.php:118:Method MCP\Server\Tests\Transport\TestableStdioTransport::readMultipleJsonOutputs() should return array<int, array<string, mixed>> but returns array<int<0, max>, mixed>.

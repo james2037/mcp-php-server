@@ -1,0 +1,6 @@
+Note: Using configuration file /app/phpstan.neon.
+?:?:Ignored error pattern #^Call to an undefined method .*::method\(\)\.$# in path /app/tests/* was not matched in reported errors.
+/app/src/Server.php:133:Undefined variable: $transport
+/app/src/Server.php:136:Undefined variable: $transport
+/app/src/Server.php:143:Undefined variable: $transport
+/app/src/Server.php:166:Undefined variable: $transport
