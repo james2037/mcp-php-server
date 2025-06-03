@@ -1,3 +1,3 @@
 # TODO List
 
-## No Outstanding Issues
+No Outstanding Issues
