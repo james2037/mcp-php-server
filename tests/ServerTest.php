@@ -21,6 +21,8 @@ use MCP\Server\Exception\TransportException;
 use MCP\Server\Transport\HttpTransport;
 use MCP\Server\Capability\ToolsCapability;
 use MCP\Server\Tests\Capability\MockTool;
+use MCP\Server\Exception\MethodNotSupportedException;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @covers \MCP\Server\Server
@@ -625,5 +627,106 @@ class ServerTest extends TestCase
 
         $shutdownResponse = $this->findResponseById($rawOutput, $shutdownId);
         $this->assertNotNull($shutdownResponse, "Shutdown response not found. Raw output: " . json_encode($rawOutput));
+    }
+
+    public function testMethodNotSupportedByCapabilityOverHttp(): void
+    {
+        // Server setup with TestableHttpTransport
+        $httpTransport = new TestableHttpTransport(new ResponseFactory(), new StreamFactory());
+        $server = new Server('test-http-server-method-not-supported', '1.0.0');
+
+        // Create a mock capability
+        /** @var CapabilityInterface&MockObject $mockCapability */
+        $mockCapability = $this->createMock(CapabilityInterface::class);
+        $unsupportedMethodName = 'test/unsupportedMethod'; // This is the fully qualified method name
+
+        // This capability "knows" of "unsupportedMethod" but will throw an exception for it.
+        // The key for getCapabilities should be the method name without the namespace,
+        // as the server seems to merge these based on capability registration.
+        // However, for a direct mock, we align what `getCapabilities` returns with what `canHandleMessage` expects.
+        // Let's assume for now that the server will correctly use the full method name from the request
+        // to check against `canHandleMessage`. The `Server::getServerCapabilitiesArray` merges these.
+        // For this test, the important part is that `canHandleMessage` and `handleMessage` work correctly.
+        $mockCapability->method('getCapabilities')->willReturn([
+            $unsupportedMethodName => (object)['description' => 'A method that is known but not supported.']
+        ]);
+
+        $expectedException = new MethodNotSupportedException($unsupportedMethodName);
+
+        // Configure 'canHandleMessage'
+        $mockCapability->method('canHandleMessage')
+            ->with($this->callback(function ($message) use ($unsupportedMethodName) {
+                return $message instanceof JsonRpcMessage && $message->method === $unsupportedMethodName;
+            }))
+            ->willReturn(true);
+
+        // Configure 'handleMessage' to throw MethodNotSupportedException for the specific method
+        $mockCapability->method('handleMessage')
+            ->with($this->callback(function ($message) use ($unsupportedMethodName) {
+                return $message instanceof JsonRpcMessage && $message->method === $unsupportedMethodName;
+            }))
+            ->willThrowException($expectedException);
+
+        // Mock other required methods from CapabilityInterface
+        // For void return types, no ->willReturn() is needed if it should just do nothing.
+        $mockCapability->method('initialize');
+        $mockCapability->method('shutdown');
+
+        $server->addCapability($mockCapability);
+        $server->connect($httpTransport);
+
+        // 1. Initialize the server
+        $initRequestId = 'init_http_mns_' . uniqid();
+        $initRequestPayload = [
+            'jsonrpc' => '2.0', 'method' => 'initialize',
+            'params' => ['protocolVersion' => '2025-03-26'], 'id' => $initRequestId
+        ];
+        $mockInitRequest = $this->createMockRequest($initRequestPayload);
+        $httpTransport->setMockRequest($mockInitRequest);
+        $server->run(); // Process initialization
+
+        $initResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($initResponse, "Initialization response should not be null.");
+        $this->assertEquals(200, $initResponse->getStatusCode(), "Initialization should return HTTP 200.");
+        $initResponseBody = json_decode((string) $initResponse->getBody(), true);
+        self::assertIsArray($initResponseBody);
+        $this->assertEquals($initRequestId, $initResponseBody['id'], "Initialization response ID mismatch.");
+        $this->assertArrayHasKey('result', $initResponseBody, "Successful initialization should have a result.");
+
+
+        // 2. Send the request for the unsupported method
+        $unsupportedMethodRequestId = 'unsupported_method_http_' . uniqid();
+        $unsupportedMethodPayload = [
+            'jsonrpc' => '2.0',
+            'method' => $unsupportedMethodName,
+            'params' => ['some_param' => 'some_value'],
+            'id' => $unsupportedMethodRequestId
+        ];
+        $mockUnsupportedMethodRequest = $this->createMockRequest($unsupportedMethodPayload);
+        $httpTransport->setMockRequest($mockUnsupportedMethodRequest);
+
+        $server->run(); // Process the unsupported method request
+
+        $capturedErrorResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedErrorResponse, "Error response for unsupported method should not be null.");
+
+        // As per HttpTransport behavior, JSON-RPC errors are returned with HTTP 200
+        // The distinction for MethodNotSupported (which implies server *could* handle it if method was supported)
+        // vs MethodNotFound (server doesn't know method) might ideally be a 405 vs 404.
+        // However, current Server implementation maps MethodNotSupportedException to JsonRpcMessage::METHOD_NOT_FOUND code (-32601)
+        // And HttpTransport sends all JsonRpc errors with HTTP 200.
+        // So, we expect HTTP 200 and JSON-RPC error -32601.
+        // If the requirement is strict HTTP 405, then Server.php and HttpTransport.php would need changes.
+        // For now, testing existing behavior.
+
+        $this->assertEquals(200, $capturedErrorResponse->getStatusCode(), "HTTP status for MethodNotSupportedException should be 200 (as per current HttpTransport behavior).");
+
+        $errorBody = json_decode((string) $capturedErrorResponse->getBody(), true);
+        self::assertIsArray($errorBody, "Error response body should be a JSON array.");
+        $this->assertEquals($unsupportedMethodRequestId, $errorBody['id'], "Error response ID should match request ID.");
+        $this->assertArrayHasKey('error', $errorBody, "Error response should contain an 'error' object.");
+        self::assertIsArray($errorBody['error'], "The 'error' field should be an array.");
+        $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorBody['error']['code'], "JSON-RPC error code should be METHOD_NOT_FOUND for MethodNotSupportedException.");
+        $this->assertStringContainsString($unsupportedMethodName, $errorBody['error']['message'], "Error message should contain the method name.");
     }
 }
