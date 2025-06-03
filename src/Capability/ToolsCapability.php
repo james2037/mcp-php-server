@@ -264,33 +264,39 @@ class ToolsCapability implements CapabilityInterface
         // - If 'total' is set, it's guaranteed to be an int.
         // - If 'hasMore' is set, it's guaranteed to be a bool.
         $errorMessage = null;
+
         if (!is_array($suggestions)) {
             $errorMessage = "Tool '{$toolName}' returned suggestions that is not an array.";
         } else {
-            // The existence and array type of $suggestions['values'] is trusted if $suggestions is an array.
-            // We still need to validate that all elements in 'values' are strings.
-            foreach ($suggestions['values'] as $value) {
-                if (!is_string($value)) {
-                    $errorMessage = "Tool '{$toolName}' returned suggestions where 'values' contains non-string elements.";
-                    break;
+            $hasValuesKey = isset($suggestions['values']);
+
+            // This check is for the case where 'values' is not an array or not set.
+            // If 'values' is not set or not an array, the foreach loop below would error.
+            if (!$hasValuesKey || !is_array($suggestions['values'])) {
+                $errorMessage = "Tool '{$toolName}' returned suggestions with invalid structure. 'values' key is missing or not an array.";
+            } else {
+                // We still need to validate that all elements in 'values' are strings if 'values' is an array.
+                foreach ($suggestions['values'] as $value) {
+                    if (!is_string($value)) {
+                        $errorMessage = "Tool '{$toolName}' returned suggestions where 'values' contains non-string elements.";
+                        break;
+                    }
                 }
             }
             // The checks for 'total' being int and 'hasMore' being bool are removed as PHPStan
             // considers them redundant if the keys are present, due to the strict PHPDoc type.
         }
 
-        // PHPStan indicates $errorMessage will always be null here if tools adhere to PHPDoc.
-        // If $errorMessage was set, it implies a deviation from the PHPDoc that PHPStan
-        // did not foresee as possible (e.g. a tool returning a non-array or non-string in values).
-        // Removing this block because PHPStan reports "Strict comparison using !== between null and null will always evaluate to false."
-        // if ($errorMessage !== null) {
-        //     error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}': {$errorMessage}");
-        //     return JsonRpcMessage::error(
-        //         JsonRpcMessage::INTERNAL_ERROR,
-        //         $errorMessage,
-        //         $message->id
-        //     );
-        // }
+        // Restore the error handling block
+        if ($errorMessage !== null) {
+            // Intentionally not logging the $errorMessage here in production,
+            // but it was useful for debugging. The client receives it.
+            return JsonRpcMessage::error(
+                JsonRpcMessage::INTERNAL_ERROR,
+                $errorMessage,
+                $message->id
+            );
+        }
 
         return JsonRpcMessage::result(['completion' => $suggestions], $message->id);
     }
