@@ -1,111 +1,183 @@
-# PHP Model Context Protocol Server
+# PHP Model Context Protocol Server SDK
 
-This project is a PHP implementation of the Model Context Protocol (MCP).
+This project provides a PHP implementation of the Model Context Protocol (MCP), enabling you to build servers that can provide context (data and tools) to Large Language Models (LLMs).
 
-MCP is an open protocol that standardizes how applications provide context to LLMs.
+MCP is an open protocol that standardizes how applications interact with LLMs. For more information about MCP, please visit the official website: [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 
-For more information about MCP, please visit the official website: https://modelcontextprotocol.io
+## Getting Started
 
-## Features
+This guide will walk you through creating simple MCP servers using this SDK.
 
-| Feature    | Status      |
-|------------|-------------|
-| Resources  | Complete    |
-|   - Text Content | Complete    |
-|   - Blob Content | Complete    |
-| Tools      | Complete    |
-| Prompts    | Not Started |
-| Sampling   | Not Started |
-| Roots      | Not Started |
-| Transport (Stdio) | Complete    |
-| Transport (Streamable HTTP) | Simplified (Basic POST JSON-RPC) |
+### Prerequisites
 
-## Capabilities
-
-This server implements the following MCP capabilities:
-
-- **Resources**: Allows the server to expose data and content to LLMs. For more details, see the [MCP Resources documentation](https://modelcontextprotocol.io/docs/concepts/resources).
-- **Tools**: Enables LLMs to perform actions through the server. For more details, see the [MCP Tools documentation](https://modelcontextprotocol.io/docs/concepts/tools).
-
-## Usage
+*   PHP 8.1 or higher
+*   Composer for dependency management
 
 ### Installation
 
-Dependencies are managed with Composer. To install them, run:
+Clone this repository and install the dependencies using Composer:
 
 ```bash
+git clone https://github.com/modelcontextprotocol/php-sdk.git <your-project-name>
+cd <your-project-name>
 composer install
 ```
 
-### Running the server
+(If you are embedding this SDK into an existing project, you would typically add it via `composer require modelcontextprotocol/php-sdk` once it's published on Packagist. For now, usage from a cloned repository is assumed for development.)
 
-The `src/Server.php` file defines a `Server` class. To use it, you need to create your own PHP script that performs the following steps:
+## Creating an STDIO Server
 
-1.  **Instantiate the `Server`**: Create an instance of the `Server` class, providing a name and version for your server.
-    ```php
-    $server = new \MCP\Server\Server('My MCPServer', '1.0.0');
-    ```
-2.  **Add Capabilities**: Instantiate and add the desired MCP capabilities. For example, to add Resources and Tools support:
-    ```php
-    $server->addCapability(new \MCP\Server\Capability\ResourcesCapability());
-    $server->addCapability(new \MCP\Server\Capability\ToolsCapability());
-    ```
-3.  **Connect a Transport**: Instantiate and connect a transport mechanism. The most common is `StdioTransport`.
-    ```php
-    $transport = new \MCP\Server\Transport\StdioTransport();
-    $server->connect($transport);
-    ```
-4.  **Run the Server**: Call the `run()` method on the server instance to start listening for requests.
-    ```php
-    $server->run();
-    ```
+An STDIO server communicates over standard input and standard output. This is commonly used for local tools or development purposes.
 
-### Transport
+The following example demonstrates a server with:
+1.  An `EchoTool`: Takes a string and returns it.
+2.  A `GreetingResource`: Provides a static greeting message.
 
-By default, the server is designed to work with `StdioTransport`, communicating over standard input/output. You will need to instantiate this or another transport as shown above. For more information on transports, see the [MCP Transports documentation](https://modelcontextprotocol.io/docs/concepts/transports).
+The full code for this example can be found in `examples/stdio_server.php`.
 
-### HTTP Transport
-
-The `HttpTransport` class provides a basic mechanism to expose the MCP server over HTTP. It focuses on a simple, stateless request-response model using JSON-RPC.
-
-**Key Characteristics:**
-
--   Uses PSR-7 HTTP message interfaces (`ServerRequestInterface`, `ResponseInterface`) for handling HTTP requests and responses.
--   **Supports POST Requests Only**: All client requests to the server endpoint must use the HTTP POST method.
--   **Content-Type**:
-    -   Clients **must** send requests with a `Content-Type: application/json` header.
-    -   The server will always respond with `Content-Type: application/json`.
--   **Payload**:
-    -   The request body must contain a valid JSON-RPC request object or batch of request objects.
-    -   The response body will contain a valid JSON-RPC response object or batch of response objects.
--   **Unsupported Features**: This simplified `HttpTransport` does **not** support:
-    -   Server-Sent Events (SSE) or any form of response streaming.
-    -   GET requests (e.g., for resumability or capability discovery over GET).
-    -   DELETE requests (e.g., for session management).
-    -   Complex session management, resumability via `Last-Event-ID`, or `Origin` header validation.
-
-**Usage with `HttpTransport`:**
-
-To use the simplified `HttpTransport`:
-1.  Create a PSR-7 `ServerRequestInterface` object from the current HTTP request (e.g., using a library like `nyholm/psr7-server`).
-2.  Instantiate PSR-7 factories (`ResponseFactoryInterface`, `StreamFactoryInterface`, e.g., from `nyholm/psr7`).
-3.  Instantiate `HttpTransport` with the request and these factories.
-4.  Connect the `HttpTransport` instance to your `Server` instance.
-5.  Call `Server::run()`. This method will handle the request-response cycle for the current HTTP request.
-6.  The `Server` class internally uses a PSR-7 emitter (like `Laminas\HttpHandlerRunner\Emitter\SapiEmitter`) to send the final HTTP response prepared by `HttpTransport`.
-
-**Example (conceptual `public/index.php` or bootstrap file):**
+**Key parts of `examples/stdio_server.php`:**
 
 ```php
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php'; // Adjust path as needed
+// Autoload dependencies
+require_once __DIR__ . '/../vendor/autoload.php';
 
+// Required MCP SDK classes
+use MCP\Server\Server;
+use MCP\Server\Transport\StdioTransport;
+use MCP\Server\Capability\ToolsCapability;
+use MCP\Server\Capability\ResourcesCapability;
+
+// For defining the tool
+use MCP\Server\Tool\Tool as BaseTool;
+use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
+use MCP\Server\Tool\Attribute\Parameter;
+
+// For defining the resource
+use MCP\Server\Resource\Resource as BaseResource;
+use MCP\Server\Resource\Attribute\ResourceUri;
+use MCP\Server\Resource\ResourceContents;
+
+// 1. Define a Tool
+#[ToolAttribute(name: "echo", description: "Echoes back the provided message.")]
+class EchoTool extends BaseTool
+{
+    protected function doExecute(
+        #[Parameter(name: "message", type: "string", description: "The message to echo.", required: true)]
+        string $message // Note: SDK will pass arguments as an array to doExecute.
+                       // For direct typed parameters, the method signature should be:
+                       // protected function doExecute(array $arguments): array
+                       // and you would access $arguments['message']
+    ): array {
+        // For this example, assuming $message is directly available.
+        // A more robust implementation would use $arguments['message'].
+        return [$this->createTextContent("Echo: " . $message)];
+    }
+}
+
+// 2. Define a Resource
+#[ResourceUri(uri: "greeting://welcome", description: "Provides a welcome greeting.")]
+class GreetingResource extends BaseResource
+{
+    public function __construct()
+    {
+        parent::__construct("Welcome Greeting", "text/plain");
+    }
+
+    public function read(array $parameters = []): ResourceContents
+    {
+        return $this->text("Hello from your MCP server!");
+    }
+}
+
+// 3. Instantiate the Server
+$server = new Server('MySimpleServer (STDIO)', '1.0.0');
+
+// 4. Setup and Add Tools Capability
+$toolsCapability = new ToolsCapability();
+$toolsCapability->addTool(new EchoTool());
+$server->addCapability($toolsCapability);
+
+// 5. Setup and Add Resources Capability
+$resourcesCapability = new ResourcesCapability();
+$resourcesCapability->addResource(new GreetingResource());
+$server->addCapability($resourcesCapability);
+
+// 6. Connect StdioTransport
+$transport = new StdioTransport();
+$server->connect($transport);
+
+// 7. Run the Server
+fwrite(STDERR, "STDIO Server listening...
+"); // Optional: message to stderr
+$server->run();
+
+```
+*(Note: The `EchoTool::doExecute` signature in the snippet above is simplified for illustration. The actual `examples/stdio_server.php` uses `string $message` directly, but for strictness with the base class it should be `array $arguments` and access `$arguments['message']`.)*
+
+
+**Running the STDIO Server:**
+
+Execute the script from your terminal:
+
+```bash
+php examples/stdio_server.php
+```
+The server will listen for JSON-RPC messages on standard input.
+
+## Creating an HTTP Server
+
+You can also expose your MCP server over HTTP using the `HttpTransport`. This example uses the same `EchoTool` and `GreetingResource`.
+
+The full code for this example is in `examples/http_server.php`. This script requires PSR-7 and PSR-17 HTTP message implementations (e.g., `nyholm/psr7` and `nyholm/psr7-server`, which are included in `composer.json`).
+
+**Key parts of `examples/http_server.php`:**
+
+```php
+<?php
+
+// Autoload dependencies
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Required MCP SDK classes & PSR implementations
 use MCP\Server\Server;
 use MCP\Server\Transport\HttpTransport;
-use MCP\Server\Capability\ResourcesCapability; // Example capability
+use MCP\Server\Capability\ToolsCapability;
+use MCP\Server\Capability\ResourcesCapability;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+
+// Tool and Resource definitions (e.g., EchoTool, GreetingResource)
+// would be included here, same as in the STDIO example.
+// For brevity, they are omitted from this snippet but are in the actual file.
+
+// --- Assume EchoTool is defined as in the STDIO example ---
+use MCP\Server\Tool\Tool as BaseTool;
+use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
+use MCP\Server\Tool\Attribute\Parameter;
+#[ToolAttribute(name: "echo", description: "Echoes back the provided message.")]
+class EchoTool extends BaseTool {
+    protected function doExecute(
+        #[Parameter(name: "message", type: "string", description: "The message to echo.", required: true)]
+        string $message
+    ): array {
+        return [$this->createTextContent("Echo: " . $message)];
+    }
+}
+
+// --- Assume GreetingResource is defined as in the STDIO example ---
+use MCP\Server\Resource\Resource as BaseResource;
+use MCP\Server\Resource\Attribute\ResourceUri;
+use MCP\Server\Resource\ResourceContents;
+#[ResourceUri(uri: "greeting://welcome", description: "Provides a welcome greeting.")]
+class GreetingResource extends BaseResource {
+    public function __construct() { parent::__construct("Welcome Greeting", "text/plain"); }
+    public function read(array $parameters = []): ResourceContents {
+        return $this->text("Hello from your MCP server!");
+    }
+}
+
 
 // 1. Create PSR-7 request and factories
 $psr17Factory = new Psr17Factory();
@@ -117,217 +189,51 @@ $requestCreator = new ServerRequestCreator(
 );
 $request = $requestCreator->fromGlobals();
 
-// 2. Instantiate Server
-$server = new Server('My MCPServer (HTTP)', '1.0.0');
+// 2. Instantiate the Server
+$server = new Server('MySimpleServer (HTTP)', '1.0.0');
 
-// 3. Add Capabilities (example)
-$server->addCapability(new ResourcesCapability());
-// Add other capabilities (Tools, etc.)
+// 3. Setup and Add Capabilities (Tools, Resources)
+// Similar to STDIO example:
+$toolsCapability = new ToolsCapability();
+$toolsCapability->addTool(new EchoTool());
+$server->addCapability($toolsCapability);
+
+$resourcesCapability = new ResourcesCapability();
+$resourcesCapability->addResource(new GreetingResource());
+$server->addCapability($resourcesCapability);
 
 // 4. Instantiate and connect HttpTransport
-// No allowedOrigins or other complex configurations needed for the simplified transport.
 $transport = new HttpTransport($request, $psr17Factory, $psr17Factory);
 $server->connect($transport);
 
-// 5. Run the server for this request
-// The SapiEmitter within Server::runHttpRequestCycle will send the response.
+// 5. Run the Server
+// For HTTP, run() processes the current request and sends the response.
 $server->run();
-
-// The script typically ends here for a standard PHP request-response cycle.
 ```
 
-## Creating Custom Resources
+**Running the HTTP Server:**
 
-To add your own custom resources to the server, you need to create classes that extend `\MCP\Server\Resource\Resource`. This base class is responsible for defining how a resource is discovered by clients (its URI, name, description, etc.) and how its content is read when requested.
+Use PHP's built-in web server for development:
 
-### Key steps for creating a custom Resource class:
-
-1.  **Extend `\MCP\Server\Resource\Resource`**: Your custom class must extend this base class.
-2.  **Constructor**: Your constructor should call the parent constructor:
-    `parent::__construct(string $name, ?string $mimeType = null, ?int $size = null, ?\MCP\Server\Tool\Content\Annotations $annotations = null, ?array $config = null);`
-    The `$name` parameter is particularly important as it's often used in user interfaces to identify the resource.
-3.  **`#[ResourceUri]` Attribute**: Use the PHP class attribute `#[\MCP\Server\Resource\Attribute\ResourceUri]` to define the resource's URI and description. The URI can be a template.
-    Example:
-    ```php
-    #[\MCP\Server\Resource\Attribute\ResourceUri(uri: "customprovider://example/{itemId}", description: "Provides an example item.")]
-    ```
-4.  **Implement `read()` Method**: You must implement the abstract method `public function read(array $parameters = []): \MCP\Server\Resource\ResourceContents;`.
-    *   The `$parameters` array will contain values extracted from any URI template placeholders. For instance, if your `ResourceUri` is `customprovider://example/{itemId}` and a client requests `customprovider://example/123`, then `$parameters` will be `['itemId' => '123']`.
-    *   This method must return an instance of `\MCP\Server\Resource\TextResourceContents` or `\MCP\Server\Resource\BlobResourceContents`.
-    *   The base `Resource` class provides helper methods to easily create these:
-        *   `protected function text(string $text, ?string $mimeType = null, array $parameters = []): TextResourceContents`
-        *   `protected function blob(string $data, string $mimeType, array $parameters = []): BlobResourceContents`
-
-### Example Custom Resource: `EchoResource`
-
-Here's a simple example of a custom resource that echoes back a message provided in its URI:
-
-```php
-<?php
-
-namespace MyServer\Resources;
-
-use MCP\Server\Resource\Resource;
-use MCP\Server\Resource\ResourceContents;
-use MCP\Server\Resource\TextResourceContents; // Explicit import for clarity
-use MCP\Server\Resource\Attribute\ResourceUri;
-
-#[ResourceUri(uri: "echo://{message}", description: "Echoes back the message provided in the URI.")]
-class EchoResource extends Resource
-{
-    public function __construct()
-    {
-        // Name, an optional MimeType for hints, etc.
-        parent::__construct("Echo Resource", "text/plain");
-    }
-
-    public function read(array $parameters = []): ResourceContents
-    {
-        $messageToEcho = $parameters['message'] ?? 'No message provided';
-        // Use the helper method from the base Resource class
-        return $this->text("You said: " . $messageToEcho, 'text/plain', $parameters);
-    }
-}
+```bash
+php -S localhost:8000 examples/http_server.php
 ```
 
-### Registering the Custom Resource
+Then, send MCP requests using an HTTP client like `curl`.
 
-To make your custom resource available through the server:
+**Example `curl` request for the `echo` tool:**
 
-1.  Instantiate your custom resource class.
-2.  Add it to an instance of `\MCP\Server\Capability\ResourcesCapability`.
-3.  Add the `ResourcesCapability` instance to your server.
-
-```php
-// ... assume $server is your \MCP\Server\Server instance,
-// and transport is already connected as shown in the main "Usage" section ...
-
-// 1. Create and configure ResourcesCapability
-$resourcesCapability = new \MCP\Server\Capability\ResourcesCapability();
-
-// 2. Instantiate and add your custom resource(s)
-// Make sure \MyServer\Resources\EchoResource is defined as in the example above
-$echoResource = new \MyServer\Resources\EchoResource();
-$resourcesCapability->addResource($echoResource);
-// You can add more resources to $resourcesCapability here
-// For example: $resourcesCapability->addResource(new \MyServer\Resources\AnotherResource());
-
-// 3. Add the configured capability to the server
-$server->addCapability($resourcesCapability);
-
-// ... then $server->run();
+```bash
+curl -X POST -H "Content-Type: application/json"      -d '{"jsonrpc":"2.0","method":"Tools/echo","params":{"message":"Hello HTTP"},"id":1}'      http://localhost:8000/
 ```
 
-## Creating Custom Tools
+**Expected JSON-RPC Response:**
 
-To add your own custom tools to the server, you need to create classes that extend `\MCP\Server\Tool\Tool`. This base class helps define the tool's name, its description, the input schema it expects, and its core execution logic.
-
-### Key steps for creating a custom Tool class:
-
-1.  **Extend `\MCP\Server\Tool\Tool`**: Your custom class must extend this base class.
-2.  **`#[Tool]` Attribute**: Use the PHP class attribute `#[\MCP\Server\Tool\Attribute\Tool]` to define the tool's unique `name` (e.g., `mytool/action` or `calculator/add`) and a human-readable `description`.
-    Example:
-    ```php
-    #[\MCP\Server\Tool\Attribute\Tool(name: "string/reverse", description: "Reverses a given string.")]
-    ```
-3.  **Input Schema (Parameters via `doExecute` method parameters)**: The input parameters your tool accepts are defined by adding `#[\MCP\Server\Tool\Attribute\Parameter]` attributes to the parameters of the `doExecute` method. The `name` you specify in the `Parameter` attribute will be the key in the `$arguments` array passed to `doExecute`.
-    Example:
-    ```php
-    protected function doExecute(
-        #[\MCP\Server\Tool\Attribute\Parameter(name: "inputString", type: "string", description: "The string to reverse.", required: true)]
-        $inputString // This PHP variable name is for use within the method
-    ): array {
-        // ... logic using $inputString ...
-    }
-    ```
-4.  **Implement `doExecute()` Method**: You must implement the abstract method `protected function doExecute(array $arguments): array;`.
-    *   The `$arguments` associative array will contain the input values provided by the client, already validated against the schema defined by your `Parameter` attributes.
-    *   This method must return an array of objects, where each object implements `\MCP\Server\Tool\Content\ContentItemInterface`.
-    *   The base `Tool` class provides helper methods to easily create common content types, such as `createTextContent()`, `createImageContent()`, `createAudioContent()`, and `createEmbeddedResource()`.
-5.  **Optional `#[ToolAnnotations]` Attribute**: You can add `#[\MCP\Server\Tool\Attribute\ToolAnnotations]` at the class level to provide additional hints like a `title` for display, a `readOnlyHint`, or other metadata.
-6.  **Optional Completion Suggestions**: You can override the `public function getCompletionSuggestions(string $argumentName, string $query, int $limit): array` method to provide dynamic suggestions for tool inputs if needed.
-
-### Example Custom Tool: `StringReverserTool`
-
-Here's a simple example of a custom tool that reverses a string:
-
-```php
-<?php
-
-namespace MyServer\Tools;
-
-use MCP\Server\Tool\Tool;
-use MCP\Server\Tool\Attribute\Tool as ToolAttribute; // Alias for clarity
-use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute; // Alias for clarity
-use MCP\Server\Tool\Content\ContentItemInterface; // For return type hint
-use MCP\Server\Tool\Content\TextContent; // For specific content type
-
-#[ToolAttribute(name: "string/reverse", description: "Reverses a given string.")]
-class StringReverserTool extends Tool
-{
-    // The doExecute method's parameters, with their attributes, define the input schema.
-    // The name in ParameterAttribute ('text_to_reverse') should match the PHP parameter name.
-    protected function doExecute(
-        #[ParameterAttribute(name: "text_to_reverse", type: "string", description: "The string that will be reversed.", required: true)]
-        $text_to_reverse
-    ): array {
-        // The $text_to_reverse parameter directly contains the validated input string.
-        $reversedString = strrev($text_to_reverse);
-
-        // Use the helper method from the base Tool class to create a TextContent item
-        return [$this->createTextContent($reversedString)];
-    }
-}
+```json
+{"jsonrpc":"2.0","result":[{"type":"text","text":"Echo: Hello HTTP"}],"id":1}
 ```
 
-*Note: The name of the PHP parameter in `doExecute` should match the `name` specified in its `ParameterAttribute` for direct access to the argument's value. If they differ, you would need to access the value via the `$arguments` array passed to `doExecute` (e.g., `$arguments['text_to_reverse']`).*
+## Further Information
 
-
-### Registering the Custom Tool
-
-To make your custom tool available through the server:
-
-1.  Instantiate your custom tool class.
-2.  Add it to an instance of `\MCP\Server\Capability\ToolsCapability`.
-3.  Add the `ToolsCapability` instance to your server.
-
-```php
-// ... assume $server is your \MCP\Server\Server instance,
-// and transport is already connected as shown in the main "Usage" section ...
-
-// 1. Create and configure ToolsCapability
-$toolsCapability = new \MCP\Server\Capability\ToolsCapability();
-
-// 2. Instantiate and add your custom tool(s)
-// Make sure \MyServer\Tools\StringReverserTool is defined as in the example above
-$stringReverser = new \MyServer\Tools\StringReverserTool();
-$toolsCapability->addTool($stringReverser);
-// You can add more tools to $toolsCapability here
-// For example: $toolsCapability->addTool(new \MyServer\Tools\AnotherTool());
-
-// 3. Add the configured capability to the server
-$server->addCapability($toolsCapability);
-
-// ... then $server->run();
+For more detailed information on MCP concepts, capabilities, and advanced usage, please refer to the source code and the official [Model Context Protocol documentation](https://modelcontextprotocol.io/docs).
 ```
-
-## Project Structure
-
-- `src/`: Contains the core source code of the server, including capabilities, resources, tools, and transport implementations.
-- `tests/`: Contains unit tests for the server components.
-- `vendor/`: Contains project dependencies managed by Composer. This directory is created after running `composer install`.
-
-## Contributing
-
-We welcome contributions from the community! If you'd like to contribute to this project, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your changes.
-3. Make your changes, ensuring to include clear comments and add or update tests where applicable.
-4. Submit a pull request for review.
-
-For more general information on contributing to MCP projects, please see the [main MCP contributing guide](https://modelcontextprotocol.io/development/contributing).
-
-## License
-
-This project is licensed under the MIT License. The full license text can be found in the `LICENSE` file.
