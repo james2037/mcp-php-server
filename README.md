@@ -1,3 +1,5 @@
+[![Latest Stable Version](https://poser.pugx.org/james2037/mcp-php-server/v/stable)](https://packagist.org/packages/james2037/mcp-php-server)
+
 # PHP Model Context Protocol Server SDK
 
 This project provides a PHP implementation of the Model Context Protocol (MCP), enabling you to build servers that can provide context (data and tools) to Large Language Models (LLMs).
@@ -29,15 +31,11 @@ This guide will walk you through creating simple MCP servers using this SDK.
 
 ### Installation
 
-Clone this repository and install the dependencies using Composer:
+Install the dependencies using Composer:
 
 ```bash
-git clone https://github.com/modelcontextprotocol/php-sdk.git <your-project-name>
-cd <your-project-name>
-composer install
+composer require james2037/mcp-php-server
 ```
-
-(If you are embedding this SDK into an existing project, you would typically add it via `composer require modelcontextprotocol/php-sdk` once it's published on Packagist. For now, usage from a cloned repository is assumed for development.)
 
 ## Creating an STDIO Server
 
