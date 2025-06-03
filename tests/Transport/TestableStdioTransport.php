@@ -19,9 +19,23 @@ class TestableStdioTransport extends StdioTransport
     public function __construct()
     {
         // Create memory streams for testing
-        $this->input = fopen('php://memory', 'r+');
-        $this->output = fopen('php://memory', 'r+');
-        $this->error = fopen('php://memory', 'r+');
+        $inputHandle = fopen('php://memory', 'r+');
+        if ($inputHandle === false) {
+            throw new \RuntimeException('Failed to open input memory stream for TestableStdioTransport');
+        }
+        $this->input = $inputHandle;
+
+        $outputHandle = fopen('php://memory', 'r+');
+        if ($outputHandle === false) {
+            throw new \RuntimeException('Failed to open output memory stream for TestableStdioTransport');
+        }
+        $this->output = $outputHandle;
+
+        $errorHandle = fopen('php://memory', 'r+');
+        if ($errorHandle === false) {
+            throw new \RuntimeException('Failed to open error memory stream for TestableStdioTransport');
+        }
+        $this->error = $errorHandle;
 
         // Call parent constructor after initializing our streams
         // StdioTransport's constructor calls getInputStream etc.
@@ -79,11 +93,17 @@ class TestableStdioTransport extends StdioTransport
         ftruncate($this->output, 0);
         fseek($this->output, 0);
 
+        if ($content === false) {
+            // If stream_get_contents fails, treat as no output.
+            return [];
+        }
+
+        // Now $content is a string.
         if (trim($content) === '') {
             return [];
         }
 
-        $lines = explode("\n", trim($content));
+        $lines = explode("\n", trim($content)); // trim is now safe
         $decodedOutputs = [];
         foreach ($lines as $line) {
             if (trim($line) === '') {

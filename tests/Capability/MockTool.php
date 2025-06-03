@@ -29,6 +29,17 @@ class MockTool extends Tool
             $filteredValues = array_filter($allValues, fn($v) => str_starts_with($v, (string)$currentValue));
             return ['values' => array_values($filteredValues), 'total' => count($filteredValues), 'hasMore' => false];
         }
-        return parent::getCompletionSuggestions($argumentName, $currentValue, $allArguments);
+        $suggestions = parent::getCompletionSuggestions($argumentName, $currentValue, $allArguments);
+
+        // Ensure 'total' and 'hasMore' are set, as our PHPDoc guarantees them.
+        // The parent PHPDoc indicates they are optional.
+        if (!isset($suggestions['total'])) {
+            $suggestions['total'] = count($suggestions['values']); // Sensible default
+        }
+        if (!isset($suggestions['hasMore'])) {
+            $suggestions['hasMore'] = false; // Sensible default
+        }
+
+        return $suggestions;
     }
 }

@@ -3,7 +3,7 @@ includes:
     # phpstan-baseline.neon is removed as we are explicitly ignoring errors.
 
 parameters:
-    level: 6
+    level: 7
     paths:
         - src
         - tests
@@ -25,6 +25,10 @@ parameters:
                 # reportUnmatchedIgnoredErrors: false # Add this if you use line numbers and they might shift
                 # lines:
                 #     - 281 # Current line number, may change
+        -
+            message: '#^Parameter \#1 \$content of method Psr\\Http\\Message\\StreamFactoryInterface::createStream\(\) expects string, string\|false given\.$#'
+            paths:
+                - src/Transport/HttpTransport.php
 
     # phpunit_config_file: phpunit.xml.dist
     # Exclude specific files or directories if needed

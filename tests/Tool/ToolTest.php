@@ -159,6 +159,9 @@ class ToolTest extends TestCase
 
         // Encode and decode to check JSON structure
         $json = json_encode($schema);
+        $this->assertIsString($json, "json_encode should return a string for a valid schema.");
+        // If $json is false, the assertIsString would have failed.
+        // So, $json is definitely a string here for json_decode.
         $decoded = json_decode($json, true);
 
         // Validate the decoded structure
@@ -233,12 +236,20 @@ class ToolTest extends TestCase
                             if (
                                 isset($schema['required'])
                                 && in_array($prop, $schema['required'])
-                                && !array_key_exists($prop, $data)
+                                && ((is_array($data) && !array_key_exists($prop, $data)) || (is_object($data) && !property_exists($data, $prop)))
                             ) {
                                 return false;
                             }
-                            if (array_key_exists($prop, $data)) {
-                                if (!$this->validateAgainstSchema($data[$prop], $propSchema)) {
+                            if ((is_array($data) && array_key_exists($prop, $data)) || (is_object($data) && property_exists($data, $prop))) {
+                                // Accessing $data[$prop] is fine for both array and object (if property exists)
+                                // For objects, this relies on PHP converting object property access to array-like access for ArrayAccess or stdClass.
+                                // However, to be more explicit and safe, especially if $data could be a specific object type
+                                // not implementing ArrayAccess, we should differentiate access.
+                                // $value = is_array($data) ? $data[$prop] : $data->$prop;
+                                // But given $data is 'mixed' and passed around, and json_decode($assoc=true) makes arrays,
+                                // let's assume for now $data[$prop] works for the objects it might be (like stdClass).
+                                // If further errors arise, this access ($data[$prop]) might need refinement.
+                                if (!$this->validateAgainstSchema(is_array($data) ? $data[$prop] : $data->$prop, $propSchema)) {
                                     return false;
                                 }
                             }
