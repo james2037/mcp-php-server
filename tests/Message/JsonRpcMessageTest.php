@@ -4,7 +4,7 @@ namespace MCP\Server\Tests\Message;
 
 use MCP\Server\Message\JsonRpcMessage;
 use PHPUnit\Framework\TestCase;
-use LogicException; // Added for explicit use
+use LogicException;
 
 /**
  * @covers \MCP\Server\Message\JsonRpcMessage
