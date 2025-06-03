@@ -132,6 +132,7 @@ class HttpTransport extends AbstractTransport
             // $this->clientRequestWasAckOnly logic removed.
             // The JsonRpcMessage parsing (fromJson, fromJsonArray) is removed from transport.
             // Transport returns the raw associative array(s).
+            /** @var array<int|string, mixed> $parsedBody */
             return $parsedBody;
         } catch (\JsonException $e) {
             throw new TransportException('JSON Parse Error: ' . $e->getMessage(), JsonRpcMessage::PARSE_ERROR, $e);

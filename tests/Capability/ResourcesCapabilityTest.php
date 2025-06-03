@@ -193,4 +193,62 @@ class ResourcesCapabilityTest extends TestCase
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
         $this->assertStringContainsString('Error reading resource test://erroronread: Mock error reading resource', $response->error['message']);
     }
+
+    public function testHandleListWithNullIdReturnsError(): void
+    {
+        $request = new JsonRpcMessage("resources/list", [], null);
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response);
+        $this->assertNotNull($response->error, "Response should be an error object.");
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error["code"]);
+        $this->assertStringContainsStringIgnoringCase("request id is missing", $response->error["message"]);
+        $this->assertNull($response->id);
+    }
+
+    public function testHandleReadWithNullIdReturnsError(): void
+    {
+        $request = new JsonRpcMessage(
+            "resources/read",
+            ["uri" => "test://static"],
+            null
+        );
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response);
+        $this->assertNotNull($response->error, "Response should be an error object.");
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error["code"]);
+        $this->assertStringContainsStringIgnoringCase("request id is missing", $response->error["message"]);
+        $this->assertNull($response->id);
+    }
+
+    public function testHandleReadWithNonStringUriReturnsError(): void
+    {
+        $request = new JsonRpcMessage(
+            "resources/read",
+            ["uri" => 12345],
+            "id_non_string_uri"
+        );
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response);
+        $this->assertNotNull($response->error, "Response should be an error object for non-string URI.");
+        $this->assertEquals(JsonRpcMessage::INVALID_PARAMS, $response->error["code"]);
+        $this->assertStringContainsString("URI parameter must be a string", $response->error["message"]);
+    }
+
+    public function testHandleReadWithArrayUriReturnsError(): void
+    {
+        $request = new JsonRpcMessage(
+            "resources/read",
+            ["uri" => ["should_be_string"]],
+            "id_array_uri"
+        );
+        $response = $this->capability->handleMessage($request);
+
+        $this->assertNotNull($response);
+        $this->assertNotNull($response->error, "Response should be an error object for array URI.");
+        $this->assertEquals(JsonRpcMessage::INVALID_PARAMS, $response->error["code"]);
+        $this->assertStringContainsString("URI parameter must be a string", $response->error["message"]);
+    }
 }

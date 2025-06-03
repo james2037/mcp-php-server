@@ -14,21 +14,17 @@ parameters:
             message: '#^Call to an undefined method .*::method\(\)\.$#'
             paths:
                 - tests/*
-
-        # Ignore the specific "Negated boolean expression is always true" in Server.php
+        # Ignore for HttpTransport.php - createStream expects string, string|false given
         -
-            message: '#^Negated boolean expression is always true\.$#'
-            paths:
-                - src/Server.php
-                # Specify line number if needed, but message and path might be specific enough.
-                # Example with line number:
-                # reportUnmatchedIgnoredErrors: false # Add this if you use line numbers and they might shift
-                # lines:
-                #     - 281 # Current line number, may change
-        -
-            message: '#^Parameter \#1 \$content of method Psr\\Http\\Message\\StreamFactoryInterface::createStream\(\) expects string, string\|false given\.$#'
+            message: '~StreamFactoryInterface::createStream\(\).*expects string, string\|false given~'
             paths:
                 - src/Transport/HttpTransport.php
+        # Ignore "Negated boolean expression is always true" for a specific elseif in Server.php
+        -
+            message: '#Negated boolean expression is always true.#'
+            paths:
+                - src/Server.php
+
 
     # phpunit_config_file: phpunit.xml.dist
     # Exclude specific files or directories if needed

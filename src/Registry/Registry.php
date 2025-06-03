@@ -32,12 +32,13 @@ abstract class Registry
         );
 
         foreach ($iterator as $file) {
-            if ($file->getExtension() !== 'php') {
+            if (!$file instanceof \SplFileInfo || $file->getExtension() !== 'php') {
                 continue;
             }
 
             // Ensure the file is included before trying to get class info
             // This was include_once, which is fine.
+            // At this point, $file is guaranteed to be an SplFileInfo object.
             include_once $file->getPathname();
             $className = $this->getClassFromFile($file);
 

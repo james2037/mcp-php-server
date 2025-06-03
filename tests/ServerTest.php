@@ -626,4 +626,74 @@ class ServerTest extends TestCase
         $shutdownResponse = $this->findResponseById($rawOutput, $shutdownId);
         $this->assertNotNull($shutdownResponse, "Shutdown response not found. Raw output: " . json_encode($rawOutput));
     }
+
+    public function testInitializeWithNullIdReturnsError(): void
+    {
+        $initRequest = [
+            "jsonrpc" => "2.0", "method" => "initialize",
+            "params" => ["protocolVersion" => "2025-03-26"],
+            "id" => null
+        ];
+        $this->transport->writeToInput($this->encodeAndAssert($initRequest));
+        $shutdownRequest = ["jsonrpc" => "2.0", "method" => "shutdown", "id" => "shutdown_null_init_" . uniqid()];
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
+
+        $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
+
+        $this->assertNotEmpty($rawOutput, "Server produced no output.");
+        $errorResponse = (isset($rawOutput[0]) && is_array($rawOutput[0]) && isset($rawOutput[0][0])) ? $rawOutput[0][0] : null;
+
+        $this->assertNotNull($errorResponse, "Error response for null ID init not found.");
+        $this->assertArrayHasKey("error", $errorResponse);
+        self::assertIsArray($errorResponse["error"]);
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $errorResponse["error"]["code"]);
+        $this->assertStringContainsStringIgnoringCase("request is missing an id", $errorResponse["error"]["message"]);
+        $this->assertNull($errorResponse["id"]);
+    }
+
+    public function testShutdownWithNullIdReturnsError(): void
+    {
+        $this->queueInitializeRequest();
+
+        $shutdownRequest = ["jsonrpc" => "2.0", "method" => "shutdown", "id" => null];
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
+
+        $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
+
+        $this->assertCount(2, $rawOutput, "Expected init and shutdown responses. Got: " . json_encode($rawOutput));
+        $errorResponse = (isset($rawOutput[1]) && is_array($rawOutput[1]) && isset($rawOutput[1][0])) ? $rawOutput[1][0] : null;
+
+        $this->assertNotNull($errorResponse, "Error response for null ID shutdown not found.");
+        $this->assertArrayHasKey("error", $errorResponse);
+        self::assertIsArray($errorResponse["error"]);
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $errorResponse["error"]["code"]);
+        $this->assertStringContainsStringIgnoringCase("request is missing an id", $errorResponse["error"]["message"]);
+        $this->assertNull($errorResponse["id"]);
+    }
+
+    public function testSetLogLevelWithNullIdReturnsError(): void
+    {
+        $this->queueInitializeRequest();
+
+        $setLevelRequest = ["jsonrpc" => "2.0", "method" => "logging/setLevel", "params" => ["level" => "debug"], "id" => null];
+        $this->transport->writeToInput($this->encodeAndAssert($setLevelRequest));
+        $shutdownRequest = ["jsonrpc" => "2.0", "method" => "shutdown", "id" => "shutdown_null_log_" . uniqid()];
+        $this->transport->writeToInput($this->encodeAndAssert($shutdownRequest));
+
+        $this->server->run();
+        $rawOutput = $this->transport->readMultipleJsonOutputs();
+
+        $this->assertCount(4, $rawOutput, "Expected init, logging notification, setLevel error, and shutdown responses. Got: " . json_encode($rawOutput));
+
+        $setLevelErrorResponse = (isset($rawOutput[2]) && is_array($rawOutput[2]) && isset($rawOutput[2][0])) ? $rawOutput[2][0] : null;
+
+        $this->assertNotNull($setLevelErrorResponse, "Error response for null ID setLevel not found. Raw output: " . json_encode($rawOutput));
+        $this->assertArrayHasKey("error", $setLevelErrorResponse);
+        self::assertIsArray($setLevelErrorResponse["error"]);
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $setLevelErrorResponse["error"]["code"]);
+        $this->assertStringContainsStringIgnoringCase("SetLogLevel request is missing an ID.", $setLevelErrorResponse["error"]["message"]);
+        $this->assertNull($setLevelErrorResponse["id"]);
+    }
 }

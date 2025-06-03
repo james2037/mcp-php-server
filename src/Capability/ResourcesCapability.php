@@ -106,6 +106,11 @@ class ResourcesCapability implements CapabilityInterface
      */
     private function handleList(JsonRpcMessage $message): JsonRpcMessage
     {
+        if ($message->id === null) {
+            // Requests that expect a result must have an ID.
+            // This is an internal error because the server should have validated this.
+            return JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Request ID is missing for a non-notification request.', null);
+        }
         $resourceList = [];
         foreach ($this->resources as $resource) {
             // The Resource class now has a toArray() method
@@ -135,11 +140,23 @@ class ResourcesCapability implements CapabilityInterface
             );
         }
 
+        if (!is_string($uri)) {
+            return JsonRpcMessage::error(
+                JsonRpcMessage::INVALID_PARAMS,
+                'URI parameter must be a string',
+                $message->id
+            );
+        }
+
         foreach ($this->resources as $resource) {
             $template = $resource->getUri();
             $parameters = $this->matchUriTemplate($template, $uri);
             if ($parameters !== null) {
                 try {
+                    if ($message->id === null) {
+                        // Requests that expect a result must have an ID.
+                        return JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Request ID is missing for a non-notification request.', null);
+                    }
                     /** @var \MCP\Server\Resource\TextResourceContents|\MCP\Server\Resource\BlobResourceContents $resourceContent */
                     $resourceContent = $resource->read($parameters);
                     // The result structure must be
