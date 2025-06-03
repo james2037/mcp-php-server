@@ -1,9 +1,3 @@
 # TODO List
 
-## SDK Issues Status
-
-- **Method Resolution After Initialize (Clarified):**
-  - **Original Observation:** An issue was reported where `Tools/*` (e.g., `Tools/echo`) or `Resources/*` methods would return "Method not found" if called immediately after a successful `initialize` in the same session/batch.
-  - **Investigation Outcome (2025-06-03):** Investigation and new test cases (e.g., `ServerTest::testInitializeAndToolCallInSameStream`) confirm that the server correctly handles an `initialize` request followed by a subsequent valid `tools/call` (or `resources/read`, etc.) request within the same STDIO stream or HTTP batch.
-  - **Conclusion:** The "Method not found" error is likely due to the client sending an incorrect JSON-RPC method name (e.g., literal `Tools/echo` or `Resources/get`). The correct approach is to use the standard method names like `tools/call` (with parameters like `{"name": "echo", "arguments": {...}}`) or `resources/read` (with parameters like `{"uri": "resource_uri"}`). The server is behaving as expected by rejecting unknown method names.
-  - **Recommendation:** Clients should ensure they are using the correct JSON-RPC method names and parameters as defined by the MCP specification and server capabilities.
+## No Outstanding Issues
