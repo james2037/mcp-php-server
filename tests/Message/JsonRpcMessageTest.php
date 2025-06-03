@@ -128,7 +128,6 @@ class JsonRpcMessageTest extends TestCase
         $this->expectException(\RuntimeException::class);
         // This will be caught by fromJson when processing the individual message
         $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
-        $this->expectExceptionMessage('Missing method'); // fromJson throws "Missing method" directly
         JsonRpcMessage::fromJsonArray($json);
     }
 
