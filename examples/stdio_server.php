@@ -57,8 +57,7 @@ $transport = new StdioTransport();
 $server->connect($transport);
 
 // 5. Run the Server
-fwrite(STDERR, "STDIO Server listening...
-"); // Message to stderr
+fwrite(STDERR, "STDIO Server listening...\n"); // Message to stderr
 $server->run();
 
 ?>
