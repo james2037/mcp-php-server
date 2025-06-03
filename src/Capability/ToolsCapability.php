@@ -268,10 +268,13 @@ class ToolsCapability implements CapabilityInterface
         if (!is_array($suggestions)) {
             $errorMessage = "Tool '{$toolName}' returned suggestions that is not an array.";
         } else {
+            // PHPStan might report that 'values' always exists due to the PHPDoc.
+            // @phpstan-ignore-next-line This isset check is a necessary runtime validation.
             $hasValuesKey = isset($suggestions['values']);
 
             // This check is for the case where 'values' is not an array or not set.
             // If 'values' is not set or not an array, the foreach loop below would error.
+            // @phpstan-ignore-next-line Runtime validation for malformed tool suggestions is necessary, as tools might not adhere to PHPDocs.
             if (!$hasValuesKey || !is_array($suggestions['values'])) {
                 $errorMessage = "Tool '{$toolName}' returned suggestions with invalid structure. 'values' key is missing or not an array.";
             } else {
@@ -288,6 +291,7 @@ class ToolsCapability implements CapabilityInterface
         }
 
         // Restore the error handling block
+        // @phpstan-ignore-next-line This block ensures error messages potentially set by prior logic are returned.
         if ($errorMessage !== null) {
             // Intentionally not logging the $errorMessage here in production,
             // but it was useful for debugging. The client receives it.
