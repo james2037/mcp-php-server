@@ -25,18 +25,18 @@ class JsonRpcMessage implements \JsonSerializable
     public ?string $id;
     /** @var string The name of the method to be invoked. Present in requests. */
     public string $method;
-    /** @var array|null The structured value that holds the parameter values to be used during the invocation of the method. Present in requests. */
+    /** @var array<mixed>|null The structured value that holds the parameter values to be used during the invocation of the method. Present in requests. */
     public ?array $params;
-    /** @var array|null The value of this member is determined by the method invoked on the Server. Present in responses. */
+    /** @var array<mixed>|null The value of this member is determined by the method invoked on the Server. Present in responses. */
     public ?array $result = null;
-    /** @var array|null An Error object if there was an error invoking the method. Present in error responses. */
+    /** @var array<string, mixed>|null An Error object if there was an error invoking the method. Present in error responses. */
     public ?array $error = null;
 
     /**
      * Constructs a new JsonRpcMessage, typically for a request or notification.
      *
      * @param string $method The method name.
-     * @param array|null $params The parameters, if any.
+     * @param array<mixed>|null $params The parameters, if any.
      * @param string|null $id The message ID. If null, it's a notification.
      */
     public function __construct(string $method, ?array $params = null, ?string $id = null)
@@ -81,14 +81,21 @@ class JsonRpcMessage implements \JsonSerializable
             }
         }
 
-        return json_encode($data);
+        $encoded = json_encode($data);
+        if ($encoded === false) {
+            // This should ideally not happen with the current structure,
+            // but good practice to handle potential json_encode failure.
+            throw new \RuntimeException('Failed to encode JSON-RPC message.', self::INTERNAL_ERROR);
+        }
+        return $encoded;
     }
 
     public static function fromJson(string $json): self
     {
         $data = json_decode($json, true);
-        if ($data === null) {
-            throw new \RuntimeException('Invalid JSON', self::PARSE_ERROR);
+        // Ensure $data is an array before proceeding
+        if (!is_array($data)) {
+            throw new \RuntimeException('Invalid JSON: Decoded data is not an array.', self::PARSE_ERROR);
         }
 
         if (!isset($data['jsonrpc']) || $data['jsonrpc'] !== '2.0') {
@@ -131,7 +138,7 @@ class JsonRpcMessage implements \JsonSerializable
     /**
      * Creates a JSON-RPC success response message.
      *
-     * @param array $result The result of the successful method execution.
+     * @param array<mixed> $result The result of the successful method execution.
      * @param string $id The ID of the original request.
      * @return self The created JsonRpcMessage object representing a success response.
      */
@@ -167,7 +174,7 @@ class JsonRpcMessage implements \JsonSerializable
     /**
      * Returns the array representation of the message, for responses or errors.
      *
-     * @return array The array representation of the message.
+     * @return array<string, mixed> The array representation of the message.
      * @throws \LogicException If the message is not a response or error.
      */
     public function toResponseArray(): array
@@ -236,7 +243,7 @@ class JsonRpcMessage implements \JsonSerializable
      * Specifies the data which should be serialized to JSON.
      * Called by json_encode().
      *
-     * @return array The data to be serialized.
+     * @return array<string, mixed> The data to be serialized.
      * @throws \LogicException If the message state is inconsistent (e.g., result without ID).
      */
     public function jsonSerialize(): array

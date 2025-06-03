@@ -24,7 +24,7 @@ final class EmbeddedResource implements ContentItemInterface
     /**
      * Constructs a new EmbeddedResource instance.
      *
-     * @param array $resourceData The resource data, expected to have a 'uri' key,
+     * @param array{uri: string, text?: string, blob?: string, mimeType?: string} $resourceData The resource data, expected to have a 'uri' key,
      *                            and either a 'text' or a 'blob' key.
      *                            Optionally, a 'mimeType' key can be included.
      *                            Example: `['uri' => '/my/data', 'text' => 'hello', 'mimeType' => 'text/plain']`
@@ -64,7 +64,7 @@ final class EmbeddedResource implements ContentItemInterface
     /**
      * Converts the embedded resource to an array.
      *
-     * @return array The array representation of the embedded resource.
+     * @return array<string, mixed> The array representation of the embedded resource.
      */
     public function toArray(): array
     {

@@ -78,6 +78,7 @@ class ServerInitializationTest extends TestCase
             public function __construct(private &$handledByRef)
             {
             }
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['conflict_cap' => true];
@@ -104,6 +105,7 @@ class ServerInitializationTest extends TestCase
             public function __construct(private &$handledByRef)
             {
             }
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['conflict_cap_alt' => true];
@@ -171,6 +173,7 @@ class ServerInitializationTest extends TestCase
             {
                 $this->orderRef[] = 'cap1';
             }
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['cap1_feature' => new \stdClass()];
@@ -196,6 +199,7 @@ class ServerInitializationTest extends TestCase
             {
                 $this->orderRef[] = 'cap2';
             }
+            /** @return array<string, mixed> */
             public function getCapabilities(): array
             {
                 return ['cap2_feature' => new \stdClass()];

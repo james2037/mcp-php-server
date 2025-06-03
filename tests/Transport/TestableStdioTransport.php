@@ -9,8 +9,11 @@ use MCP\Server\Message\JsonRpcMessage;
 
 class TestableStdioTransport extends StdioTransport
 {
+    /** @var resource */
     private $input; // PHPCS: PSR2.Classes.PropertyDeclaration.Underscore
+    /** @var resource */
     private $output; // PHPCS: PSR2.Classes.PropertyDeclaration.Underscore
+    /** @var resource */
     private $error; // PHPCS: PSR2.Classes.PropertyDeclaration.Underscore
 
     public function __construct()
@@ -68,6 +71,7 @@ class TestableStdioTransport extends StdioTransport
         return $content ?: ''; // Ensure string return
     }
 
+    /** @return array<int, array<string, mixed>> */
     public function readMultipleJsonOutputs(): array
     {
         fseek($this->output, 0);

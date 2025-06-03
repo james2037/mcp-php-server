@@ -29,7 +29,7 @@ final class TextContent implements ContentItemInterface
     /**
      * Converts the text content to an array.
      *
-     * @return array The array representation of the text content.
+     * @return array<string, mixed> The array representation of the text content.
      */
     public function toArray(): array
     {

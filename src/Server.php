@@ -36,7 +36,7 @@ class Server
     /** The expected authorization token value if authorization is required. */
     private ?string $expectedAuthTokenValue = null;
 
-    /** Mapping of PSR-3 log levels to system log priorities. */
+    /** @var array<string, int> Mapping of PSR-3 log levels to system log priorities. */
     private static array $logLevelPriorities = [
         'emergency' => LOG_EMERG, // 0
         'alert'     => LOG_ALERT,   // 1

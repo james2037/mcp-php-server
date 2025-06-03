@@ -36,7 +36,7 @@ final class ImageContent implements ContentItemInterface
     /**
      * Converts the image content to an array.
      *
-     * @return array The array representation of the image content.
+     * @return array<string, mixed> The array representation of the image content.
      */
     public function toArray(): array
     {

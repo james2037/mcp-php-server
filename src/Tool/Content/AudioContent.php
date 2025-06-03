@@ -36,7 +36,7 @@ final class AudioContent implements ContentItemInterface
     /**
      * Converts the audio content to an array.
      *
-     * @return array The array representation of the audio content.
+     * @return array<string, mixed> The array representation of the audio content.
      */
     public function toArray(): array
     {

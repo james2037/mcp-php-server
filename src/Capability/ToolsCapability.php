@@ -246,18 +246,33 @@ class ToolsCapability implements CapabilityInterface
         $suggestions = $tool->getCompletionSuggestions($argumentName, $currentValue, $allCurrentArguments);
 
         // Validate suggestions structure
-        // @phpstan-ignore-next-line - Defensive check for tools not adhering to documented return type
-        if (!is_array($suggestions) || !isset($suggestions['values']) || !is_array($suggestions['values'])) {
-            error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}'.");
-            // As per subtask requirements, return a JSON-RPC error.
-            // The tests created in the previous step expect this behavior.
+        $errorMessage = null;
+        if (!is_array($suggestions)) {
+            $errorMessage = "Tool '{$toolName}' returned suggestions that is not an array.";
+        } elseif (!isset($suggestions['values']) || !is_array($suggestions['values'])) {
+            $errorMessage = "Tool '{$toolName}' returned suggestions with invalid structure. 'values' key is missing or not an array.";
+        } else {
+            foreach ($suggestions['values'] as $value) {
+                if (!is_string($value)) {
+                    $errorMessage = "Tool '{$toolName}' returned suggestions where 'values' contains non-string elements.";
+                    break;
+                }
+            }
+            if (!$errorMessage && isset($suggestions['total']) && !is_int($suggestions['total'])) {
+                $errorMessage = "Tool '{$toolName}' returned suggestions where 'total' is not an integer.";
+            }
+            if (!$errorMessage && isset($suggestions['hasMore']) && !is_bool($suggestions['hasMore'])) {
+                $errorMessage = "Tool '{$toolName}' returned suggestions where 'hasMore' is not a boolean.";
+            }
+        }
+
+        if ($errorMessage !== null) {
+            error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}': {$errorMessage}");
             return JsonRpcMessage::error(
                 JsonRpcMessage::INTERNAL_ERROR,
-                "Tool '{$toolName}' returned suggestions with invalid structure. 'values' key is missing or not an array.",
+                $errorMessage,
                 $message->id
             );
-            // If we were not to return an error, we might default to this:
-            // $suggestions = ['values' => [], 'total' => 0, 'hasMore' => false];
         }
 
         return JsonRpcMessage::result(['completion' => $suggestions], $message->id);

@@ -15,7 +15,7 @@ interface CapabilityInterface
      * Returns the description of the capability.
      * This description is used during server initialization.
      *
-     * @return array The capability description.
+     * @return array<string, mixed> The capability description.
      */
     public function getCapabilities(): array;
 

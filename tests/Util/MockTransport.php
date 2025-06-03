@@ -7,7 +7,9 @@ use MCP\Server\Transport\TransportInterface;
 
 class MockTransport implements TransportInterface
 {
+    /** @var array<int, array<int, JsonRpcMessage>> */
     private array $incomingMessages = []; // Stores batches of messages (JsonRpcMessage[])
+    /** @var array<int, JsonRpcMessage> */
     private array $sentMessages = [];     // Stores individual JsonRpcMessage objects
 
     /**

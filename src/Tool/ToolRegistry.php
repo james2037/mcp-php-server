@@ -19,8 +19,8 @@ class ToolRegistry extends Registry
      * Creates a Tool instance from its ReflectionClass object.
      * It expects the class to be a subclass of Tool and have a ToolAttribute.
      *
-     * @param ReflectionClass $reflection The reflection object for the tool class.
-     * @param array $config Optional configuration array to pass to the tool's constructor.
+     * @param ReflectionClass<Tool> $reflection The reflection object for the tool class.
+     * @param array<string, mixed> $config Optional configuration array to pass to the tool's constructor.
      * @return Tool|null The created Tool instance, or null if the class is not a valid tool
      *                   (e.g., missing ToolAttribute or not an instance of Tool).
      */
