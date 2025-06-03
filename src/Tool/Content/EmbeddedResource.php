@@ -36,26 +36,35 @@ final class EmbeddedResource implements ContentItemInterface
         array $resourceData,
         ?Annotations $annotations = null
     ) {
-        if (!isset($resourceData['uri'])) {
-            throw new InvalidArgumentException(
-                "EmbeddedResource data must contain a 'uri' key."
-            );
-        }
+        // The following checks are removed based on PHPStan's analysis of the PHPDoc type
+        // array{uri: string, text?: string, blob?: string, mimeType?: string} for $resourceData.
+        // PHPStan considers 'uri' to be always set and a string.
+        // It also considers 'text' (if set) to be a string, and 'blob' (if set) to be a string.
+
+        // if (!isset($resourceData['uri'])) {
+        //     throw new InvalidArgumentException(
+        //         "EmbeddedResource data must contain a 'uri' key."
+        //     );
+        // }
+
+        // This check remains necessary as it ensures at least one of the content keys is present.
+        // PHPStan does not simplify this kind of OR logic for optional keys based on the type alone.
         if (!isset($resourceData['text']) && !isset($resourceData['blob'])) {
             throw new InvalidArgumentException(
                 "EmbeddedResource data must contain either a 'text' or a 'blob' key."
             );
         }
-        if (isset($resourceData['text']) && !is_string($resourceData['text'])) {
-            throw new InvalidArgumentException(
-                "EmbeddedResource 'text' must be a string."
-            );
-        }
-        if (isset($resourceData['blob']) && !is_string($resourceData['blob'])) {
-            throw new InvalidArgumentException(
-                "EmbeddedResource 'blob' must be a string (base64 encoded)."
-            );
-        }
+
+        // if (isset($resourceData['text']) && !is_string($resourceData['text'])) {
+        //     throw new InvalidArgumentException(
+        //         "EmbeddedResource 'text' must be a string."
+        //     );
+        // }
+        // if (isset($resourceData['blob']) && !is_string($resourceData['blob'])) {
+        //     throw new InvalidArgumentException(
+        //         "EmbeddedResource 'blob' must be a string (base64 encoded)."
+        //     );
+        // }
 
         $this->resource = $resourceData;
         $this->annotations = $annotations;

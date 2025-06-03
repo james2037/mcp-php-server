@@ -8,10 +8,10 @@ use MCP\Server\Tool\Tool;
 #[ToolAttribute('invalidSuggestionsTool', 'Tool that returns invalid suggestions')]
 class InvalidSuggestionsTool extends Tool
 {
-    /** @var array{values: string[], total?: int, hasMore?: bool} */
+    /** @var array<string, mixed> The suggestions array, potentially malformed for testing. */
     private array $suggestionsToReturn;
 
-    /** @param array{values: string[], total?: int, hasMore?: bool} $suggestionsToReturn */
+    /** @param array<string, mixed> $suggestionsToReturn */
     public function __construct(array $suggestionsToReturn)
     {
         parent::__construct();

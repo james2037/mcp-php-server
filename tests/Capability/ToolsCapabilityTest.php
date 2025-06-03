@@ -41,8 +41,9 @@ class ToolsCapabilityTest extends TestCase
         $request = new JsonRpcMessage('tools/list', [], '1');
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null before proceeding
         $this->assertNull($response->error, "tools/list should not produce an error directly.");
+        $this->assertNotNull($response->result, "Result should not be null for tools/list"); // Added
         $this->assertIsArray($response->result['tools']);
         $this->assertCount(1, $response->result['tools']);
 
@@ -71,8 +72,9 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNull($response->error, "tools/call with valid tool should not produce a top-level error.");
+        $this->assertNotNull($response->result, "Result should not be null for successful tools/call"); // Added
         $this->assertFalse($response->result['isError']);
         $this->assertIsArray($response->result['content']);
         $this->assertCount(1, $response->result['content']);
@@ -90,8 +92,9 @@ class ToolsCapabilityTest extends TestCase
         $response = $this->capability->handleMessage($request);
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNull($response->error); // Error is within the result for tools/call
+        $this->assertNotNull($response->result, "Result should not be null for tools/call (unknown tool)."); // Added
         $this->assertTrue($response->result['isError']);
         $this->assertIsArray($response->result['content']);
         $this->assertCount(1, $response->result['content']);
@@ -110,8 +113,9 @@ class ToolsCapabilityTest extends TestCase
         $response = $this->capability->handleMessage($request);
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNull($response->error); // Error is within the result for tools/call
+        $this->assertNotNull($response->result, "Result should not be null for tools/call (failing tool)."); // Added
         $this->assertTrue($response->result['isError']);
         $this->assertIsArray($response->result['content']);
         $this->assertCount(1, $response->result['content']);
@@ -131,8 +135,9 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNull($response->error);
+        $this->assertNotNull($response->result, "Result should not be null for tools/call (missing arg)."); // Added
         $this->assertTrue($response->result['isError']);
         $this->assertIsArray($response->result['content']);
         $this->assertCount(1, $response->result['content']);
@@ -153,8 +158,9 @@ class ToolsCapabilityTest extends TestCase
             );
             $response = $this->capability->handleMessage($request);
 
-            $this->assertNotNull($response);
+            $this->assertNotNull($response); // Ensure response is not null
             $this->assertNull($response->error);
+            $this->assertNotNull($response->result, "Result should not be null for tools/call (invalid tool name type)."); // Added
             $this->assertTrue($response->result['isError']);
             $this->assertIsArray($response->result['content']);
             $this->assertCount(1, $response->result['content']);
@@ -172,8 +178,9 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNull($response->error);
+        $this->assertNotNull($response->result, "Result should not be null for tools/call (empty tool name)."); // Added
         $this->assertTrue($response->result['isError']);
         $this->assertIsArray($response->result['content']);
         $this->assertCount(1, $response->result['content']);
@@ -193,8 +200,9 @@ class ToolsCapabilityTest extends TestCase
             );
             $response = $this->capability->handleMessage($request);
 
-            $this->assertNotNull($response);
+            $this->assertNotNull($response); // Ensure response is not null
             $this->assertNull($response->error);
+            $this->assertNotNull($response->result, "Result should not be null for tools/call (invalid arg type)."); // Added
             $this->assertTrue($response->result['isError']);
             $this->assertIsArray($response->result['content']);
             $this->assertCount(1, $response->result['content']);
@@ -252,9 +260,11 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNull($response->error);
+        $this->assertNotNull($response->result, "Result should not be null for completion/complete."); // Added
         $this->assertArrayHasKey('completion', $response->result);
+        self::assertIsArray($response->result['completion']); // Added
         $expectedSuggestions = ['apple', 'apricot'];
         $this->assertEquals($expectedSuggestions, $response->result['completion']['values']);
         $this->assertEquals(count($expectedSuggestions), $response->result['completion']['total']);
@@ -281,8 +291,9 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNull($response->error);
+        $this->assertNotNull($response->result, "Result should not be null for completion/complete (default)."); // Added
         $this->assertArrayHasKey('completion', $response->result);
         $this->assertEquals(['values' => [], 'total' => 0, 'hasMore' => false], $response->result['completion']);
     }
@@ -299,11 +310,12 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
-        $this->assertNotNull($response);
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNotNull($response->error); // The $response object itself should have its error property set
         $this->assertNull($response->result);   // For an error response, result should be null
-
+        // $response->error is now known non-null array
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $response->error['code']);
+        self::assertIsString($response->error['message']); // Ensure message is a string
         $this->assertStringContainsString('Tool not found for completion: unknownToolForCompletion', $response->error['message']);
     }
 
@@ -344,9 +356,12 @@ class ToolsCapabilityTest extends TestCase
         $request = new JsonRpcMessage('completion/complete', $params, 'comp_invalid');
         $response = $this->capability->handleMessage($request);
 
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNotNull($response->error, "Expected an error response for params: " . json_encode($params));
         $this->assertNull($response->result);
+        // $response->error is now known non-null array
         $this->assertEquals($expectedErrorCode, $response->error['code']);
+        self::assertIsString($response->error['message']); // Ensure message is a string
         $this->assertStringContainsString($expectedErrorMessageSubstring, $response->error['message']);
     }
 
@@ -369,9 +384,12 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNotNull($response->error);
         $this->assertNull($response->result);
+        // $response->error is now known non-null array
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
+        self::assertIsString($response->error['message']); // Ensure message is a string
         $this->assertStringContainsString("Tool 'invalidSuggestionsTool' returned suggestions with invalid structure. 'values' key is missing or not an array.", $response->error['message']);
     }
 
@@ -389,10 +407,15 @@ class ToolsCapabilityTest extends TestCase
         // Let's adjust the test to reflect what can be passed to constructor,
         // and accept that this particular internal error path in ToolsCapability might be hard to reach
         // if constructor validation is robust.
-        $customBadTool = new #[ToolAttribute('customBadValuesTool', 'Tool with bad values type')] class extends Tool {
-            protected function doExecute(array $arguments): array { return []; }
+        $customBadTool = new #[ToolAttribute('customBadValuesTool', 'Tool with bad values type')] class extends Tool
+        {
+            protected function doExecute(array $arguments): array
+            {
+                return [];
+            }
             public function getCompletionSuggestions(string $argumentName, mixed $currentValue, array $allCurrentArguments = []): array
             {
+                // @phpstan-ignore-next-line Incorrect return type (array<int> for values) is intended for testing robustness of ToolsCapability.
                 return ['values' => [123]]; // Directly return the problematic structure
             }
         };
@@ -408,9 +431,12 @@ class ToolsCapabilityTest extends TestCase
         );
         $response = $this->capability->handleMessage($request);
 
+        $this->assertNotNull($response); // Ensure response is not null
         $this->assertNotNull($response->error);
         $this->assertNull($response->result);
+        // $response->error is now known non-null array
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $response->error['code']);
+        self::assertIsString($response->error['message']); // Ensure message is a string
         $this->assertStringContainsString("Tool 'customBadValuesTool' returned suggestions where 'values' contains non-string elements.", $response->error['message']);
     }
 

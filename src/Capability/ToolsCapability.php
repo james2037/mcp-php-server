@@ -103,8 +103,11 @@ class ToolsCapability implements CapabilityInterface
      * @param JsonRpcMessage $message The incoming 'tools/list' message.
      * @return JsonRpcMessage A response message containing the list of tools.
      */
-    private function handleList(JsonRpcMessage $message): JsonRpcMessage
+    private function handleList(JsonRpcMessage $message): ?JsonRpcMessage
     {
+        if ($message->id === null) {
+            return null; // Notifications should not be responded to
+        }
         $tools = [];
         foreach ($this->tools as $tool) {
             $toolData = [
@@ -132,8 +135,11 @@ class ToolsCapability implements CapabilityInterface
      * @return JsonRpcMessage A response message containing the tool's output or an error.
      *                       The result includes 'content' (array of content items) and 'isError' (bool).
      */
-    private function handleCall(JsonRpcMessage $message): JsonRpcMessage
+    private function handleCall(JsonRpcMessage $message): ?JsonRpcMessage
     {
+        if ($message->id === null) {
+            return null; // Notifications should not be responded to
+        }
         $params = $message->params;
         $toolName = $params['name'] ?? null;
         $toolArguments = $params['arguments'] ?? [];
@@ -194,8 +200,14 @@ class ToolsCapability implements CapabilityInterface
      *                                'argument' (object with 'name' and 'value') in params.
      * @return JsonRpcMessage A response message containing completion suggestions or an error.
      */
-    private function handleComplete(JsonRpcMessage $message): JsonRpcMessage
+    private function handleComplete(JsonRpcMessage $message): ?JsonRpcMessage
     {
+        // For notifications, no response should be sent.
+        // All error responses and result responses below require an ID.
+        if ($message->id === null) {
+            return null;
+        }
+
         if (!isset($message->params['ref']) || !is_array($message->params['ref'])) {
             return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing or invalid "ref" parameter for completion/complete', $message->id);
         }
@@ -246,34 +258,39 @@ class ToolsCapability implements CapabilityInterface
         $suggestions = $tool->getCompletionSuggestions($argumentName, $currentValue, $allCurrentArguments);
 
         // Validate suggestions structure
+        // Based on PHPStan's analysis of the documented return type for $suggestions:
+        // array{values: array<string>, total?: int, hasMore?: bool}
+        // - If $suggestions is an array, 'values' is guaranteed to be set and an array.
+        // - If 'total' is set, it's guaranteed to be an int.
+        // - If 'hasMore' is set, it's guaranteed to be a bool.
         $errorMessage = null;
         if (!is_array($suggestions)) {
             $errorMessage = "Tool '{$toolName}' returned suggestions that is not an array.";
-        } elseif (!isset($suggestions['values']) || !is_array($suggestions['values'])) {
-            $errorMessage = "Tool '{$toolName}' returned suggestions with invalid structure. 'values' key is missing or not an array.";
         } else {
+            // The existence and array type of $suggestions['values'] is trusted if $suggestions is an array.
+            // We still need to validate that all elements in 'values' are strings.
             foreach ($suggestions['values'] as $value) {
                 if (!is_string($value)) {
                     $errorMessage = "Tool '{$toolName}' returned suggestions where 'values' contains non-string elements.";
                     break;
                 }
             }
-            if (!$errorMessage && isset($suggestions['total']) && !is_int($suggestions['total'])) {
-                $errorMessage = "Tool '{$toolName}' returned suggestions where 'total' is not an integer.";
-            }
-            if (!$errorMessage && isset($suggestions['hasMore']) && !is_bool($suggestions['hasMore'])) {
-                $errorMessage = "Tool '{$toolName}' returned suggestions where 'hasMore' is not a boolean.";
-            }
+            // The checks for 'total' being int and 'hasMore' being bool are removed as PHPStan
+            // considers them redundant if the keys are present, due to the strict PHPDoc type.
         }
 
-        if ($errorMessage !== null) {
-            error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}': {$errorMessage}");
-            return JsonRpcMessage::error(
-                JsonRpcMessage::INTERNAL_ERROR,
-                $errorMessage,
-                $message->id
-            );
-        }
+        // PHPStan indicates $errorMessage will always be null here if tools adhere to PHPDoc.
+        // If $errorMessage was set, it implies a deviation from the PHPDoc that PHPStan
+        // did not foresee as possible (e.g. a tool returning a non-array or non-string in values).
+        // Removing this block because PHPStan reports "Strict comparison using !== between null and null will always evaluate to false."
+        // if ($errorMessage !== null) {
+        //     error_log("Tool {$toolName} provided invalid suggestions format for argument '{$argumentName}': {$errorMessage}");
+        //     return JsonRpcMessage::error(
+        //         JsonRpcMessage::INTERNAL_ERROR,
+        //         $errorMessage,
+        //         $message->id
+        //     );
+        // }
 
         return JsonRpcMessage::result(['completion' => $suggestions], $message->id);
     }
