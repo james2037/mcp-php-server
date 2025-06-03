@@ -1,10 +1,9 @@
 # TODO List
 
-## Potential SDK Bugs
+## SDK Issues Status
 
-- **Method Resolution After Initialize:**
-  Observed an issue where `Tools/*` or `Resources/*` methods return a "Method not found" error (JSON-RPC error -32601) if called immediately after a successful `initialize` method within the same logical session or batch.
-  - **STDIO Transport:** When `initialize` is sent, followed by a method like `Tools/echo` in the same piped stdin stream, the `Tools/echo` call fails.
-  - **HTTP Transport (Batched Requests):** When a batch request is sent (e.g., `[initialize_request, tools_echo_request]`), the `initialize` part succeeds, but the subsequent `Tools/echo` in the same batch fails.
-  - This suggests that capabilities (tools, resources) might be correctly registered and reported during `initialize`, but the server's dispatcher or capability registries fail to locate them for subsequent calls within that same initialized context.
-  - Individual HTTP requests for tools/resources (each in its own script execution) work if `initialize` was also part of that specific request, or fail with "Server not initialized" if it wasn't (which is expected for stateless HTTP handling without external session persistence).
+- **Method Resolution After Initialize (Clarified):**
+  - **Original Observation:** An issue was reported where `Tools/*` (e.g., `Tools/echo`) or `Resources/*` methods would return "Method not found" if called immediately after a successful `initialize` in the same session/batch.
+  - **Investigation Outcome (2025-06-03):** Investigation and new test cases (e.g., `ServerTest::testInitializeAndToolCallInSameStream`) confirm that the server correctly handles an `initialize` request followed by a subsequent valid `tools/call` (or `resources/read`, etc.) request within the same STDIO stream or HTTP batch.
+  - **Conclusion:** The "Method not found" error is likely due to the client sending an incorrect JSON-RPC method name (e.g., literal `Tools/echo` or `Resources/get`). The correct approach is to use the standard method names like `tools/call` (with parameters like `{"name": "echo", "arguments": {...}}`) or `resources/read` (with parameters like `{"uri": "resource_uri"}`). The server is behaving as expected by rejecting unknown method names.
+  - **Recommendation:** Clients should ensure they are using the correct JSON-RPC method names and parameters as defined by the MCP specification and server capabilities.

@@ -230,13 +230,13 @@ Then, send MCP requests using an HTTP client like `curl`.
 **Example `curl` request for the `echo` tool:**
 
 ```bash
-curl -X POST -H "Content-Type: application/json"      -d '{"jsonrpc":"2.0","method":"Tools/echo","params":{"message":"Hello HTTP"},"id":1}'      http://localhost:8000/
+curl -X POST -H "Content-Type: application/json"      -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"echo","arguments":{"message":"Hello HTTP"}},"id":1}'      http://localhost:8000/
 ```
 
 **Expected JSON-RPC Response:**
 
 ```json
-{"jsonrpc":"2.0","result":[{"type":"text","text":"Echo: Hello HTTP"}],"id":1}
+{"jsonrpc":"2.0","result":{"content":[{"type":"text","text":"Echo: Hello HTTP"}],"isError":false},"id":1}
 ```
 
 ### Using with PHP-FPM or mod_php
