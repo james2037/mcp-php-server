@@ -5,36 +5,47 @@ namespace MCP\Server\Capability;
 use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Exception\MethodNotSupportedException;
 
+/**
+ * Defines the contract for server capabilities.
+ * Capabilities are modules that extend the server's functionality.
+ */
 interface CapabilityInterface
 {
     /**
-     * Get the capability description for server initialization
-     * This goes into the ServerCapabilities object during initialize
+     * Returns the description of the capability.
+     * This description is used during server initialization.
+     *
+     * @return array The capability description.
      */
     public function getCapabilities(): array;
 
     /**
-     * Check if this capability can handle the given message
+     * Checks if this capability can handle the given JSON-RPC message.
+     *
+     * @param JsonRpcMessage $message The message to check.
+     * @return bool True if the capability can handle the message, false otherwise.
      */
     public function canHandleMessage(JsonRpcMessage $message): bool;
 
     /**
-     * Handle an incoming request or notification
+     * Handles an incoming JSON-RPC request or notification.
      *
-     * @throws MethodNotSupportedException if method not supported
-     * @throws \Exception on other errors
+     * @param JsonRpcMessage $message The message to handle.
+     * @return JsonRpcMessage|null A response message, or null for notifications.
+     * @throws MethodNotSupportedException if the method is not supported by this capability.
+     * @throws \Exception on other processing errors.
      */
     public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage;
 
     /**
-     * Called when server is initializing
-     * Can be used to set up resources, validate configuration, etc.
+     * Initializes the capability.
+     * This method is called when the server is initializing.
      */
     public function initialize(): void;
 
     /**
-     * Called when server is shutting down
-     * Can be used to clean up resources
+     * Shuts down the capability.
+     * This method is called when the server is shutting down.
      */
     public function shutdown(): void;
 }

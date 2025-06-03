@@ -1,9 +1,5 @@
 <?php
 
-/**
- * This file contains the EmbeddedResource class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Content;
@@ -11,21 +7,30 @@ namespace MCP\Server\Tool\Content;
 use InvalidArgumentException;
 
 /**
- * Represents an embedded resource content item.
+ * Represents an embedded resource as a content item.
+ * This is used when a tool's output includes the content of a resource directly,
+ * rather than just a URI pointing to it. The embedded resource itself
+ * should conform to the structure of a TextResourceContents or BlobResourceContents array.
  */
 final class EmbeddedResource implements ContentItemInterface
 {
-    // Represents TextResourceContents or BlobResourceContents
+    /** @var array{uri: string, text?: string, blob?: string, mimeType?: string} The actual resource data,
+     * typically matching the structure of TextResourceContents or BlobResourceContents.
+     */
     private array $resource;
+    /** @var Annotations|null Optional annotations for the embedded resource. */
     private ?Annotations $annotations;
 
     /**
      * Constructs a new EmbeddedResource instance.
      *
-     * @param array $resourceData The resource data.
-     *                            Must contain 'uri' and either 'text' or 'blob'.
+     * @param array $resourceData The resource data, expected to have a 'uri' key,
+     *                            and either a 'text' or a 'blob' key.
+     *                            Optionally, a 'mimeType' key can be included.
+     *                            Example: `['uri' => '/my/data', 'text' => 'hello', 'mimeType' => 'text/plain']`
+     *                            Example: `['uri' => '/my/image', 'blob' => 'base64data', 'mimeType' => 'image/png']`
      * @param Annotations|null $annotations Optional annotations.
-     * @throws InvalidArgumentException If resource data is invalid.
+     * @throws InvalidArgumentException If resource data is invalid (missing keys or incorrect types).
      */
     public function __construct(
         array $resourceData,

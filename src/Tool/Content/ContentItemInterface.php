@@ -1,15 +1,13 @@
 <?php
 
-/**
- * This file contains the ContentItemInterface.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Content;
 
 /**
- * Interface for content items.
+ * Defines the contract for content items that can be part of a tool's execution result.
+ * All content items must be convertible to an array suitable for JSON serialization
+ * as part of the tool's response.
  */
 interface ContentItemInterface
 {

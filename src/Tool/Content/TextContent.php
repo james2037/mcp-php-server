@@ -1,19 +1,17 @@
 <?php
 
-/**
- * This file contains the TextContent class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Content;
 
 /**
- * Represents a text content item.
+ * Represents a plain text content item.
  */
 final class TextContent implements ContentItemInterface
 {
+    /** @var string The plain text content. */
     private string $text;
+    /** @var Annotations|null Optional annotations for the text content. */
     private ?Annotations $annotations;
 
     /**

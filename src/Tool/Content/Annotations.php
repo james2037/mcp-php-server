@@ -1,9 +1,5 @@
 <?php
 
-/**
- * This file contains the Annotations class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Content;
@@ -11,11 +7,14 @@ namespace MCP\Server\Tool\Content;
 use InvalidArgumentException;
 
 /**
- * Represents annotations for content items.
+ * Represents annotations for content items, such as audience and priority.
+ * These annotations provide metadata about how the content should be treated or displayed.
  */
 final class Annotations
 {
+    /** @var string[]|null The intended audience for the content item (e.g., ['user', 'assistant']). */
     public ?array $audience = null;
+    /** @var float|null Priority of the content item (0.0 to 1.0). */
     public ?float $priority = null;
 
     /**

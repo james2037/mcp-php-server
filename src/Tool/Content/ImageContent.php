@@ -1,20 +1,19 @@
 <?php
 
-/**
- * This file contains the ImageContent class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Content;
 
 /**
- * Represents an image content item.
+ * Represents an image content item, typically containing base64 encoded image data and its MIME type.
  */
 final class ImageContent implements ContentItemInterface
 {
-    private string $data; // base64 encoded
+    /** @var string Base64 encoded image data. */
+    private string $data;
+    /** @var string The MIME type of the image data (e.g., "image/png", "image/jpeg"). */
     private string $mimeType;
+    /** @var Annotations|null Optional annotations for the image content. */
     private ?Annotations $annotations;
 
     /**

@@ -1,20 +1,19 @@
 <?php
 
-/**
- * This file contains the AudioContent class.
- */
-
 declare(strict_types=1);
 
 namespace MCP\Server\Tool\Content;
 
 /**
- * Represents an audio content item.
+ * Represents an audio content item, typically containing base64 encoded audio data and its MIME type.
  */
 final class AudioContent implements ContentItemInterface
 {
-    private string $data; // base64 encoded
+    /** @var string Base64 encoded audio data. */
+    private string $data;
+    /** @var string The MIME type of the audio data (e.g., "audio/mpeg"). */
     private string $mimeType;
+    /** @var Annotations|null Optional annotations for the audio content. */
     private ?Annotations $annotations;
 
     /**

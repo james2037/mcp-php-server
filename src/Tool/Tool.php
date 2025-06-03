@@ -11,22 +11,32 @@ namespace MCP\Server\Tool;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use MCP\Server\Tool\Attribute\ToolAnnotations;
-use MCP\Server\Tool\Content; // Import the namespace
+use MCP\Server\Tool\Content;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 
 /**
- * Abstract base class for tools.
+ * Abstract base class for server tools.
+ *
+ * Tools are self-contained units of functionality that can be executed by the server.
+ * They define their metadata (name, description, parameters, annotations) using PHP attributes
+ * (Tool, Parameter, ToolAnnotations). The `initializeMetadata` method reads these attributes
+ * using reflection.
+ *
+ * Subclasses must implement the `doExecute` method, which contains the core logic of the tool.
+ * Helper methods are provided for creating standard content item types (text, image, audio, resource).
+ * Tools also have `initialize` and `shutdown` lifecycle methods that can be overridden.
  */
 abstract class Tool
 {
+    /** @var ToolAttribute|null Metadata extracted from the Tool attribute (name, description). */
     private ?ToolAttribute $metadata = null;
-    /** @var ?array<string, string|bool> $toolAnnotationsData */
+    /** @var array<string, string|bool>|null Annotations extracted from the ToolAnnotations attribute. */
     private ?array $toolAnnotationsData = null;
-    /** @var array<string, ParameterAttribute> $parameters */
+    /** @var array<string, ParameterAttribute> Parameters extracted from Parameter attributes on the doExecute() method, keyed by parameter name. */
     private array $parameters = [];
-    /** @var array<string, mixed> $config */
+    /** @var array<string, mixed> Configuration for the tool, passed during construction. */
     protected array $config = [];
 
     /**
@@ -45,31 +55,30 @@ abstract class Tool
 
     /**
      * Initializes metadata for the tool using reflection.
+     * This method reads Tool, Parameter (from doExecute), and ToolAnnotations attributes
+     * to populate the tool's metadata properties.
      */
     private function initializeMetadata(): void
     {
         $reflection = new ReflectionClass($this);
 
-        // Get tool metadata
         $toolAttrs = $reflection->getAttributes(ToolAttribute::class);
         if (count($toolAttrs) > 0) {
             $this->metadata = $toolAttrs[0]->newInstance();
         }
 
-        // Get parameter metadata from doExecute method
-        $method = $reflection->getMethod('doExecute');
-        foreach ($method->getParameters() as $param) {
-            $attrs = $param->getAttributes(ParameterAttribute::class);
-            foreach ($attrs as $attr) {
-                $paramAttr = $attr->newInstance();
-                // Store using the attribute name as key
-                $this->parameters[$paramAttr->name] = $paramAttr;
+        if ($reflection->hasMethod('doExecute')) {
+            $method = $reflection->getMethod('doExecute');
+            foreach ($method->getParameters() as $param) {
+                $attrs = $param->getAttributes(ParameterAttribute::class);
+                foreach ($attrs as $attr) {
+                    $paramAttr = $attr->newInstance();
+                    $this->parameters[$paramAttr->name] = $paramAttr;
+                }
             }
         }
 
-        // Get ToolAnnotations attribute
-        $toolAnnotationsAttribute =
-            $reflection->getAttributes(ToolAnnotations::class);
+        $toolAnnotationsAttribute = $reflection->getAttributes(ToolAnnotations::class);
         if (!empty($toolAnnotationsAttribute)) {
             $toolAnnotationsInstance = $toolAnnotationsAttribute[0]->newInstance();
             $annotationsData = [];
@@ -77,20 +86,16 @@ abstract class Tool
                 $annotationsData['title'] = $toolAnnotationsInstance->title;
             }
             if ($toolAnnotationsInstance->readOnlyHint !== null) {
-                $annotationsData['readOnlyHint'] =
-                    $toolAnnotationsInstance->readOnlyHint;
+                $annotationsData['readOnlyHint'] = $toolAnnotationsInstance->readOnlyHint;
             }
             if ($toolAnnotationsInstance->destructiveHint !== null) {
-                $annotationsData['destructiveHint'] =
-                    $toolAnnotationsInstance->destructiveHint;
+                $annotationsData['destructiveHint'] = $toolAnnotationsInstance->destructiveHint;
             }
             if ($toolAnnotationsInstance->idempotentHint !== null) {
-                $annotationsData['idempotentHint'] =
-                    $toolAnnotationsInstance->idempotentHint;
+                $annotationsData['idempotentHint'] = $toolAnnotationsInstance->idempotentHint;
             }
             if ($toolAnnotationsInstance->openWorldHint !== null) {
-                $annotationsData['openWorldHint'] =
-                    $toolAnnotationsInstance->openWorldHint;
+                $annotationsData['openWorldHint'] = $toolAnnotationsInstance->openWorldHint;
             }
 
             if (!empty($annotationsData)) {
@@ -101,6 +106,7 @@ abstract class Tool
 
     /**
      * Gets the name of the tool.
+     * Falls back to the class name if the Tool attribute is not present.
      *
      * @return string The name of the tool.
      */
@@ -140,15 +146,16 @@ abstract class Tool
         $required = [];
 
         foreach ($this->parameters as $name => $param) {
-            // Create a property object for each parameter
             $propObj = new \stdClass();
-            $propObj->type = $param->type;
+            $propObj->type = $param->type; // Type from Parameter attribute
 
             if ($param->description !== null) {
-                $propObj->description = $param->description;
+                $propObj->description = $param->description; // Description from Parameter attribute
             }
 
-            // Assign the property object to the properties object
+            // TODO: Handle other schema properties like 'enum', 'default', 'items' (for array type) if needed.
+            // For now, it's basic type and description.
+
             $properties->$name = $propObj;
 
             if ($param->required) {
@@ -222,29 +229,24 @@ abstract class Tool
      */
     protected function validateArguments(array $arguments): void
     {
-        // Check for unknown arguments
         foreach ($arguments as $name => $value) {
             if (!isset($this->parameters[$name])) {
                 throw new \InvalidArgumentException("Unknown argument: {$name}");
             }
         }
 
-        // Check required parameters
         foreach ($this->parameters as $name => $param) {
             if ($param->required && !isset($arguments[$name])) {
-                throw new \InvalidArgumentException(
-                    "Missing required argument: {$name}"
-                );
+                throw new \InvalidArgumentException("Missing required argument: {$name}");
             }
-        }
-
-        // Check parameter types
-        foreach ($arguments as $name => $value) {
-            $param = $this->parameters[$name];
-            if (!$this->validateType($value, $param->type)) {
-                throw new \InvalidArgumentException(
-                    "Invalid type for argument {$name}: expected {$param->type}"
-                );
+            // If parameter is present, validate its type.
+            // If not required and not present, skip type validation.
+            if (isset($arguments[$name])) {
+                if (!$this->validateType($arguments[$name], $param->type)) {
+                    throw new \InvalidArgumentException(
+                        "Invalid type for argument {$name}: expected {$param->type}, got " . gettype($arguments[$name])
+                    );
+                }
             }
         }
     }
@@ -265,7 +267,10 @@ abstract class Tool
             'boolean' => is_bool($value),
             'array' => is_array($value),
             'object' => is_object($value),
-            default => true // Allow unknown types
+            // For 'any' or other custom types, we might need more sophisticated validation or assume true.
+            // 'any' type essentially means no type validation beyond presence if required.
+            'any' => true, // Explicitly allow 'any' type.
+            default => true // Allow other unknown types by default, or could be stricter.
         };
     }
 
@@ -276,19 +281,20 @@ abstract class Tool
      * validated arguments and should return an array of ContentItemInterface
      * objects representing the tool's output.
      *
-     * @param array<string,mixed> $arguments Validated arguments for the tool.
-     * @return Content\ContentItemInterface[] An array of content items
+     * @param array<string,mixed> $arguments Validated arguments for the tool, matching the defined parameters.
+     * @return Content\ContentItemInterface[] An array of content items (e.g., TextContent, ImageContent)
      *                                        representing the tool's response.
      */
     abstract protected function doExecute(array $arguments): array;
 
-    // New Content Creation Helper Methods
+    // Content Creation Helper Methods
 
     /**
      * Creates a new TextContent item.
+     * This is a convenience method for subclasses to easily create text outputs.
      *
      * @param string $text The text content.
-     * @param Content\Annotations|null $annotations Optional annotations.
+     * @param Content\Annotations|null $annotations Optional annotations for the text content.
      * @return Content\TextContent The created TextContent item.
      */
     final protected function createTextContent(
@@ -300,10 +306,12 @@ abstract class Tool
 
     /**
      * Creates a new ImageContent item from raw image data.
+     * The raw data will be base64 encoded.
+     * This is a convenience method for subclasses.
      *
-     * @param string $rawData The raw image data.
-     * @param string $mimeType The MIME type of the image.
-     * @param Content\Annotations|null $annotations Optional annotations.
+     * @param string $rawData The raw binary image data.
+     * @param string $mimeType The MIME type of the image (e.g., "image/png", "image/jpeg").
+     * @param Content\Annotations|null $annotations Optional annotations for the image content.
      * @return Content\ImageContent The created ImageContent item.
      */
     final protected function createImageContent(
@@ -320,10 +328,12 @@ abstract class Tool
 
     /**
      * Creates a new AudioContent item from raw audio data.
+     * The raw data will be base64 encoded.
+     * This is a convenience method for subclasses.
      *
-     * @param string $rawData The raw audio data.
-     * @param string $mimeType The MIME type of the audio.
-     * @param Content\Annotations|null $annotations Optional annotations.
+     * @param string $rawData The raw binary audio data.
+     * @param string $mimeType The MIME type of the audio (e.g., "audio/mpeg", "audio/wav").
+     * @param Content\Annotations|null $annotations Optional annotations for the audio content.
      * @return Content\AudioContent The created AudioContent item.
      */
     final protected function createAudioContent(
@@ -340,9 +350,11 @@ abstract class Tool
 
     /**
      * Creates a new EmbeddedResource item.
+     * This is a convenience method for subclasses to embed resource data directly in the output.
      *
-     * @param array $resourceData The resource data.
-     * @param Content\Annotations|null $annotations Optional annotations.
+     * @param array $resourceData The resource data, conforming to TextResourceContents or BlobResourceContents structure.
+     *                            Example: `['uri' => '/my/data', 'text' => 'hello', 'mimeType' => 'text/plain']`
+     * @param Content\Annotations|null $annotations Optional annotations for the embedded resource.
      * @return Content\EmbeddedResource The created EmbeddedResource item.
      */
     final protected function createEmbeddedResource(
@@ -353,7 +365,7 @@ abstract class Tool
     }
 
     /**
-     * Provides completion suggestions for an argument.
+     * Provides completion suggestions for a tool argument based on the current input.
      *
      * Subclasses should override this method to provide actual suggestions.
      * Example: `['values' => ['suggestion1', 'suggestion2'], 'total' => 2, 'hasMore' => false]`
