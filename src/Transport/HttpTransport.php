@@ -185,10 +185,10 @@ class HttpTransport extends AbstractTransport
                 ],
                 'id' => null
             ];
-            $jsonErrorString = json_encode($errorPayload);
+            $encodedErrorString = json_encode($errorPayload);
             $this->response = $this->responseFactory->createResponse(500)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($jsonErrorString ?? '')); // Fallback for json_encode failure
+                ->withBody($this->streamFactory->createStream($encodedErrorString !== false ? $encodedErrorString : '{"jsonrpc":"2.0","error":{"code":-32000,"message":"Server JSON encoding error"}}'));
             $this->responsePrepared = true;
             return;
         }
@@ -205,10 +205,10 @@ class HttpTransport extends AbstractTransport
                 ],
                 'id' => null // ID is difficult to determine reliably at this stage for a failed batch.
             ];
-            $jsonPayloadString = json_encode($errorPayload); // This should not fail.
+            $encodedErrorString = json_encode($errorPayload); // This should not fail.
             $this->response = $this->responseFactory->createResponse(500)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($jsonPayloadString ?? '')); // Fallback for json_encode failure
+                ->withBody($this->streamFactory->createStream($encodedErrorString !== false ? $encodedErrorString : '{"jsonrpc":"2.0","error":{"code":-32000,"message":"Server JSON encoding error"}}'));
         } else {
             // Original behavior: always return 200 OK if JSON encoding is successful
             $httpStatus = 200;
