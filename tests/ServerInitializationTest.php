@@ -34,7 +34,9 @@ class ServerInitializationTest extends TestCase
         $this->assertNotNull($response);
 
         $responseArray = json_decode($response->toJson(), true);
+        self::assertIsArray($responseArray);
         $this->assertArrayHasKey('error', $responseArray);
+        self::assertIsArray($responseArray['error']);
         $this->assertEquals('Server not initialized', $responseArray['error']['message']);
         $this->assertEquals(JsonRpcMessage::INVALID_REQUEST, $responseArray['error']['code']);
     }
@@ -59,8 +61,12 @@ class ServerInitializationTest extends TestCase
         $this->assertNotNull($response);
 
         $responseArray = json_decode($response->toJson(), true);
+        self::assertIsArray($responseArray);
         $this->assertArrayHasKey('result', $responseArray);
+        self::assertIsArray($responseArray['result']);
         $this->assertEquals('2025-03-26', $responseArray['result']['protocolVersion']); // Server responds with its version
+        self::assertArrayHasKey('capabilities', $responseArray['result']);
+        self::assertIsArray($responseArray['result']['capabilities']);
         $this->assertArrayHasKey('logging', $responseArray['result']['capabilities']);
         $this->assertEquals([], $responseArray['result']['capabilities']['logging']); // Empty JSON object {} decodes to empty array []
         $this->assertArrayHasKey('completions', $responseArray['result']['capabilities']);
@@ -90,7 +96,8 @@ class ServerInitializationTest extends TestCase
             public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
             {
                 $this->handledByRef = 'cap1';
-                return JsonRpcMessage::result(['handled_by' => 'cap1'], $message->id);
+                if ($message->id === null) return null; // Cannot result for notification
+                return JsonRpcMessage::result(['handled_by' => 'cap1'], (string)$message->id);
             }
             public function initialize(): void
             {
@@ -118,7 +125,8 @@ class ServerInitializationTest extends TestCase
             public function handleMessage(JsonRpcMessage $message): ?JsonRpcMessage
             {
                 $this->handledByRef = 'cap2';
-                return JsonRpcMessage::result(['handled_by' => 'cap2'], $message->id);
+                if ($message->id === null) return null; // Cannot result for notification
+                return JsonRpcMessage::result(['handled_by' => 'cap2'], (string)$message->id);
             }
             public function initialize(): void
             {
@@ -250,11 +258,17 @@ class ServerInitializationTest extends TestCase
         $this->assertNotNull($response);
 
         $responseArray = json_decode($response->toJson(), true);
+        self::assertIsArray($responseArray);
         $this->assertArrayHasKey('result', $responseArray);
+        self::assertIsArray($responseArray['result']);
+        self::assertArrayHasKey('serverInfo', $responseArray['result']);
+        self::assertIsArray($responseArray['result']['serverInfo']);
         $this->assertEquals('test-server', $responseArray['result']['serverInfo']['name']);
 
         // Server announces its own capabilities, not client's.
         // Check for default 'logging' and 'completions'.
+        self::assertArrayHasKey('capabilities', $responseArray['result']);
+        self::assertIsArray($responseArray['result']['capabilities']);
         $this->assertArrayHasKey('logging', $responseArray['result']['capabilities']);
         $this->assertEquals([], $responseArray['result']['capabilities']['logging']); // Empty JSON object {} decodes to empty array []
         $this->assertArrayHasKey('completions', $responseArray['result']['capabilities']);
@@ -299,6 +313,7 @@ class ServerInitializationTest extends TestCase
         }
         $this->assertNotNull($logNotification, "Explicitly triggered log notification with 'test-logger' not found.");
         $this->assertNull($logNotification->id, "Log notification should not have an ID.");
+        self::assertIsArray($logNotification->params);
         $this->assertEquals('debug', $logNotification->params['level']);
         $this->assertEquals('test client log message', $logNotification->params['message']);
         $this->assertEquals('test-logger', $logNotification->params['logger']);

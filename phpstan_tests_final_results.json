@@ -1,0 +1,1 @@
+{"totals":{"errors":2,"file_errors":0},"files":[],"errors":["Ignored error pattern ~StreamFactoryInterface::createStream\\(\\).*expects string, string\\|false given~ in path /app/src/Transport/HttpTransport.php was not matched in reported errors.","Ignored error pattern #Negated boolean expression is always true.# in path /app/src/Server.php was not matched in reported errors."]}

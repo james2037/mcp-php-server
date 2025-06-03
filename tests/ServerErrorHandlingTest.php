@@ -61,7 +61,9 @@ class ServerErrorHandlingTest extends TestCase
         $this->assertNotNull($response);
 
         $responseArray = json_decode($response->toJson(), true);
+        self::assertIsArray($responseArray);
         $this->assertArrayHasKey('error', $responseArray);
+        self::assertIsArray($responseArray['error']); // Ensure error itself is an array before accessing keys
         $this->assertEquals('Initialization failed', $responseArray['error']['message']);
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $responseArray['error']['code']);
     }
@@ -124,7 +126,9 @@ class ServerErrorHandlingTest extends TestCase
 
         $this->assertNotNull($shutdownResponse);
         $responseArray = json_decode($shutdownResponse->toJson(), true);
+        self::assertIsArray($responseArray);
         $this->assertArrayHasKey('error', $responseArray);
+        self::assertIsArray($responseArray['error']); // Ensure error itself is an array before accessing keys
         $this->assertEquals('Shutdown failed', $responseArray['error']['message']);
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $responseArray['error']['code']);
     }

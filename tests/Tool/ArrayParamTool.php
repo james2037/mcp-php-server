@@ -17,7 +17,13 @@ class ArrayParamTool extends Tool
         if (!$arguments['enabled']) {
             return [$this->createTextContent('Processing disabled')];
         }
-        $sum = array_sum($arguments['numbers']);
+        $numbersValue = $arguments['numbers'] ?? null;
+        if (!is_array($numbersValue)) {
+            // This path indicates an issue with argument parsing or tool definition,
+            // as 'numbers' is declared as type: 'array'.
+            return [$this->createTextContent("Error: 'numbers' parameter must be an array.")];
+        }
+        $sum = array_sum($numbersValue);
         return [$this->createTextContent("Sum: $sum")];
     }
 }

@@ -46,6 +46,7 @@ class JsonRpcMessageTest extends TestCase
         $json = $message->toJson();
 
         $decoded = json_decode($json, true);
+        self::assertIsArray($decoded);
         $this->assertEquals('2.0', $decoded['jsonrpc']);
         $this->assertEquals('test.method', $decoded['method']);
         $this->assertEquals(['param' => 'value'], $decoded['params']);
@@ -63,8 +64,13 @@ class JsonRpcMessageTest extends TestCase
         $json = $message->toJson();
         $decoded = json_decode($json, true);
 
+        self::assertIsArray($decoded);
         $this->assertEquals('2.0', $decoded['jsonrpc']);
         $this->assertEquals('123', $decoded['id']);
+        self::assertArrayHasKey('error', $decoded);
+        self::assertIsArray($decoded['error']);
+        self::assertArrayHasKey('code', $decoded['error']);
+        self::assertArrayHasKey('message', $decoded['error']);
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $decoded['error']['code']);
         $this->assertEquals('Method not found', $decoded['error']['message']);
     }
@@ -144,12 +150,18 @@ class JsonRpcMessageTest extends TestCase
         $this->assertIsArray($decoded);
         $this->assertCount(2, $decoded);
 
+        self::assertIsArray($decoded[0]);
         $this->assertEquals('2.0', $decoded[0]['jsonrpc']);
         $this->assertEquals('1', $decoded[0]['id']);
         $this->assertEquals(['foo' => 'bar'], $decoded[0]['result']);
 
+        self::assertIsArray($decoded[1]);
         $this->assertEquals('2.0', $decoded[1]['jsonrpc']);
         $this->assertEquals('2', $decoded[1]['id']);
+        self::assertArrayHasKey('error', $decoded[1]);
+        self::assertIsArray($decoded[1]['error']);
+        self::assertArrayHasKey('code', $decoded[1]['error']);
+        self::assertArrayHasKey('message', $decoded[1]['error']);
         $this->assertEquals(-32600, $decoded[1]['error']['code']);
         $this->assertEquals('Invalid Request', $decoded[1]['error']['message']);
     }

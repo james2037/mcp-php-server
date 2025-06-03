@@ -53,6 +53,8 @@ class ToolTest extends TestCase
         $this->assertEquals('number', $schema['properties']->b->type);
 
         // Check required fields are present (all parameters are required by default)
+        self::assertArrayHasKey('required', $schema);
+        self::assertIsArray($schema['required']);
         $this->assertContains('operation', $schema['required']);
         $this->assertContains('a', $schema['required']);
         $this->assertContains('b', $schema['required']);
@@ -228,39 +230,71 @@ class ToolTest extends TestCase
         if (isset($schema['type'])) {
             switch ($schema['type']) {
                 case 'object':
-                    if (!is_object($data) && !is_array($data)) {
+                    if (!is_object($data) && !is_array($data)) { // Validates $data itself
                         return false;
                     }
+
                     if (isset($schema['properties'])) {
-                        foreach ($schema['properties'] as $prop => $propSchema) {
-                            if (
-                                isset($schema['required'])
-                                && in_array($prop, $schema['required'])
-                                && ((is_array($data) && !array_key_exists($prop, $data)) || (is_object($data) && !property_exists($data, $prop)))
-                            ) {
-                                return false;
-                            }
-                            if ((is_array($data) && array_key_exists($prop, $data)) || (is_object($data) && property_exists($data, $prop))) {
-                                // Accessing $data[$prop] is fine for both array and object (if property exists)
-                                // For objects, this relies on PHP converting object property access to array-like access for ArrayAccess or stdClass.
-                                // However, to be more explicit and safe, especially if $data could be a specific object type
-                                // not implementing ArrayAccess, we should differentiate access.
-                                // $value = is_array($data) ? $data[$prop] : $data->$prop;
-                                // But given $data is 'mixed' and passed around, and json_decode($assoc=true) makes arrays,
-                                // let's assume for now $data[$prop] works for the objects it might be (like stdClass).
-                                // If further errors arise, this access ($data[$prop]) might need refinement.
-                                if (!$this->validateAgainstSchema(is_array($data) ? $data[$prop] : $data->$prop, $propSchema)) {
+                        $propertiesField = $schema['properties'];
+
+                        // Ensure $propertiesField is iterable (stdClass object or array)
+                        if ($propertiesField instanceof \stdClass || is_array($propertiesField)) {
+                            /** @phpstan-ignore-next-line https://github.com/phpstan/phpstan/issues/2463 - stdClass is iterable */
+                            foreach ($propertiesField as $prop => $propSchema) { // Loop L1
+                                $propName = (string)$prop;
+
+                                // Ensure $propSchema is a valid schema (array) for recursive call
+                                if (!is_array($propSchema)) {
+                                    // error_log("Debug: propSchema for $propName is not an array: " . gettype($propSchema) . json_encode($propSchema));
+                                    return false; // Invalid sub-schema structure
+                                }
+
+                                $schemaRequired = $schema['required'] ?? [];
+                                if (!is_array($schemaRequired)) { $schemaRequired = []; } // Ensure 'required' is an array for in_array
+
+                                $isRequired = in_array($propName, $schemaRequired, true);
+
+                                $value = null; // Initialize value
+                                $dataHasProperty = false;
+                                if (is_array($data)) {
+                                    if (array_key_exists($propName, $data)) {
+                                        $value = $data[$propName];
+                                        $dataHasProperty = true;
+                                    }
+                                } elseif (is_object($data)) { // $data is known to be object or array from initial check
+                                    if (property_exists($data, $propName)) {
+                                        $value = $data->{$propName}; // Correct object property access
+                                        $dataHasProperty = true;
+                                    }
+                                }
+
+                                if ($isRequired && !$dataHasProperty) {
                                     return false;
                                 }
+
+                                if ($dataHasProperty) {
+                                    // $propSchema is already asserted to be an array
+                                    if (!$this->validateAgainstSchema($value, $propSchema)) {
+                                        return false;
+                                    }
+                                }
                             }
+                        } else {
+                            // $schema['properties'] was set but not an object or array - schema error.
+                            return false;
                         }
                     }
+                    // Consider additionalProperties validation here if needed
                     return true;
                 case 'array':
                     if (!is_array($data)) {
                         return false;
                     }
                     if (isset($schema['items'])) {
+                        // Ensure $schema['items'] is an array (a schema definition) before passing
+                        if (!is_array($schema['items'])) {
+                            return false; // Invalid 'items' schema
+                        }
                         foreach ($data as $item) {
                             if (!$this->validateAgainstSchema($item, $schema['items'])) {
                                 return false;
@@ -270,10 +304,13 @@ class ToolTest extends TestCase
                     return true;
                 case 'string':
                     return is_string($data);
+                // Add other types as needed: number, integer, boolean, null
                 default:
-                    return true;
+                    // For types not explicitly handled, or if 'type' is an array of types.
+                    // This basic validator doesn't handle complex 'type' arrays or all schema keywords.
+                    return true; // Be permissive for unhandled types or keywords
             }
         }
-        return true;
+        return true; // No 'type' keyword, or schema is empty, considered valid by this basic validator
     }
 }

@@ -247,8 +247,14 @@ class HttpTransportTest extends TestCase
         $body = (string) $response->getBody();
         $this->assertJson($body);
         $decodedBody = json_decode($body, true);
+        self::assertIsArray($decodedBody);
         $this->assertEquals('2.0', $decodedBody['jsonrpc']);
         $this->assertNull($decodedBody['id']);
+        self::assertArrayHasKey('error', $decodedBody);
+        self::assertIsArray($decodedBody['error']);
+        self::assertArrayHasKey('code', $decodedBody['error']);
+        self::assertArrayHasKey('message', $decodedBody['error']);
+        self::assertIsString($decodedBody['error']['message']); // Ensure message is string for assertStringContainsString
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $decodedBody['error']['code']);
         $this->assertStringContainsString('Failed to encode JSON response', $decodedBody['error']['message']);
     }

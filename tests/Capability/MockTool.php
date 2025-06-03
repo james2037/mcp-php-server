@@ -26,7 +26,8 @@ class MockTool extends Tool
     {
         if ($argumentName === 'data') {
             $allValues = ['apple', 'apricot', 'banana', 'blueberry'];
-            $filteredValues = array_filter($allValues, fn($v) => str_starts_with($v, (string)$currentValue));
+            $prefixToSearch = is_scalar($currentValue) ? (string)$currentValue : '';
+            $filteredValues = array_filter($allValues, fn($v) => str_starts_with($v, $prefixToSearch));
             return ['values' => array_values($filteredValues), 'total' => count($filteredValues), 'hasMore' => false];
         }
         $suggestions = parent::getCompletionSuggestions($argumentName, $currentValue, $allArguments);

@@ -113,7 +113,20 @@ class TestableStdioTransport extends StdioTransport
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \RuntimeException("Failed to decode JSON line: " . $line . " - Error: " . json_last_error_msg());
             }
-            $decodedOutputs[] = $decoded;
+            // Ensure that what we decoded is actually an array, as per PHPDoc return type promise.
+            // json_decode($line, true) can return null for JSON "null", or scalars.
+            if (!is_array($decoded)) {
+                // This could happen if a line contains valid JSON like "null" or "true" or "123" or "\"a string\"".
+                // The method's PHPDoc implies it expects lines that decode to JSON objects (arrays in PHP).
+                // If such non-array JSON is not an error, the PHPDoc should be array<int, mixed>.
+                // Given the PHPDoc, we treat non-array results as an error or skip them.
+                // Throwing an error is safer to highlight unexpected input.
+                throw new \RuntimeException(
+                    "Decoded JSON line did not result in an array: " . $line .
+                    " (decoded type: " . gettype($decoded) . ")"
+                );
+            }
+            $decodedOutputs[] = $decoded; // Now $decoded is confirmed to be an array.
         }
         return $decodedOutputs;
     }
