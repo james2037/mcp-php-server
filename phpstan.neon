@@ -32,5 +32,6 @@ parameters:
 
     # phpunit_config_file: phpunit.xml.dist
     # Exclude specific files or directories if needed
-    # excludePaths:
+    excludePaths:
+        - tests/Registry/DiscoveryTestFiles/*
     #     - src/some_legacy_code_to_ignore.php
