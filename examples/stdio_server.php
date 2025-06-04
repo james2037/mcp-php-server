@@ -16,12 +16,15 @@ use MCP\Server\Tool\Attribute\Parameter;
 #[ToolAttribute(name: "echo", description: "Echoes back the provided message.")]
 class EchoTool extends BaseTool
 {
+    /**
+     * @return \MCP\Server\Tool\Content\ContentItemInterface
+     */
     protected function doExecute(
         #[Parameter(name: 'message', type: 'string', description: 'The message to echo.')]
         array $arguments
-    ): array {
+    ): \MCP\Server\Tool\Content\ContentItemInterface {
         $message = $arguments['message'] ?? 'Default message if not provided';
-        return [$this->createTextContent("Echo: " . $message)];
+        return $this->text("Echo: " . $message);
     }
 }
 

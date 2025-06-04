@@ -11,10 +11,10 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class MockTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
-    protected function doExecute(array $arguments): array
+    protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
     {
-        return [$this->text('Hello World')];
+        return $this->text('Hello World');
     }
 }

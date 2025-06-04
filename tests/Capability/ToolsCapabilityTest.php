@@ -254,11 +254,11 @@ class ToolsCapabilityTest extends TestCase
                 $this->shutdownCountRef++;
             }
             /**
-             * @return array<Content\ContentItemInterface>
+             * @return Content\ContentItemInterface
              */
-            protected function doExecute(array $arguments): array
+            protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
             {
-                return [$this->text('done')];
+                return $this->text('done');
             }
         };
 
@@ -316,11 +316,11 @@ class ToolsCapabilityTest extends TestCase
     {
         $basicTool = new #[ToolAttribute('basic', 'Basic Tool')] class extends Tool {
             /**
-             * @return array<Content\ContentItemInterface>
+             * @return Content\ContentItemInterface
              */
-            protected function doExecute(array $arguments): array
+            protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
             {
-                return [$this->text('done')];
+                return $this->text('done');
             }
         };
         $this->capability->addTool($basicTool); // Add to the existing capability instance

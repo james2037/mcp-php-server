@@ -13,10 +13,10 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class OtherMockTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
-    protected function doExecute(array $arguments): array
+    protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
     {
-        return [$this->text('Other Result')];
+        return $this->text('Other Result');
     }
 }

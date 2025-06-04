@@ -11,12 +11,12 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class TestTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
     protected function doExecute(
         #[ParameterAttribute('name', type: 'string', description: 'Name to greet')]
         array $arguments
-    ): array {
-        return [$this->text('Hello ' . $arguments['name'])];
+    ): \MCP\Server\Tool\Content\ContentItemInterface {
+        return $this->text('Hello ' . $arguments['name']);
     }
 }

@@ -11,20 +11,20 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class CalculatorTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
     protected function doExecute(
         #[ParameterAttribute('operation', type: 'string', description: 'Operation to perform (add/subtract)')]
         #[ParameterAttribute('a', type: 'number', description: 'First number')]
         #[ParameterAttribute('b', type: 'number', description: 'Second number')]
         array $arguments
-    ): array {
+    ): \MCP\Server\Tool\Content\ContentItemInterface {
         $result = match ($arguments['operation']) {
             'add' => $arguments['a'] + $arguments['b'],
             'subtract' => $arguments['a'] - $arguments['b'],
             default => throw new \InvalidArgumentException('Invalid operation')
         };
 
-        return [$this->text((string)$result)];
+        return $this->text((string)$result);
     }
 }
