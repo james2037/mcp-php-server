@@ -145,7 +145,7 @@ abstract class Resource
         return new TextResourceContents(
             $this->resolveUri($this->getUri(), $parameters),
             $text,
-            $mimeType
+            $mimeType ?? 'text/plain'
         );
     }
 

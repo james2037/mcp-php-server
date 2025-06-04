@@ -15,28 +15,26 @@ class TextResourceContents extends ResourceContents
      *
      * @param string $uri The URI of the resource.
      * @param string $text The text content.
-     * @param string|null $mimeType The MIME type of the content. Defaults to "text/plain" if null.
+     * @param string $mimeType The MIME type of the resource. Defaults to 'text/plain'.
      */
     public function __construct(
         string $uri,
         public readonly string $text,
-        ?string $mimeType = null
+        string $mimeType = 'text/plain'
     ) {
-        parent::__construct($uri, $mimeType ?? 'text/plain');
+        parent::__construct($uri, $mimeType);
     }
 
     /**
      * Converts the text resource contents to an array format.
-     * Includes 'uri', 'text', and 'mimeType'.
+     * Includes 'uri', 'mimeType', and 'text'.
      *
-     * @return array{uri: string, text: string, mimeType?: string} The array representation.
+     * @return array{uri: string, mimeType: string, text: string} The array representation.
      */
     public function toArray(): array
     {
-        $data = ['uri' => $this->uri, 'text' => $this->text];
-        if ($this->mimeType !== null) {
-            $data['mimeType'] = $this->mimeType;
-        }
+        $data = parent::toArray(); // Gets 'uri' and 'mimeType' from ResourceContents
+        $data['text'] = $this->text;
         return $data;
     }
 }
