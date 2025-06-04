@@ -19,7 +19,7 @@ class ToolRegistry extends Registry
      * Creates a Tool instance from its ReflectionClass object.
      * It expects the class to be a subclass of Tool and have a ToolAttribute.
      *
-     * @param ReflectionClass<Tool> $reflection The reflection object for the tool class.
+     * @param ReflectionClass<object> $reflection The reflection object for the class to check.
      * @param array<string, mixed> $config Optional configuration array to pass to the tool's constructor.
      * @return Tool|null The created Tool instance, or null if the class is not a valid tool
      *                   (e.g., missing ToolAttribute or not an instance of Tool).
@@ -30,12 +30,17 @@ class ToolRegistry extends Registry
     ): ?Tool {
         $toolAttr = $reflection->getAttributes(ToolAttribute::class)[0] ?? null;
         if ($toolAttr !== null) {
-            // Ensure the class is a subclass of Tool before instantiation
-            if (!$reflection->isSubclassOf(Tool::class) && $reflection->getName() !== Tool::class) {
+            // Ensure the class is a subclass of Tool and is instantiable before instantiation
+            if (!$reflection->isSubclassOf(Tool::class) || !$reflection->isInstantiable()) {
                 // Optionally log this issue or handle as an error
                 return null;
             }
+            // We've already checked it's a subclass of Tool and instantiable.
+            // newInstanceArgs is appropriate here.
             $toolInstance = $reflection->newInstanceArgs([$config]); // Pass config to constructor
+            // Final check, though $reflection->isSubclassOf(Tool::class) should make this redundant
+            // if Tool class itself is not processed or handled by isSubclassOf correctly.
+            // However, newInstanceArgs on an abstract class would fail before this.
             if ($toolInstance instanceof Tool) {
                 return $toolInstance;
             }
