@@ -359,4 +359,50 @@ class JsonRpcMessageTest extends TestCase
         $this->assertNull($message->params);
         $this->assertNull($message->result);
     }
+
+    public function testFromJsonResponseMissingId(): void
+    {
+        // This JSON represents a result response but is missing the 'id' field.
+        $json = '{"jsonrpc": "2.0", "result": {"foo": "bar"}}';
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        $this->expectExceptionMessage('Response must include ID (even if null for some error cases as per spec, this implementation expects it)');
+        JsonRpcMessage::fromJson($json);
+    }
+
+    public function testFromJsonErrorResponseMissingId(): void
+    {
+        // This JSON represents an error response but is missing the 'id' field.
+        $json = '{"jsonrpc": "2.0", "error": {"code": -32600, "message": "Invalid Request"}}';
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        $this->expectExceptionMessage('Response must include ID (even if null for some error cases as per spec, this implementation expects it)');
+        JsonRpcMessage::fromJson($json);
+    }
+
+    public function testFromJsonErrorFieldNotAnArray(): void
+    {
+        // This JSON represents an error response, but the 'error' field is a string, not an object/array.
+        $json = '{"jsonrpc": "2.0", "error": "This should be an error object", "id": "err-789"}';
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        $this->expectExceptionMessage('Invalid error object in JSON-RPC response');
+        JsonRpcMessage::fromJson($json);
+    }
+
+    public function testJsonSerializeRequestWithId(): void
+    {
+        $message = new JsonRpcMessage('test.request', ['foo' => 'bar'], 'req-789');
+        // Ensure it's treated as a request by jsonSerialize, not result/error
+        $message->result = null;
+        $message->error = null;
+
+        $serialized = $message->jsonSerialize();
+
+        $this->assertArrayHasKey('id', $serialized);
+        $this->assertEquals('req-789', $serialized['id']);
+        $this->assertEquals('test.request', $serialized['method']);
+        $this->assertEquals(['foo' => 'bar'], $serialized['params']);
+        $this->assertEquals('2.0', $serialized['jsonrpc']);
+    }
 }
