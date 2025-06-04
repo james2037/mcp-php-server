@@ -7,6 +7,8 @@ use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use PHPUnit\Framework\TestCase;
 use MCP\Server\Tool\Content\ContentItemInterface;
+use MCP\Server\Tests\Tool\Fixture\LifecycleTestTool;
+use MCP\Server\Tests\Tool\Fixture\ValidationTestTool;
 
 // TestTool and CalculatorTool are now in separate files.
 
@@ -383,5 +385,245 @@ class ToolTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('All items returned by doExecute must be instances of ContentItemInterface.');
         $tool->execute([]);
+    }
+
+    public function testInitializeMethodSetsFlagAndLogs(): void
+    {
+        $tool = new LifecycleTestTool();
+        // Assert initial state (before explicit initialize call)
+        $this->assertFalse($tool->initialized, "Tool should not be initialized before initialize() is called.");
+        $initialLog = $tool->getLog();
+        $this->assertNotContains("initialize called", $initialLog, "Log should not contain 'initialize called' before execution.");
+        $this->assertContains("Before parent constructor", $initialLog);
+        $this->assertContains("After parent constructor", $initialLog);
+
+        // Call initialize
+        $tool->initialize();
+
+        $this->assertTrue($tool->initialized, "Tool initialize flag should be true after calling initialize().");
+        $finalLog = $tool->getLog();
+        $this->assertContains("initialize called", $finalLog, "Log should contain 'initialize called' after execution.");
+
+        // Check full log order now
+        $expectedLog = [
+            "Before parent constructor",
+            "After parent constructor",
+            "initialize called"
+        ];
+        $this->assertEquals($expectedLog, $finalLog);
+    }
+
+    public function testShutdownMethodSetsFlag(): void
+    {
+        $tool = new LifecycleTestTool();
+        // Reset log to make assertions cleaner for shutdown only
+        $tool->clearLog();
+
+        $tool->shutdown();
+        $this->assertTrue($tool->shutdown, "Tool shutdown flag should be true after calling shutdown().");
+        $this->assertContains("shutdown called", $tool->getLog(), "Log should contain 'shutdown called'.");
+        $this->assertCount(1, $tool->getLog()); // Ensure only shutdown was logged now
+        $this->assertEquals("shutdown called", $tool->getLog()[0]);
+    }
+
+    /**
+     * Helper method to set the private 'parameters' property on a Tool instance using reflection.
+     *
+     * @param Tool $tool The tool instance.
+     * @param array<string, array{type: string, description?: string|null, required?: bool}> $paramsConfig
+     *        An array where keys are parameter names and values are arrays defining the parameter.
+     *        Example: ['paramName' => ['type' => 'string', 'required' => true]]
+     */
+    private function setToolParameters(Tool $tool, array $paramsConfig): void
+    {
+        $parameters = [];
+        foreach ($paramsConfig as $name => $config) {
+            $parameters[$name] = new \MCP\Server\Tool\Attribute\Parameter(
+                name: $name,
+                type: $config['type'],
+                description: $config['description'] ?? null,
+                required: $config['required'] ?? true
+            );
+        }
+
+        // Get reflection of the parent class (Tool) to access its private properties
+        $reflection = new \ReflectionClass(Tool::class);
+        $parametersProperty = $reflection->getProperty('parameters');
+        $parametersProperty->setAccessible(true); // Allow modification of private property
+        $parametersProperty->setValue($tool, $parameters); // Set value on the $tool instance
+    }
+
+    // Tests for 'integer' type validation
+    public function testValidateArgumentsIntegerTypeCorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+        ]);
+        $result = $tool->execute(['pInt' => 123, 'pObj' => new \stdClass(), 'pAny' => 'hello']);
+        $this->assertStringContainsString("pInt type: integer", $result[0]['text']);
+    }
+
+    public function testValidateArgumentsIntegerTypeIncorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+        ]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid type for argument pInt: expected integer, got string");
+        $tool->execute(['pInt' => "not-an-integer", 'pObj' => new \stdClass(), 'pAny' => 'hello']);
+    }
+
+    public function testValidateArgumentsIntegerTypeMissingRequired(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer', 'required' => true],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+        ]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Missing required argument: pInt");
+        $tool->execute(['pObj' => new \stdClass(), 'pAny' => 'hello']);
+    }
+
+    public function testValidateArgumentsOptionalIntegerTypeCorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+            'pOptInt' => ['type' => 'integer', 'required' => false],
+        ]);
+        // pOptInt is provided
+        $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => 'a', 'pOptInt' => 456]);
+        $this->assertStringContainsString("pOptInt type: integer", $result[0]['text']);
+
+        // pOptInt is omitted (which is valid)
+        $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => 'a']);
+        $this->assertStringNotContainsString("pOptInt type", $result[0]['text']);
+    }
+
+    // Tests for 'object' type validation
+    public function testValidateArgumentsObjectTypeCorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+        ]);
+        $result = $tool->execute(['pInt' => 123, 'pObj' => new \stdClass(), 'pAny' => 'hello']);
+        $this->assertStringContainsString("pObj type: object", $result[0]['text']);
+    }
+
+    public function testValidateArgumentsObjectTypeIncorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+        ]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid type for argument pObj: expected object, got string");
+        $tool->execute(['pInt' => 123, 'pObj' => "not-an-object", 'pAny' => 'hello']);
+    }
+
+    public function testValidateArgumentsObjectTypeMissingRequired(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object', 'required' => true],
+            'pAny' => ['type' => 'any'],
+        ]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Missing required argument: pObj");
+        $tool->execute(['pInt' => 123, 'pAny' => 'hello']);
+    }
+
+    public function testValidateArgumentsOptionalObjectTypeCorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+            'pOptObj' => ['type' => 'object', 'required' => false],
+        ]);
+        // pOptObj is provided
+        $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => 'a', 'pOptObj' => new \stdClass()]);
+        $this->assertStringContainsString("pOptObj type: object", $result[0]['text']);
+
+        // pOptObj is omitted
+        $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => 'a']);
+        $this->assertStringNotContainsString("pOptObj type", $result[0]['text']);
+    }
+
+    // Tests for 'any' type validation
+    public function testValidateArgumentsAnyTypeCorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'], // 'required' defaults to true
+        ]);
+
+        // Test null value explicitly for 'any' type
+        $resultNull = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => null]);
+        $this->assertStringContainsString("pAny type: NULL", $resultNull[0]['text'], "Failed for 'any' type with null value.");
+
+        $testValues = [
+            'string_val' => "hello",
+            'int_val' => 123,
+            'bool_val' => true,
+            'array_val' => ['a', 'b'],
+            'object_val' => new \stdClass(),
+            'double_val' => 1.23,
+        ];
+
+        foreach ($testValues as $key => $value) {
+            $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => $value]);
+            $this->assertStringContainsString("pAny type: " . gettype($value), $result[0]['text'], "Failed for 'any' type with key: " . $key . " value type: " . gettype($value));
+        }
+    }
+
+    public function testValidateArgumentsAnyTypeMissingRequired(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any', 'required' => true],
+        ]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Missing required argument: pAny");
+        $tool->execute(['pInt' => 123, 'pObj' => new \stdClass()]);
+    }
+
+    public function testValidateArgumentsOptionalAnyTypeCorrect(): void
+    {
+        $tool = new ValidationTestTool();
+        $this->setToolParameters($tool, [
+            'pInt' => ['type' => 'integer'],
+            'pObj' => ['type' => 'object'],
+            'pAny' => ['type' => 'any'],
+            'pOptAny' => ['type' => 'any', 'required' => false],
+        ]);
+        // pOptAny is provided with a string
+        $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => 'a', 'pOptAny' => 'optional string']);
+        $this->assertStringContainsString("pOptAny type: string", $result[0]['text']);
+
+        // pOptAny is omitted
+        $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => 'a']);
+        $this->assertStringNotContainsString("pOptAny type", $result[0]['text']);
     }
 }
