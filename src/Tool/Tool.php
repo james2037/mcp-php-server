@@ -203,23 +203,9 @@ abstract class Tool
     {
         $this->validateArguments($arguments);
         $returnedContent = $this->doExecute($arguments); // Can be single item or array
-
-        $contentItems = [];
-        if ($returnedContent instanceof Content\ContentItemInterface) {
-            // If doExecute returns a single item, wrap it in an array
-            $contentItems[] = $returnedContent;
-        } elseif (is_array($returnedContent)) {
-            // If it's already an array, use it directly
-            $contentItems = $returnedContent;
-        } else {
-            // If $returnedContent is not an array and not a ContentItemInterface,
-            // it's an invalid return type from doExecute.
-            throw new \LogicException(
-                'doExecute must return an array of ContentItemInterface objects or a single ContentItemInterface object.'
-            );
-        }
-
+        $contentItems = is_array($returnedContent) ? $returnedContent : [$returnedContent];
         $resultArray = [];
+
         foreach ($contentItems as $item) {
             if (!$item instanceof Content\ContentItemInterface) {
                 // Throw an exception for stricter validation, ensuring all items are correct
