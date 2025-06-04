@@ -6,6 +6,7 @@ use MCP\Server\Tool\Tool;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use PHPUnit\Framework\TestCase;
+use MCP\Server\Tool\Content\ContentItemInterface;
 
 // TestTool and CalculatorTool are now in separate files.
 
@@ -275,5 +276,112 @@ class ToolTest extends TestCase
             }
         }
         return true;
+    }
+
+    public function testExecuteWithSingleTextContentReturn(): void
+    {
+        $tool = new class extends Tool {
+            protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
+            {
+                return $this->text('Hello world');
+            }
+        };
+
+        $result = $tool->execute([]);
+        $this->assertEquals([['type' => 'text', 'text' => 'Hello world']], $result);
+    }
+
+    public function testExecuteWithSingleImageContentReturn(): void
+    {
+        $tool = new class extends Tool {
+            protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
+            {
+                return $this->image('fakedata', 'image/png');
+            }
+        };
+
+        $result = $tool->execute([]);
+        $this->assertEquals([['type' => 'image', 'data' => base64_encode('fakedata'), 'mimeType' => 'image/png']], $result);
+    }
+
+    public function testExecuteWithSingleAudioContentReturn(): void
+    {
+        $tool = new class extends Tool {
+            protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
+            {
+                return $this->audio('fakedata', 'audio/mp3');
+            }
+        };
+
+        $result = $tool->execute([]);
+        $this->assertEquals([['type' => 'audio', 'data' => base64_encode('fakedata'), 'mimeType' => 'audio/mp3']], $result);
+    }
+
+    public function testExecuteWithSingleEmbeddedResourceReturn(): void
+    {
+        $tool = new class extends Tool {
+            protected function doExecute(array $arguments): \MCP\Server\Tool\Content\ContentItemInterface
+            {
+                return $this->embeddedResource(['uri' => '/my/res', 'text' => 'res text']);
+            }
+        };
+
+        $result = $tool->execute([]);
+        $this->assertEquals([['type' => 'resource', 'resource' => ['uri' => '/my/res', 'text' => 'res text']]], $result);
+    }
+
+    public function testExecuteWithMultipleContentItemsReturn(): void
+    {
+        $tool = new class extends Tool {
+            /**
+             * @return array<\MCP\Server\Tool\Content\ContentItemInterface>
+             */
+            protected function doExecute(array $arguments): array
+            {
+                return [
+                    $this->text('Hello'),
+                    $this->image('fakedata', 'image/jpeg')
+                ];
+            }
+        };
+
+        $result = $tool->execute([]);
+        $this->assertEquals(
+            [['type' => 'text', 'text' => 'Hello'], ['type' => 'image', 'data' => base64_encode('fakedata'), 'mimeType' => 'image/jpeg']],
+            $result
+        );
+    }
+
+    public function testExecuteWithInvalidReturnFromDoExecuteNotContentItem(): void
+    {
+        $tool = new class extends Tool {
+            protected function doExecute(array $arguments): array|\MCP\Server\Tool\Content\ContentItemInterface
+            {
+                // @phpstan-ignore-next-line Deliberately returning invalid type for test.
+                return 'not a content item';
+            }
+        };
+
+        $this->expectException(\TypeError::class);
+        // $this->expectExceptionMessage('doExecute must return an array of ContentItemInterface objects or a single ContentItemInterface object.');
+        $tool->execute([]);
+    }
+
+    public function testExecuteWithInvalidReturnFromDoExecuteArrayWithInvalidItem(): void
+    {
+        $tool = new class extends Tool {
+            /**
+             * @return array<\MCP\Server\Tool\Content\ContentItemInterface>
+             */
+            protected function doExecute(array $arguments): array
+            {
+                // @phpstan-ignore-next-line Deliberately returning invalid type in array for test.
+                return [$this->text("valid"), "invalid"];
+            }
+        };
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('All items returned by doExecute must be instances of ContentItemInterface.');
+        $tool->execute([]);
     }
 }

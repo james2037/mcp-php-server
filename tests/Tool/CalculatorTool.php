@@ -5,10 +5,14 @@ namespace MCP\Server\Tests\Tool;
 use MCP\Server\Tool\Tool;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
+use MCP\Server\Tool\Content\ContentItemInterface;
 
 #[ToolAttribute('calculator', 'A calculator tool')]
 class CalculatorTool extends Tool
 {
+    /**
+     * @return array<ContentItemInterface>
+     */
     protected function doExecute(
         #[ParameterAttribute('operation', type: 'string', description: 'Operation to perform (add/subtract)')]
         #[ParameterAttribute('a', type: 'number', description: 'First number')]
@@ -21,6 +25,6 @@ class CalculatorTool extends Tool
             default => throw new \InvalidArgumentException('Invalid operation')
         };
 
-        return [$this->createTextContent((string)$result)];
+        return [$this->text((string)$result)];
     }
 }

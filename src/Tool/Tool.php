@@ -202,19 +202,30 @@ abstract class Tool
     final public function execute(array $arguments): array
     {
         $this->validateArguments($arguments);
-        $contentItems = $this->doExecute($arguments);
+        $returnedContent = $this->doExecute($arguments); // Can be single item or array
+
+        $contentItems = [];
+        if ($returnedContent instanceof Content\ContentItemInterface) {
+            // If doExecute returns a single item, wrap it in an array
+            $contentItems[] = $returnedContent;
+        } elseif (is_array($returnedContent)) {
+            // If it's already an array, use it directly
+            $contentItems = $returnedContent;
+        } else {
+            // If $returnedContent is not an array and not a ContentItemInterface,
+            // it's an invalid return type from doExecute.
+            throw new \LogicException(
+                'doExecute must return an array of ContentItemInterface objects or a single ContentItemInterface object.'
+            );
+        }
+
         $resultArray = [];
         foreach ($contentItems as $item) {
             if (!$item instanceof Content\ContentItemInterface) {
-                // Or throw an exception, depending on how strict we want to be
-                // For now, let's assume doExecute correctly returns
-                // ContentItemInterface objects and skip invalid items if any
-                // for robustness.
-                // A stricter approach might be:
-                // throw new \LogicException(
-                // 'doExecute must return an array of ContentItemInterface objects.'
-                // );
-                continue;
+                // Throw an exception for stricter validation, ensuring all items are correct
+                throw new \LogicException(
+                    'All items returned by doExecute must be instances of ContentItemInterface.'
+                );
             }
             $resultArray[] = $item->toArray();
         }
@@ -278,14 +289,20 @@ abstract class Tool
      * Executes the core logic of the tool.
      *
      * This method must be implemented by concrete tool classes. It receives
-     * validated arguments and should return an array of ContentItemInterface
+     * validated arguments and should return one or more ContentItemInterface
      * objects representing the tool's output.
      *
+     * If a single ContentItemInterface object is returned, the `execute()` method
+     * will automatically wrap it in an array. This ensures that the final tool
+     * response sent by the server adheres to the protocol, which expects an array
+     * of content items.
+     *
      * @param array<string,mixed> $arguments Validated arguments for the tool, matching the defined parameters.
-     * @return Content\ContentItemInterface[] An array of content items (e.g., TextContent, ImageContent)
+     * @return Content\ContentItemInterface[]|Content\ContentItemInterface An array of content items
+     *                                        (e.g., TextContent, ImageContent) or a single content item
      *                                        representing the tool's response.
      */
-    abstract protected function doExecute(array $arguments): array;
+    abstract protected function doExecute(array $arguments): array|Content\ContentItemInterface;
 
     // Content Creation Helper Methods
 
@@ -297,7 +314,7 @@ abstract class Tool
      * @param Content\Annotations|null $annotations Optional annotations for the text content.
      * @return Content\TextContent The created TextContent item.
      */
-    final protected function createTextContent(
+    final protected function text(
         string $text,
         ?Content\Annotations $annotations = null
     ): Content\TextContent {
@@ -314,7 +331,7 @@ abstract class Tool
      * @param Content\Annotations|null $annotations Optional annotations for the image content.
      * @return Content\ImageContent The created ImageContent item.
      */
-    final protected function createImageContent(
+    final protected function image(
         string $rawData,
         string $mimeType,
         ?Content\Annotations $annotations = null
@@ -336,7 +353,7 @@ abstract class Tool
      * @param Content\Annotations|null $annotations Optional annotations for the audio content.
      * @return Content\AudioContent The created AudioContent item.
      */
-    final protected function createAudioContent(
+    final protected function audio(
         string $rawData,
         string $mimeType,
         ?Content\Annotations $annotations = null
@@ -357,7 +374,7 @@ abstract class Tool
      * @param Content\Annotations|null $annotations Optional annotations for the embedded resource.
      * @return Content\EmbeddedResource The created EmbeddedResource item.
      */
-    final protected function createEmbeddedResource(
+    final protected function embeddedResource(
         array $resourceData,
         ?Content\Annotations $annotations = null
     ): Content\EmbeddedResource {

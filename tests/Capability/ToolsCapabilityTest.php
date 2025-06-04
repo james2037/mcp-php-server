@@ -253,9 +253,12 @@ class ToolsCapabilityTest extends TestCase
             {
                 $this->shutdownCountRef++;
             }
+            /**
+             * @return array<Content\ContentItemInterface>
+             */
             protected function doExecute(array $arguments): array
             {
-                return [$this->createTextContent('done')];
+                return [$this->text('done')];
             }
         };
 
@@ -312,9 +315,12 @@ class ToolsCapabilityTest extends TestCase
     public function testHandleCompleteDefaultSuggestions(): void
     {
         $basicTool = new #[ToolAttribute('basic', 'Basic Tool')] class extends Tool {
+            /**
+             * @return array<Content\ContentItemInterface>
+             */
             protected function doExecute(array $arguments): array
             {
-                return [$this->createTextContent('done')];
+                return [$this->text('done')];
             }
         };
         $this->capability->addTool($basicTool); // Add to the existing capability instance
@@ -447,6 +453,9 @@ class ToolsCapabilityTest extends TestCase
         // if constructor validation is robust.
         $customBadTool = new #[ToolAttribute('customBadValuesTool', 'Tool with bad values type')] class extends Tool
         {
+            /**
+             * @return array<Content\ContentItemInterface>
+             */
             protected function doExecute(array $arguments): array
             {
                 return [];
@@ -481,6 +490,9 @@ class ToolsCapabilityTest extends TestCase
     public function testHandleCompleteWithToolReturningNonArraySuggestions(): void
     {
         $nonArraySuggestionsTool = new #[ToolAttribute('nonArraySuggestionsTool', 'Tool returning non-array suggestions')] class extends Tool {
+            /**
+             * @return array<Content\ContentItemInterface>
+             */
             protected function doExecute(array $arguments): array
             {
                 return []; // Not called in this test path

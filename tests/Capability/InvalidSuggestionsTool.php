@@ -4,6 +4,7 @@ namespace MCP\Server\Tests\Capability;
 
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Tool;
+use MCP\Server\Tool\Content\ContentItemInterface;
 
 #[ToolAttribute('invalidSuggestionsTool', 'Tool that returns invalid suggestions')]
 class InvalidSuggestionsTool extends Tool
@@ -18,6 +19,9 @@ class InvalidSuggestionsTool extends Tool
         $this->suggestionsToReturn = $suggestionsToReturn;
     }
 
+    /**
+     * @return array<ContentItemInterface>
+     */
     protected function doExecute(array $arguments): array
     {
         // Not used for completion tests
