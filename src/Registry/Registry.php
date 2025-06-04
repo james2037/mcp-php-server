@@ -89,12 +89,12 @@ abstract class Registry
     {
         $filePath = $file->getRealPath();
         if ($filePath === false) {
-            return ''; // File path could not be resolved.
+            return ''; // @codeCoverageIgnore - Filesystem edge case
         }
 
         $contents = file_get_contents($filePath);
         if ($contents === false) {
-            return ''; // Or throw specific exception
+            return ''; // @codeCoverageIgnore - File read failure after path resolution
         }
 
         $tokens = token_get_all($contents);
