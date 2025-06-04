@@ -11,17 +11,17 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class ArrayParamTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
     protected function doExecute(
         #[ParameterAttribute('numbers', type: 'array', description: 'List of numbers')]
         #[ParameterAttribute('enabled', type: 'boolean', description: 'Whether processing is enabled')]
         array $arguments
-    ): array {
+    ): \MCP\Server\Tool\Content\ContentItemInterface {
         if (!$arguments['enabled']) {
-            return [$this->text('Processing disabled')];
+            return $this->text('Processing disabled');
         }
         $sum = array_sum($arguments['numbers']);
-        return [$this->text("Sum: $sum")];
+        return $this->text("Sum: $sum");
     }
 }

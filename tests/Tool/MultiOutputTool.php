@@ -11,15 +11,15 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class MultiOutputTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
     protected function doExecute(
         #[ParameterAttribute('format', type: 'string', description: 'Output format (text/image)')]
         array $arguments
-    ): array {
+    ): \MCP\Server\Tool\Content\ContentItemInterface {
         if ($arguments['format'] === 'text') {
-            return [$this->text('Hello world')];
+            return $this->text('Hello world');
         }
-        return [$this->image('fake-image-data', 'image/png')];
+        return $this->image('fake-image-data', 'image/png');
     }
 }

@@ -11,14 +11,14 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class OptionalParamTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
     protected function doExecute(
         #[ParameterAttribute('name', type: 'string', description: 'Name to greet')]
         #[ParameterAttribute('title', type: 'string', description: 'Optional title', required: false)]
         array $arguments
-    ): array {
+    ): \MCP\Server\Tool\Content\ContentItemInterface {
         $title = $arguments['title'] ?? 'friend';
-        return [$this->text("Hello {$title} {$arguments['name']}")];
+        return $this->text("Hello {$title} {$arguments['name']}");
     }
 }

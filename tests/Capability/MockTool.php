@@ -13,13 +13,13 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 class MockTool extends Tool
 {
     /**
-     * @return array<ContentItemInterface>
+     * @return ContentItemInterface
      */
     protected function doExecute(
         #[ParameterAttribute('data', type: 'string', description: 'Input data')]
         array $arguments
-    ): array {
-        return [$this->text('Result: ' . $arguments['data'])];
+    ): \MCP\Server\Tool\Content\ContentItemInterface {
+        return $this->text('Result: ' . $arguments['data']);
     }
 
     /**
