@@ -130,4 +130,17 @@ class ToolRegistryTest extends TestCase
             rmdir($tempDir);
         }
     }
+
+    public function testDiscoverSkipsProblematicFiles(): void
+    {
+        // Directory containing files that should not be registered as tools
+        $testFilesDir = __DIR__ . '/../Registry/DiscoveryTestFiles';
+
+        // Attempt to discover tools in the directory with problematic files
+        $this->registry->discover($testFilesDir);
+
+        // Assert that no tools were registered from these files
+        $tools = $this->registry->getTools();
+        $this->assertCount(0, $tools, "Registry should be empty after discovering problematic files.");
+    }
 }
