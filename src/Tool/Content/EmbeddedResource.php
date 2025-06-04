@@ -8,40 +8,26 @@ use InvalidArgumentException;
 
 /**
  * Represents an embedded resource as a content item.
- * This is used when a tool's output includes the content of a resource directly,
- * rather than just a URI pointing to it. The embedded resource itself
- * should conform to the structure of a TextResourceContents or BlobResourceContents array.
  */
-final class EmbeddedResource implements ContentItemInterface
+final class EmbeddedResource extends AbstractContent // Extend AbstractContent
 {
-    /** @var array{uri: string, text?: string, blob?: string, mimeType?: string} The actual resource data,
-     * typically matching the structure of TextResourceContents or BlobResourceContents.
-     */
+    /** @var array{uri: string, text?: string, blob?: string, mimeType?: string} The actual resource data. */
     private array $resource;
-    /** @var Annotations|null Optional annotations for the embedded resource. */
-    private ?Annotations $annotations;
+    // Remove private ?Annotations $annotations;
 
     /**
      * Constructs a new EmbeddedResource instance.
      *
-     * @param array{uri: string, text?: string, blob?: string, mimeType?: string} $resourceData The resource data, expected to have a 'uri' key,
-     *                            and either a 'text' or a 'blob' key.
-     *                            Optionally, a 'mimeType' key can be included.
-     *                            Example: `['uri' => '/my/data', 'text' => 'hello', 'mimeType' => 'text/plain']`
-     *                            Example: `['uri' => '/my/image', 'blob' => 'base64data', 'mimeType' => 'image/png']`
+     * @param array{uri: string, text?: string, blob?: string, mimeType?: string} $resourceData
      * @param Annotations|null $annotations Optional annotations.
-     * @throws InvalidArgumentException If resource data is invalid (missing keys or incorrect types).
+     * @throws InvalidArgumentException If resource data is invalid.
      */
     public function __construct(
         array $resourceData,
         ?Annotations $annotations = null
     ) {
-        // The 'uri' key and the string types for 'text' (if set) and 'blob' (if set)
-        // are expected to be guaranteed by the caller, aligning with the PHPDoc type:
-        // array{uri: string, text?: string, blob?: string, mimeType?: string}.
-        // Static analysis tools can enforce this at the call site.
+        parent::__construct($annotations); // Call parent constructor
 
-        // This runtime check ensures that at least one of 'text' or 'blob' is provided.
         if (!isset($resourceData['text']) && !isset($resourceData['blob'])) {
             throw new InvalidArgumentException(
                 "EmbeddedResource data must contain either a 'text' or a 'blob' key."
@@ -49,7 +35,6 @@ final class EmbeddedResource implements ContentItemInterface
         }
 
         $this->resource = $resourceData;
-        $this->annotations = $annotations;
     }
 
     /**
@@ -59,17 +44,11 @@ final class EmbeddedResource implements ContentItemInterface
      */
     public function toArray(): array
     {
-        $data = [
+        $contentData = [
             'type' => 'resource',
             'resource' => $this->resource,
         ];
 
-        if ($this->annotations !== null) {
-            $annotationsArray = $this->annotations->toArray();
-            if (!empty($annotationsArray)) {
-                $data['annotations'] = $annotationsArray;
-            }
-        }
-        return $data;
+        return array_merge($contentData, parent::toArray()); // Merge with parent::toArray()
     }
 }
