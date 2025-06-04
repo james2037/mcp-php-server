@@ -72,4 +72,48 @@ class ResourceRegistryTest extends TestCase
             rmdir($tempDir);
         }
     }
+
+    public function testDiscoverSkipsProblematicFiles(): void
+    {
+        // Directory containing files that should not be registered as resources
+        $testFilesDir = __DIR__ . '/../Registry/DiscoveryTestFiles';
+
+        // Attempt to discover resources in the directory with problematic files
+        $this->registry->discover($testFilesDir);
+
+        // Assert that no resources were registered from these files
+        $resources = $this->registry->getResources();
+        $this->assertCount(0, $resources, "Registry should be empty after discovering problematic files.");
+    }
+
+    public function testDiscoverSkipsResourceWithoutUriAttribute(): void
+    {
+        // Define the directory where NoAttributeResource.php is located
+        $testFilesDir = __DIR__ . '/DiscoveryTestFiles'; // Adjusted path
+
+        // Ensure the directory exists for the test context (it should, as NoAttributeResource.php was created there)
+        if (!is_dir($testFilesDir)) {
+            mkdir($testFilesDir, 0777, true); // Create if it doesn't exist, though it should
+        }
+
+        // Attempt to discover resources in the directory
+        $this->registry->discover($testFilesDir);
+
+        // Assert that no resources were registered because NoAttributeResource lacks the ResourceUri attribute
+        $resources = $this->registry->getResources();
+        $this->assertCount(0, $resources, "Registry should be empty as NoAttributeResource lacks ResourceUri attribute.");
+    }
+
+    public function testGetItemKeyThrowsOnInvalidItemType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Item must be an instance of ' . Resource::class);
+
+        $registry = new ResourceRegistry(); // Use a fresh instance for this specific test
+        $method = new \ReflectionMethod(ResourceRegistry::class, 'getItemKey');
+        $method->setAccessible(true);
+
+        $invalidItem = new \stdClass();
+        $method->invoke($registry, $invalidItem);
+    }
 }

@@ -106,3 +106,7 @@ This document tracks features from the Model Context Protocol (MCP) specificatio
 ## General SDK Enhancements
 *   **[ ] Comprehensive Examples:** Add more examples for each implemented capability and feature.
 *   **[ ] Detailed Documentation:** Improve inline documentation and generate API docs.
+
+## Improve Discovery Error Handling
+
+- Consider logging a warning or providing a configurable option to throw an exception when the `discover` method in `Registry.php` encounters files that are skipped (e.g., non-class files, abstract classes, resources/tools missing required attributes). Currently, these are skipped silently.
