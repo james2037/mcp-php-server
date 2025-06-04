@@ -87,27 +87,80 @@ abstract class Registry
      */
     private function getClassFromFile(\SplFileInfo $file): string
     {
-        $contents = file_get_contents($file->getRealPath());
+        $filePath = $file->getRealPath();
+        if ($filePath === false) {
+            return ''; // File path could not be resolved.
+        }
+
+        $contents = file_get_contents($filePath);
         if ($contents === false) {
-            return ''; // Or throw exception
+            return ''; // Or throw specific exception
         }
 
+        $tokens = token_get_all($contents);
         $namespace = '';
-        $class = '';
+        $className = '';
+        $lookingForNamespace = false;
+        $lookingForClass = false;
 
-        if (preg_match('/namespace\s+([^;]+);/', $contents, $matches)) {
-            $namespace = $matches[1];
+        foreach ($tokens as $token) {
+            if (is_array($token)) {
+                switch ($token[0]) {
+                    case T_NAMESPACE:
+                        $lookingForNamespace = true;
+                        $lookingForClass = false; // Reset class search if namespace is redefined (though unusual)
+                        $namespace = ''; // Reset namespace
+                        break;
+                    case T_CLASS:
+                    case T_INTERFACE:
+                    case T_ENUM:
+                        if (!$lookingForNamespace) { // Class/Interface/Enum found before namespace or in global namespace
+                            $lookingForClass = true;
+                        }
+                        // If we were looking for namespace parts, finding a class keyword means namespace definition is over.
+                        // However, class could be part of a namespace name if not careful.
+                        // The T_NAME_QUALIFIED and T_STRING checks handle this.
+                        break;
+                    case T_STRING: // T_NAME_QUALIFIED for PHP 8+ qualified names, T_STRING for simple names
+                    case T_NAME_QUALIFIED:
+                        if ($lookingForNamespace) {
+                            $namespace .= $token[1];
+                        } elseif ($lookingForClass) {
+                            $className = $token[1];
+                            $lookingForClass = false; // Found the class name, stop looking for it.
+                                                     // We take the first one found as per original logic.
+                        }
+                        break;
+                    case T_WHITESPACE:
+                        // Ignore whitespace, but it can delimit parts of a namespace.
+                        // If building namespace and see whitespace, then next T_STRING is part of it.
+                        // If $namespace is not empty and last char is not \\, append \\ if next is T_STRING.
+                        if ($lookingForNamespace && !empty($namespace) && $namespace[strlen($namespace) - 1] !== '\\') {
+                             // This logic might be too simple for complex namespace names with whitespace.
+                             // Usually, T_NAME_QUALIFIED handles multi-part names.
+                        }
+                        break;
+                    // Other tokens like T_NS_SEPARATOR are handled by T_NAME_QUALIFIED or within T_STRING if it's a single backslash.
+                }
+            } elseif (is_string($token)) {
+                // Handle string tokens like ';', '{', '}' etc.
+                if ($token === ';' || $token === '{') {
+                    if ($lookingForNamespace) {
+                        $lookingForNamespace = false; // End of namespace statement
+                        $lookingForClass = true; // Start looking for class/interface/enum name
+                    }
+                }
+            }
         }
 
-        if (preg_match('/class\s+([^\s{]+)/', $contents, $matches)) {
-            $class = $matches[1];
+        if (empty($className)) {
+            return ''; // No class, interface, or enum name found
         }
 
-        if (empty($class)) {
-            return ''; // Or throw exception if class name is mandatory
-        }
+        // Trim leading/trailing backslashes from namespace if any, then ensure single backslash separator.
+        $namespace = trim($namespace, '\\');
 
-        return $namespace ? $namespace . '\\' . $class : $class;
+        return $namespace ? $namespace . '\\' . $className : $className;
     }
 
     /**
