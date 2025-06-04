@@ -10,12 +10,6 @@ use MCP\Server\Tool\Content\ContentItemInterface;
 
 class ValidationTestTool extends Tool
 {
-    #[Parameter(name: 'pInt', type: 'integer', description: 'An integer parameter')]
-    #[Parameter(name: 'pObj', type: 'object', description: 'An object parameter')]
-    #[Parameter(name: 'pAny', type: 'any', description: 'A parameter of any type')]
-    #[Parameter(name: 'pOptInt', type: 'integer', description: 'An optional integer parameter', required: false)]
-    #[Parameter(name: 'pOptObj', type: 'object', description: 'An optional object parameter', required: false)]
-    #[Parameter(name: 'pOptAny', type: 'any', description: 'An optional parameter of any type', required: false)]
     protected function doExecute(array $arguments): ContentItemInterface
     {
         $results = [];

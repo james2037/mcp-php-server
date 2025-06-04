@@ -626,4 +626,29 @@ class ToolTest extends TestCase
         $result = $tool->execute(['pInt' => 1, 'pObj' => new \stdClass(), 'pAny' => 'a']);
         $this->assertStringNotContainsString("pOptAny type", $result[0]['text']);
     }
+
+    public function testValidateTypeWithNullForNonAnyTypes(): void
+    {
+        $tool = new TestTool(); // Using TestTool, or any concrete Tool implementation
+        $reflectionMethod = new \ReflectionMethod(Tool::class, 'validateType');
+        $reflectionMethod->setAccessible(true);
+
+        $typesToTest = [
+            'string',
+            'number',
+            'integer',
+            'boolean',
+            'array',
+            'object',
+        ];
+
+        foreach ($typesToTest as $type) {
+            $isValid = $reflectionMethod->invoke($tool, null, $type);
+            $this->assertFalse($isValid, "validateType(null, '{$type}') should return false.");
+        }
+
+        // Also confirm 'any' type still accepts null
+        $isValidForAny = $reflectionMethod->invoke($tool, null, 'any');
+        $this->assertTrue($isValidForAny, "validateType(null, 'any') should return true.");
+    }
 }
