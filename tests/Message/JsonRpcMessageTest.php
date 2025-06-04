@@ -335,4 +335,28 @@ class JsonRpcMessageTest extends TestCase
         $this->expectExceptionMessage('Message is not a response or error, cannot convert to response array.');
         $message->toResponseArray();
     }
+
+    public function testFromJsonWithResultField(): void
+    {
+        $json = '{"jsonrpc":"2.0","result":{"data":"success"},"id":"res-123"}';
+        $message = JsonRpcMessage::fromJson($json);
+
+        $this->assertSame('res-123', $message->id);
+        $this->assertSame(['data' => 'success'], $message->result);
+        $this->assertSame('', $message->method);
+        $this->assertNull($message->params);
+        $this->assertNull($message->error);
+    }
+
+    public function testFromJsonWithErrorField(): void
+    {
+        $json = '{"jsonrpc":"2.0","error":{"code":-32600,"message":"Invalid Request"},"id":"err-456"}';
+        $message = JsonRpcMessage::fromJson($json);
+
+        $this->assertSame('err-456', $message->id);
+        $this->assertSame(['code' => -32600, 'message' => 'Invalid Request'], $message->error);
+        $this->assertSame('', $message->method);
+        $this->assertNull($message->params);
+        $this->assertNull($message->result);
+    }
 }
