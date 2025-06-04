@@ -203,72 +203,58 @@ class Server
         $responsePayload = null;
 
         try {
-            // HttpTransport->receive() returns array (decoded JSON) or throws TransportException.
-            // It ensures the payload is a valid JSON object or array of objects.
-            $rawPayload = $httpTransport->receive();
+            // HttpTransport::receive() now returns JsonRpcMessage[]|null|false or throws TransportException.
+            $messagesReceived = $httpTransport->receive();
+            $isBatchResponse = false; // Default: assume response is not a batch unless determined otherwise.
 
-            $responseMessages = [];
-            // HttpTransport's receive method ensures $rawPayload is either an associative array (single)
-            // or a non-empty list of associative arrays (batch).
-            $isBatchRequest = array_is_list($rawPayload);
+            if ($messagesReceived === false) {
+                // Transport validation failed (e.g., wrong HTTP method, wrong Content-Type).
+                $this->logMessage('error', 'HttpTransport->receive() returned false, request unsuitable.', 'Server.runHttpRequestCycle');
+                $responsePayload = JsonRpcMessage::error(JsonRpcMessage::INVALID_REQUEST, 'Invalid request (transport level error).', null);
+            } elseif ($messagesReceived === null) {
+                // Empty or whitespace-only body, parseMessages returned null.
+                $this->logMessage('error', 'HttpTransport->receive() returned null (empty request body).', 'Server.runHttpRequestCycle');
+                $responsePayload = JsonRpcMessage::error(JsonRpcMessage::INVALID_REQUEST, 'Request body was empty or contained only whitespace.', null);
+            } else {
+                // $messagesReceived is JsonRpcMessage[] (can be an empty array for "[]" batch from parseMessages)
+                $isBatchResponse = $httpTransport->lastRequestAppearedAsBatch();
+                $responseMessages = $this->processMessageBatch($messagesReceived); // Use the new helper
 
-            if ($isBatchRequest) {
-                foreach ($rawPayload as $rawMessage) {
-                    // $rawMessage is expected to be an associative array here.
-                    try {
-                        $messageJson = json_encode($rawMessage);
-                        if ($messageJson === false) {
-                            // This should be rare if $rawMessage is a valid array from json_decode
-                            throw new \RuntimeException("Failed to re-encode batch item for parsing.", JsonRpcMessage::PARSE_ERROR);
-                        }
-                        $message = JsonRpcMessage::fromJson($messageJson);
-                        $response = $this->processSingleMessage($message);
-                        if ($response) {
-                            $responseMessages[] = $response;
-                        }
-                    } catch (\Throwable $e) {
-                        $id = is_array($rawMessage) && array_key_exists('id', $rawMessage) ? $rawMessage['id'] : null;
-                        // Ensure ID is string or null for JsonRpcMessage::error
-                        $id = is_scalar($id) ? (string)$id : null;
-                        $responseMessages[] = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, "Error processing item in batch: " . $e->getMessage(), $id);
-                    }
-                }
-                $responsePayload = !empty($responseMessages) ? $responseMessages : null;
-            } else { // Single request (which is an associative array)
-                try {
-                    $messageJson = json_encode($rawPayload);
-                    if ($messageJson === false) {
-                        throw new \RuntimeException("Failed to re-encode single request for parsing.", JsonRpcMessage::PARSE_ERROR);
-                    }
-                    $message = JsonRpcMessage::fromJson($messageJson);
-                    $responsePayload = $this->processSingleMessage($message);
-                } catch (\Throwable $e) {
-                    $id = is_array($rawPayload) && array_key_exists('id', $rawPayload) ? $rawPayload['id'] : null;
-                    // Ensure ID is string or null for JsonRpcMessage::error
-                    $id = is_scalar($id) ? (string)$id : null;
-                    $errorCode = JsonRpcMessage::INTERNAL_ERROR; // Default
-                    if ($e instanceof \MCP\Server\Exception\MethodNotSupportedException) {
-                        $errorCode = JsonRpcMessage::METHOD_NOT_FOUND;
-                    } elseif ($e instanceof \MCP\Server\Exception\InvalidRequestException) {
-                        $errorCode = JsonRpcMessage::INVALID_REQUEST;
-                    } elseif ($e instanceof \MCP\Server\Exception\InvalidParamsException) {
-                        $errorCode = JsonRpcMessage::INVALID_PARAMS;
-                    } elseif ($e instanceof \RuntimeException && $e->getCode() !== 0 && is_int($e->getCode())) {
-                        $errorCode = $e->getCode();
-                    }
-                    $responsePayload = JsonRpcMessage::error($errorCode, "Error processing request: " . $e->getMessage(), $id);
+                if ($isBatchResponse) {
+                    // For a batch request, always respond with an array of responses.
+                    // $responseMessages is already JsonRpcMessage[] from processMessageBatch.
+                    // If all were notifications, $responseMessages will be empty, resulting in "[]" response.
+                    $responsePayload = $responseMessages;
+                } elseif (!empty($responseMessages)) {
+                    // Single request that yielded a response.
+                    $responsePayload = $responseMessages[0];
+                } else {
+                    // Single request that was a notification (no response generated),
+                    // or an empty batch "[]" that didn't appear as a batch (edge case, defensive).
+                    // $responsePayload remains null.
+                    $responsePayload = null;
                 }
             }
         } catch (TransportException $e) {
             $this->logMessage('error', 'TransportException in HTTP cycle: ' . $e->getMessage(), 'Server.runHttpRequestCycle', ['code' => $e->getCode()]);
             $errorCode = (is_int($e->getCode()) && $e->getCode() !== 0) ? $e->getCode() : JsonRpcMessage::INTERNAL_ERROR;
-            $responsePayload = JsonRpcMessage::error($errorCode, $e->getMessage(), null); // ID is null for transport errors not tied to a specific request ID
+            $responsePayload = JsonRpcMessage::error($errorCode, $e->getMessage(), null);
+            $isBatchResponse = false; // Not a batch response in case of these transport errors before processing
         } catch (\Throwable $e) { // Catchall for unexpected errors
             $this->logMessage('critical', "Critical Server Error in HTTP cycle: " . $e->getMessage(), 'Server.runHttpRequestCycle', ['trace' => $e->getTraceAsString()]);
-            $responsePayload = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Internal server error.', null); // ID is null
+            $responsePayload = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Internal server error.', null);
+            $isBatchResponse = false; // Not a batch response for critical internal errors
         }
 
-        $httpTransport->send($responsePayload); // $responsePayload could be single JsonRpcMessage or array of them, or null for no response
+        // Only call send if there's a non-null payload OR if it's a batch response (which might be an empty array for all-notification batches).
+        if ($responsePayload !== null || $isBatchResponse) {
+             /** @var JsonRpcMessage|JsonRpcMessage[] $responsePayload PHPStan type hint */
+            // If $isBatchResponse is true, $responsePayload is guaranteed to be an array (possibly empty from processMessageBatch).
+            // If $responsePayload is not null and $isBatchResponse is false, it's a JsonRpcMessage.
+            $httpTransport->send($responsePayload);
+        }
+        // If $responsePayload is null AND $isBatchResponse is false (e.g. single notification), send() is not called.
+        // HttpTransport->getResponse() will then provide a default (e.g. HTTP 204 or empty 200).
         $httpResponse = $httpTransport->getResponse(); // This will always return a ResponseInterface
 
         if (!headers_sent()) {
@@ -293,6 +279,32 @@ class Server
         }
     }
 
+    /**
+     * Processes a batch of received JsonRpcMessage objects.
+     *
+     * @param JsonRpcMessage[] $receivedMessages An array of messages to process.
+     *                                           This array can be empty if an empty batch "[]" was received.
+     * @return JsonRpcMessage[] An array of response messages. Empty if all messages were notifications or errors for notifications.
+     */
+    private function processMessageBatch(array $receivedMessages): array
+    {
+        $responseMessages = [];
+        if (empty($receivedMessages)) {
+            // If an empty batch "[]" was received and parsed by AbstractTransport::parseMessages,
+            // $receivedMessages will be an empty array. No processing needed.
+            return [];
+        }
+
+        foreach ($receivedMessages as $currentMessage) {
+            // Type safety: $currentMessage should already be JsonRpcMessage
+            // due to the return type of AbstractTransport::parseMessages.
+            $response = $this->processSingleMessage($currentMessage);
+            if ($response) {
+                $responseMessages[] = $response;
+            }
+        }
+        return $responseMessages;
+    }
 
     /**
      * Shuts down the server and its capabilities.

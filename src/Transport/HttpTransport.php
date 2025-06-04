@@ -31,6 +31,8 @@ class HttpTransport extends AbstractTransport
     private ?ResponseInterface $response = null;
     /** @var bool Flag to track if the send() method has been called and the response is ready. */
     private bool $responsePrepared = false; // To track if send() has been called
+    /** @var bool Flag to indicate if the last received request body appeared to be a batch. */
+    private bool $lastRequestAppearedBatch = false;
 
     /** @var ServerRequestInterface The current PSR-7 server request. */
     protected ServerRequestInterface $request;
@@ -66,164 +68,137 @@ class HttpTransport extends AbstractTransport
      * Receives and decodes the JSON-RPC request payload from the HTTP request.
      *
      * Expects a POST request with 'application/json' Content-Type.
-     * Validates the JSON structure (must be a JSON object or an array of JSON objects).
-     * This method does not parse into JsonRpcMessage objects itself but returns the
-     * raw associative array(s) decoded from the JSON payload.
+     * Validates the HTTP request and uses `parseMessages` to process the body.
      *
-     * @return array<int|string, mixed> Returns an associative array for a single JSON-RPC request,
-     *               or a list of associative arrays for a batch request.
-     * @throws TransportException If the request method is not POST, Content-Type is not JSON,
-     *                            the body is empty, JSON is malformed, or the JSON structure
-     *                            is not a valid JSON-RPC request object or batch.
+     * @return JsonRpcMessage[]|null|false An array of `JsonRpcMessage` objects if successful,
+     *                                     `null` if the request body is effectively empty (after trim),
+     *                                     or `false` if critical HTTP validation (method, Content-Type) fails.
+     * @throws TransportException If `parseMessages()` encounters an error (e.g., malformed JSON,
+     *                            invalid JSON-RPC structure, message too large), this exception will propagate.
      */
-    public function receive(): array
+    public function receive(): array|null|false
     {
         if ($this->request->getMethod() !== 'POST') {
-            throw new TransportException('Only POST requests are supported.', JsonRpcMessage::INVALID_REQUEST);
+            $this->log('HttpTransport::receive: Invalid request method: ' . $this->request->getMethod());
+            // Optionally set a specific error response here if desired,
+            // but returning false signals transport-level unsuitability for this request.
+            // The Server should ideally handle this by not attempting to process further with this transport.
+            // If a response is desired, it should be a 405 Method Not Allowed.
+            // For now, stick to `false` as per subtask interpretation.
+            return false;
         }
 
         $contentType = $this->request->getHeaderLine('Content-Type');
-        if (stripos($contentType, 'application/json') === false) {
-            throw new TransportException('Content-Type must be application/json.', JsonRpcMessage::INVALID_REQUEST);
+        if (stripos($contentType, 'application/json') === false && stripos($contentType, 'application/json-rpc') === false) {
+            $this->log('HttpTransport::receive: Invalid Content-Type: ' . $contentType);
+            // Similar to above, returning false. Server might produce a 415 Unsupported Media Type.
+            return false;
         }
 
         $body = (string) $this->request->getBody();
-        if (empty($body)) {
-            throw new TransportException('Request body cannot be empty for JSON-RPC POST.', JsonRpcMessage::INVALID_REQUEST);
+        // $this->request->getBody()->rewind(); // Ensure stream can be re-read if necessary
+
+        // Determine if the raw body string looks like a batch before parsing
+        $trimmedBody = trim($body);
+        if (str_starts_with($trimmedBody, '[') && str_ends_with($trimmedBody, ']')) {
+            $this->lastRequestAppearedBatch = true;
+        } else {
+            $this->lastRequestAppearedBatch = false;
         }
 
+        // `parseMessages` handles empty body (after trim) by returning null.
+        // It also handles JSON parsing errors and structure validation by throwing TransportException.
         try {
-            $parsedBody = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-
-            // Basic validation for JSON-RPC structure (object or array of objects).
-            // json_decode($body, true) turns JSON objects into associative arrays.
-            $isAssocArray = function (array $arr): bool {
-                // An empty array is not an associative array in JSON-RPC object context.
-                // An associative array has string keys or non-sequential integer keys.
-                // array_is_list() checks for sequential, 0-indexed integer keys.
-                // So, if it's not a list, it's considered associative for this check.
-                return !empty($arr) && !array_is_list($arr);
-            };
-
-            $isValidStructure = false;
-            if (is_array($parsedBody)) {
-                if (array_is_list($parsedBody)) { // Potential Batch
-                    if (!empty($parsedBody)) { // Batch array cannot be empty itself
-                        $allBatchItemsValid = true;
-                        foreach ($parsedBody as $item) {
-                            if (!is_array($item) || !$isAssocArray($item)) { // Each item must be a non-empty associative array
-                                $allBatchItemsValid = false;
-                                break;
-                            }
-                        }
-                        if ($allBatchItemsValid) {
-                            $isValidStructure = true;
-                        }
-                    }
-                } elseif ($isAssocArray($parsedBody)) { // Single request (must be a non-empty associative array)
-                    $isValidStructure = true;
-                }
-            }
-
-            if (!$isValidStructure) {
-                 throw new TransportException('Invalid JSON-RPC: Request must be a JSON object or an array of JSON objects.', JsonRpcMessage::INVALID_REQUEST);
-            }
-
-            // $this->clientRequestWasAckOnly logic removed.
-            // The JsonRpcMessage parsing (fromJson, fromJsonArray) is removed from transport.
-            // Transport returns the raw associative array(s).
-            return $parsedBody;
-        } catch (\JsonException $e) {
-            throw new TransportException('JSON Parse Error: ' . $e->getMessage(), JsonRpcMessage::PARSE_ERROR, $e);
+            return $this->parseMessages($body); // $body is untrimmed, parseMessages will trim
+        } catch (TransportException $e) {
+            // Log the exception and let it propagate.
+            $this->log("TransportException in HttpTransport::receive while calling parseMessages: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+            throw $e;
         }
-        // Removed: catch (\Exception $e) for JsonRpcMessage parsing, as it's no longer done here.
+    }
+
+    /**
+     * Checks if the last request received by this transport appeared to be a batch request
+     * based on its raw structure (e.g., starting with '[' and ending with ']').
+     *
+     * Note: This is a heuristic based on the raw body. `parseMessages` might still return
+     * a single message if the batch array was empty or contained only one valid message after parsing.
+     *
+     * @return bool True if the last request body looked like a batch, false otherwise.
+     */
+    public function lastRequestAppearedAsBatch(): bool
+    {
+        return $this->lastRequestAppearedBatch;
     }
 
     /**
      * Prepares the PSR-7 response with the JSON-RPC payload.
      *
-     * This method takes a single JsonRpcMessage, an array of JsonRpcMessages (for batch),
-     * or a pre-formatted payload array, encodes it to a JSON string, and sets it
-     * as the body of the PSR-7 response object. The response is typically a 200 OK,
-     * or a 500 Internal Server Error if encoding fails.
+     * This method takes a single JsonRpcMessage or an array of JsonRpcMessages (for batch),
+     * encodes it to a JSON string, and sets it as the body of the PSR-7 response object.
+     * The response is typically a 200 OK, or a 500 Internal Server Error if encoding/serialization fails.
      *
-     * @param JsonRpcMessage|array<mixed>|null $messageOrPayload The message(s) or pre-formatted payload to send.
-     *        If JsonRpcMessage, it will be serialized. If array, it's assumed to be a batch
-     *        of JsonRpcMessage objects or a ready-to-encode payload. Null means no specific
-     *        payload (though usually an error or empty response would be structured).
+     * @param JsonRpcMessage|JsonRpcMessage[] $messageOrPayload The message or array of messages to send.
+     *        If JsonRpcMessage, it will be serialized using its `toJson()` method.
+     *        If array (of JsonRpcMessage), it is serialized using `JsonRpcMessage::toJsonArray()`.
      */
-    public function send(JsonRpcMessage|array|null $messageOrPayload): void
+    public function send(JsonRpcMessage|array $messageOrPayload): void
     {
-        // SSE, GET/DELETE, Origin validation, and complex ack-only (202) logic is removed.
-        // This method now only prepares a standard JSON-RPC response for POST requests.
+        // Adhering to TransportInterface: send(JsonRpcMessage|array $message)
+        // The prompt suggested send(array $messages) but this would break the interface.
+        // We will internally assume if $messageOrPayload is an array, it's JsonRpcMessage[].
 
-        $payloadToEncode = null;
+        $jsonPayloadString = '';
 
-        if ($messageOrPayload instanceof JsonRpcMessage) {
-            // If JsonRpcMessage implements JsonSerializable, json_encode will call jsonSerialize()
-            $payloadToEncode = $messageOrPayload;
-        } elseif (is_array($messageOrPayload)) {
-            // Handles an array of JsonRpcMessage objects or a pre-formatted payload array.
-            // If all elements are JsonRpcMessage, they will be serialized by json_encode.
-            // If it's a plain array (e.g. batch response), it's used as is.
-            $payloadToEncode = $messageOrPayload;
-        } elseif ($messageOrPayload === null) {
-            // If payload is null, an empty JSON response might be intended (e.g. "[]" for empty batch, or "" which becomes "null").
-            // For JSON-RPC, a response to a request usually has 'result' or 'error'.
-            // A notification expects no response. If this is for a request expecting a response,
-            // it might result in a parsing error on the client if it's not valid JSON-RPC (e.g. just "null").
-            // For now, allow encoding null, which results in JSON "null".
-            $payloadToEncode = null;
-        } else {
-            // Should not be reached due to type hints. Internal error if it does.
-            // Prepare a JSON-RPC error response.
-            $errorPayload = [
-                'jsonrpc' => '2.0',
-                'error' => [
-                    'code' => JsonRpcMessage::INTERNAL_ERROR,
-                    'message' => 'Server error: Invalid message type for sending.'
-                ],
-                'id' => null
-            ];
-            $encodedErrorString = json_encode($errorPayload);
+        try {
+            if ($messageOrPayload instanceof JsonRpcMessage) {
+                $jsonPayloadString = $messageOrPayload->toJson();
+            } elseif (is_array($messageOrPayload)) {
+                // Assumed to be JsonRpcMessage[] as per intent.
+                // JsonRpcMessage::toJsonArray will validate this.
+                // If $messageOrPayload is an empty array, toJsonArray([]) returns "[]".
+                $jsonPayloadString = JsonRpcMessage::toJsonArray($messageOrPayload);
+            } else {
+                // This case should not be reached if called correctly according to type hint.
+                // However, if it was, create a JSON-RPC error.
+                $errorMsg = JsonRpcMessage::error(
+                    JsonRpcMessage::INTERNAL_ERROR,
+                    'Server error: Invalid message type for sending.',
+                    null // No ID available
+                );
+                $jsonPayloadString = $errorMsg->toJson();
+                $this->response = $this->responseFactory->createResponse(500)
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withBody($this->streamFactory->createStream($jsonPayloadString));
+                $this->responsePrepared = true;
+                $this->log('HttpTransport::send: Invalid message type provided.');
+                return;
+            }
+        } catch (\Exception $e) {
+            // Catch exceptions during toJson() or toJsonArray() (e.g., InvalidArgumentException from toJsonArray)
+            $this->log('HttpTransport::send: Error during message serialization: ' . $e->getMessage());
+            $errorMsg = JsonRpcMessage::error(
+                JsonRpcMessage::INTERNAL_ERROR,
+                'Server error: Failed to serialize JSON response.',
+                null // ID is difficult to determine reliably here.
+            );
+            $jsonPayloadString = $errorMsg->toJson(); // This should be safe.
             $this->response = $this->responseFactory->createResponse(500)
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($encodedErrorString !== false ? $encodedErrorString : '{"jsonrpc":"2.0","error":{"code":-32000,"message":"Server JSON encoding error"}}'));
+                ->withBody($this->streamFactory->createStream($jsonPayloadString));
             $this->responsePrepared = true;
             return;
         }
 
-        $jsonPayloadString = json_encode($payloadToEncode);
+        // At this point, $jsonPayloadString is successfully created.
+        // Default HTTP status 200. Specific error statuses (e.g. 400, 500 for JSON-RPC errors)
+        // are typically embedded in the JsonRpcMessage error object, not as HTTP status codes,
+        // unless the error is at the HTTP transport level itself.
+        $this->response = $this->responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->withBody($this->streamFactory->createStream($jsonPayloadString));
 
-        if ($jsonPayloadString === false) {
-            // JSON encoding failed. Prepare a standard JSON-RPC error.
-            $errorPayload = [
-                'jsonrpc' => '2.0',
-                'error' => [
-                    'code' => JsonRpcMessage::INTERNAL_ERROR,
-                    'message' => 'Server error: Failed to encode JSON response: ' . json_last_error_msg()
-                ],
-                'id' => null // ID is difficult to determine reliably at this stage for a failed batch.
-            ];
-            $encodedErrorString = json_encode($errorPayload); // This should not fail.
-            $this->response = $this->responseFactory->createResponse(500)
-                ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($encodedErrorString !== false ? $encodedErrorString : '{"jsonrpc":"2.0","error":{"code":-32000,"message":"Server JSON encoding error"}}'));
-        } else {
-            // Original behavior: always return 200 OK if JSON encoding is successful
-            $httpStatus = 200;
-            // The check for ($payloadToEncode instanceof JsonRpcMessage && $payloadToEncode->error !== null)
-            // was part of the detailed status code mapping. If we revert to always 200 (or 500 on encode failure),
-            // this specific check isn't strictly needed here for status determination but can be kept for clarity
-            // if we want to log errors, etc. For minimal change from "original" simple 200/500, it's not used to change status.
-
-            $this->response = $this->responseFactory->createResponse($httpStatus)
-                ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($jsonPayloadString));
-        }
         $this->responsePrepared = true;
-        // The response is stored in $this->response and will be retrieved by getResponse().
-        // No direct output or header manipulation here.
     }
 
     /**

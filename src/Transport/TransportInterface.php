@@ -26,19 +26,19 @@ interface TransportInterface
      * - If no message is currently available but the transport is still open
      *   (e.g., non-blocking read with no data), it should return `null`.
      * - If the transport is definitively closed (e.g., EOF on STDIN, HTTP connection ended
-     *   before full message), it should return an empty array `[]`.
+     *   before full message), it should return `false`.
      *
      * Implementations are responsible for handling framing, decoding, and basic structural
      * validation of incoming messages.
      *
-     * @return JsonRpcMessage[]|null An array of JsonRpcMessage objects,
-     *                               null if no message is currently available,
-     *                               or an empty array if the transport is closed.
+     * @return JsonRpcMessage[]|null|false An array of JsonRpcMessage objects,
+     *                                     null if no message is currently available,
+     *                                     or false if the transport is closed.
      * @throws \MCP\Server\Exception\TransportException For critical transport errors
      *         (e.g., connection lost mid-message, unrecoverable framing issues).
      * @throws \RuntimeException For errors like JSON parsing failures if handled within receive.
      */
-    public function receive(): ?array;
+    public function receive(): array|null|false;
 
     /**
      * Sends a single JSON-RPC message or an array of JSON-RPC messages through the transport.

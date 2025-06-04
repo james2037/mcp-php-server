@@ -536,32 +536,27 @@ class ServerTest extends TestCase
 
         // Scenario 5: TransportException set explicitly to be thrown by receive()
         $transportExceptionId = 'tex_http_' . uniqid();
-        $someValidPayload = ['jsonrpc' => '2.0', 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-03-26'], 'id' => $transportExceptionId];
-        $mockRequestForTransportException = $this->createMockRequest($someValidPayload);
-        $httpTransport->setMockRequest($mockRequestForTransportException);
-        $customTransportException = new TransportException("Custom transport error", 12345);
-        $httpTransport->setExceptionToThrowOnReceive($customTransportException);
+        // Scenario 5: TransportException due to malformed JSON
+        $malformedJsonRequestId = 'malformed_json_http_' . uniqid(); // ID won't actually be parsed
+        $malformedJsonPayload = '{"jsonrpc": "2.0", "method": "test", "id": "' . $malformedJsonRequestId . '"'; // Intentionally malformed
 
-        $server->run();
-        $capturedCustomErrorResponse = $httpTransport->getCapturedResponse();
-        $this->assertNotNull($capturedCustomErrorResponse);
-        // The status code will depend on how HttpTransport maps generic TransportException codes.
-        // If the code is non-standard JSON-RPC, it might default to 500 or use the code if it's a valid HTTP code.
-        // Server::runHttpRequestCycle catches TransportException and uses its code for JsonRpcMessage::error
-        // HttpTransport then maps this JsonRpcMessage error code to an HTTP status.
-        // If TransportException code 12345 is used in JsonRpcMessage, and it's not a standard one,
-        // JsonRpcMessage::error would make it the error code.
-        // HttpTransport now sends JSON-RPC errors with HTTP 200
-        $this->assertEquals(200, $capturedCustomErrorResponse->getStatusCode());
-        $customErrorBody = json_decode((string) $capturedCustomErrorResponse->getBody(), true);
-        self::assertIsArray($customErrorBody); // Ensure $customErrorBody is an array
-        $this->assertNull($customErrorBody['id']); // ID might be lost if error happens before parsing ID.
-                                                 // Server.php L203 tries to get ID from raw payload for general errors.
-                                                 // TransportException happens before this, so ID is null.
-        $this->assertArrayHasKey('error', $customErrorBody);
-        self::assertIsArray($customErrorBody['error']);
-        $this->assertEquals(12345, $customErrorBody['error']['code']);
-        $this->assertEquals("Custom transport error", $customErrorBody['error']['message']);
+        // Use createMockRequest to set up the request with malformed JSON body
+        $mockRequestWithMalformedJson = $this->createMockRequest($malformedJsonPayload);
+        $httpTransport->setMockRequest($mockRequestWithMalformedJson);
+
+        $server->run(); // Server should catch TransportException and create a JSON-RPC error response
+
+        $capturedErrorResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedErrorResponse);
+        $this->assertEquals(200, $capturedErrorResponse->getStatusCode(), "HTTP status for parse error should be 200.");
+
+        $errorBody = json_decode((string) $capturedErrorResponse->getBody(), true);
+        $this->assertIsArray($errorBody, "Error response body should be a JSON array.");
+        $this->assertNull($errorBody['id'], "ID should be null for a parse error before ID extraction.");
+        $this->assertArrayHasKey('error', $errorBody, "Error response should contain an 'error' object.");
+        $this->assertIsArray($errorBody['error'], "The 'error' field should be an array.");
+        $this->assertEquals(JsonRpcMessage::PARSE_ERROR, $errorBody['error']['code'], "JSON-RPC error code should be PARSE_ERROR.");
+        $this->assertStringContainsStringIgnoringCase("Failed to decode JSON", $errorBody['error']['message'], "Error message should indicate JSON decoding failure.");
     }
 
     public function testInitializeAndToolCallInSameStream(): void

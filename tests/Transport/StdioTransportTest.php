@@ -61,59 +61,64 @@ class StdioTransportTest extends TestCase
         $this->assertEmpty($messages);
     }
 
-    public function testReceiveInvalidJsonThrowsException(): void // Renamed and Updated
+    public function testReceiveInvalidJsonThrowsTransportException(): void
     {
         $this->transport->writeToInput('{"invalidjson');
-        $this->expectException(\RuntimeException::class);
-        // StdioTransport::receive catches JsonException and re-throws RuntimeException with code PARSE_ERROR
+        $this->expectException(\MCP\Server\Exception\TransportException::class);
         $this->expectExceptionCode(JsonRpcMessage::PARSE_ERROR);
+        $this->expectExceptionMessageMatches('/Failed to decode JSON/');
         $this->transport->receive();
     }
 
-    public function testReceiveEmptyLineReturnsNull(): void // Renamed and Updated
+    public function testReceiveEmptyLineReturnsNull(): void
     {
-        $this->transport->writeToInput(''); // Empty line, but still a line
+        // TestableStdioTransport->writeToInput adds a newline.
+        // fgets will read this newline. parseMessages will trim it.
+        // trim("\n") is empty, so parseMessages returns null.
+        $this->transport->writeToInput('');
         $receivedMessages = $this->transport->receive();
-        $this->assertNull($receivedMessages); // As per StdioTransport logic for empty line
+        $this->assertNull($receivedMessages);
     }
 
-    public function testReceiveStreamClosedReturnsEmptyArray(): void // Revised logic for EOF
+    public function testReceiveStreamClosedReturnsFalse(): void
     {
         // Write one line
         $this->transport->writeToInput('{"jsonrpc":"2.0","method":"ping","id":1}');
         // Consume that one line
         $firstResult = $this->transport->receive();
-        $this->assertNotNull($firstResult);
-        if ($firstResult !== null) { // Check to satisfy static analyzer
+        $this->assertNotNull($firstResult, "First receive() call should return a message or null, not false EOF yet.");
+        if (is_array($firstResult)) { // Ensure it's an array before counting
              $this->assertCount(1, $firstResult);
+        } else {
+            // If it's not an array here, it might be null (empty line), which is unexpected for this specific test input.
+            // Or it could be false if the stream was already at EOF, also unexpected here.
+            // Fail if it's not an array, as this test expects a valid message first.
+            $this->fail("Expected an array of messages from the first receive() call, got " . gettype($firstResult));
         }
 
         // Now try to receive again, fgets should return false as no more data
         $messages = $this->transport->receive();
-        $this->assertIsArray($messages);
-        $this->assertEmpty($messages);
+        $this->assertFalse($messages);
     }
 
-    public function testReceiveInvalidJsonStructureThrowsException(): void
+    public function testReceiveInvalidJsonStructureThrowsTransportException(): void
     {
         $this->transport->writeToInput('"just a string"'); // A JSON scalar
-        $this->expectException(\RuntimeException::class);
-        // This specific message comes from the generic catch (\Exception $e) block
-        // that re-throws the initially thrown "Invalid JSON-RPC message structure." exception.
-        $this->expectExceptionMessage('Error parsing JSON-RPC message: Invalid JSON-RPC message structure.');
-        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST); // Code from the generic catch block
+        $this->expectException(\MCP\Server\Exception\TransportException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        $this->expectExceptionMessageMatches('/Decoded JSON is not an array or object/');
         $this->transport->receive();
     }
 
-    public function testReceiveCatchesExceptionFromJsonRpcMessage(): void
+    public function testReceiveInvalidRpcStructureThrowsTransportException(): void
     {
         // This JSON is an object but is missing the 'method' field,
-        // which JsonRpcMessage::fromJson() will throw an error for.
+        // which JsonRpcMessage::fromJson() will throw an error for (via parseMessages).
         $this->transport->writeToInput('{"jsonrpc": "2.0", "id": 1}');
-        $this->expectException(\RuntimeException::class);
-        // This message comes from the generic catch (\Exception $e) block
-        // re-throwing the exception from JsonRpcMessage::fromJson().
-        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST); // Code from the generic catch block
+        $this->expectException(\MCP\Server\Exception\TransportException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        // Message will be something like "Error parsing single message: Missing or invalid method name..."
+        $this->expectExceptionMessageMatches('/Error parsing single message: Missing or invalid method name in JSON-RPC request/');
         $this->transport->receive();
     }
 

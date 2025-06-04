@@ -16,109 +16,54 @@ use Laminas\Diactoros\ServerRequestFactory;
 class TestableHttpTransport extends HttpTransport
 {
     private ?ServerRequestInterface $mockRequest = null;
-    private ?\Throwable $exceptionToThrowOnReceive = null;
+    // Removed: private ?\Throwable $exceptionToThrowOnReceive = null;
 
     public function __construct(
         ?ResponseFactoryInterface $responseFactory = null,
-        ?StreamFactoryInterface $streamFactory = null
+        ?StreamFactoryInterface $streamFactory = null,
+        // Allow injecting the initial mock request directly via constructor for convenience
+        ?ServerRequestInterface $initialMockRequest = null
     ) {
-        // Pass null for the request. The parent HttpTransport will default to fromGlobals(),
-        // but TestableHttpTransport::getRequest() overrides to use the mock request.
-        // Factories are passed through; if null, parent HttpTransport creates defaults.
-        parent::__construct($responseFactory, $streamFactory, null);
+        // HttpTransport's constructor expects a ServerRequestInterface or null.
+        // We pass the $initialMockRequest here. If it's null, HttpTransport creates one from globals.
+        // Our getRequest() override will ensure this mock is used if set later via setMockRequest.
+        parent::__construct($responseFactory, $streamFactory, $initialMockRequest);
+        if ($initialMockRequest !== null) {
+            $this->mockRequest = $initialMockRequest;
+            // Ensure the protected $this->request in HttpTransport is also set.
+            $this->request = $initialMockRequest;
+        }
     }
 
-    // This is the primary way to inject the request for the test.
+    // This is the primary way to inject or update the request for the test.
     public function setMockRequest(ServerRequestInterface $request): void
     {
         $this->mockRequest = $request;
-        // Also update the internal $this->request property of AbstractTransport
-        // so that if any parent method relies on $this->request directly, it's set.
-        // And so that our getRequest() override below can also set it if needed.
+        // Update the protected $this->request in HttpTransport.
         $this->request = $this->mockRequest;
     }
 
-    public function setExceptionToThrowOnReceive(\Throwable $e): void
-    {
-        $this->exceptionToThrowOnReceive = $e;
-    }
+    // Removed: public function setExceptionToThrowOnReceive(\Throwable $e)
 
     /**
      * Override getRequest to ensure our mock request is used by receive().
-     * The receive() method (whether parent's or overridden) will call getRequest().
+     * HttpTransport::receive() calls $this->request. This method ensures $this->request is our mock.
+     * Note: HttpTransport::receive() itself uses $this->request directly, not $this->getRequest().
+     * The constructor and setMockRequest now directly set $this->request (protected in parent).
+     * This method is more of a conceptual override if there were other places getRequest() was used.
+     * For direct testing of HttpTransport::receive(), setting $this->request via setMockRequest is key.
      */
-    public function getRequest(): ServerRequestInterface
-    {
-        if ($this->mockRequest !== null) {
-            // Ensure the parent's $this->request is also updated if it hasn't been.
-            if ($this->request !== $this->mockRequest) {
-                $this->request = $this->mockRequest;
-            }
-            return $this->mockRequest;
-        }
-        // If no mock request is set, and we are in a test environment,
-        // calling parent::getRequest() could lead to errors if it tries to access SAPI globals.
-        throw new \LogicException('Mock request not set in TestableHttpTransport. Call setMockRequest() before receive() is triggered.');
-    }
+    // public function getRequest(): ServerRequestInterface // This override might not be strictly necessary
+    // {
+    //     if ($this->mockRequest !== null) {
+    //         return $this->mockRequest;
+    //     }
+    //     // Fallback to parent or error if not set, though HttpTransport sets $this->request in constructor.
+    //     return parent::getRequest(); // Or throw if always expect mock to be set.
+    // }
 
-    /**
-     * Override receive to use the mock request's body or throw a predefined exception.
-     * This method is called by Server::runHttpRequestCycle().
-     * @return array<int|string, mixed>
-     */
-    public function receive(): array
-    {
-        if ($this->exceptionToThrowOnReceive !== null) {
-            $e = $this->exceptionToThrowOnReceive;
-            $this->exceptionToThrowOnReceive = null; // Clear after use to prevent re-throwing
-            throw $e;
-        }
-
-        // Our overridden getRequest() will be called here.
-        $currentRequest = $this->getRequest();
-        $body = $currentRequest->getBody();
-        $body->rewind(); // Ensure reading from the start of the stream
-        $contents = $body->getContents();
-
-        if (empty($contents)) {
-            throw new TransportException('Request body is empty.', \MCP\Server\Message\JsonRpcMessage::INVALID_REQUEST);
-        }
-
-        $decoded = json_decode($contents, true);
-
-        // Check for JSON decoding errors
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new TransportException('JSON decode error: ' . json_last_error_msg(), JsonRpcMessage::PARSE_ERROR);
-        }
-
-        // Validate the basic structure of the decoded JSON for JSON-RPC
-        if (!is_array($decoded)) {
-            // Must be a JSON object (associative array) or array of objects (numerically indexed array for batch)
-            throw new TransportException('Invalid JSON payload: expected JSON object or array of objects.', JsonRpcMessage::INVALID_REQUEST);
-        }
-
-        $isBatch = array_is_list($decoded);
-        if ($isBatch) { // Batch request
-            if (empty($decoded)) { // Batch array cannot be empty
-                throw new TransportException('Invalid JSON-RPC batch: Batch array cannot be empty.', JsonRpcMessage::INVALID_REQUEST);
-            }
-            foreach ($decoded as $item) {
-                // Each item in a batch must be a JSON object (associative array)
-                if (!is_array($item) || array_is_list($item)) {
-                    throw new TransportException('Invalid JSON-RPC batch: All items in batch must be JSON objects.', JsonRpcMessage::INVALID_REQUEST);
-                }
-            }
-        } else { // Single request (must be an associative array/JSON object)
-            // If $decoded is an empty array [], it means the JSON was "{}"
-            // This is an empty object, which is not a valid JSON-RPC request.
-            if (empty($decoded)) {
-                throw new TransportException('Invalid JSON-RPC request: Request object cannot be empty.', JsonRpcMessage::INVALID_REQUEST);
-            }
-        }
-
-        // The Server will further validate 'jsonrpc', 'method', 'params', 'id' fields.
-        return $decoded;
-    }
+    // Removed: public function receive(): array
+    // We want to test HttpTransport::receive(), not override it here.
 
     /**
      * After the Server calls send() (which is the parent HttpTransport::send()),
