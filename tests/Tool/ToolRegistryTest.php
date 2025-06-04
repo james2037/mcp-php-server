@@ -7,6 +7,8 @@ use MCP\Server\Tool\Tool;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use PHPUnit\Framework\TestCase;
+use MCP\Server\Tests\Tool\Helpers\AbstractTestTool;
+use MCP\Server\Tests\Tool\Helpers\NoAttributeTool;
 
 // MockTool and OtherMockTool are now in separate files.
 
@@ -253,5 +255,54 @@ class ToolRegistryTest extends TestCase
             }
             rmdir($skipTestDir);
         }
+    }
+
+    public function testCreateFromReflectionWithNonToolClasses(): void
+    {
+        $registry = new class () extends ToolRegistry {
+            // Expose protected method for testing
+            /**
+             * @param \ReflectionClass<object> $reflection
+             * @param array<string, mixed> $config
+             * @return Tool|null
+             */
+            public function callCreateFromReflection(\ReflectionClass $reflection, array $config = []): ?Tool
+            {
+                return $this->createFromReflection($reflection, $config);
+            }
+        };
+
+        // Test with the Tool class itself (has ToolAttribute but is not a SUBCLASS of Tool, it IS Tool)
+        // and is abstract, so not instantiable.
+        $reflectionTool = new \ReflectionClass(Tool::class);
+        $this->assertNull($registry->callCreateFromReflection($reflectionTool), "createFromReflection should return null for Tool class itself.");
+
+        // Test with a class that is not a subclass of Tool and does not have ToolAttribute
+        $reflectionStdClass = new \ReflectionClass(\stdClass::class);
+        $this->assertNull($registry->callCreateFromReflection($reflectionStdClass), "createFromReflection should return null for a class not subclassing Tool and without ToolAttribute.");
+
+        // Test with an abstract subclass of Tool (has ToolAttribute but not instantiable)
+        $abstractToolReflection = new \ReflectionClass(AbstractTestTool::class);
+        $this->assertNull($registry->callCreateFromReflection($abstractToolReflection), "createFromReflection should return null for an abstract tool, even with ToolAttribute.");
+
+        // Test with a concrete class that *is* a subclass of Tool but lacks the ToolAttribute
+        $reflectionNoAttributeTool = new \ReflectionClass(NoAttributeTool::class);
+        $this->assertNull($registry->callCreateFromReflection($reflectionNoAttributeTool), "createFromReflection should return null for a Tool subclass without ToolAttribute.");
+    }
+
+    public function testGetItemKeyThrowsExceptionForNonTool(): void
+    {
+        $registry = new class () extends ToolRegistry {
+            // Expose protected method for testing
+            public function callGetItemKey(object $item): string
+            {
+                return $this->getItemKey($item);
+            }
+        };
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Item must be an instance of ' . Tool::class);
+
+        $registry->callGetItemKey(new \stdClass());
     }
 }

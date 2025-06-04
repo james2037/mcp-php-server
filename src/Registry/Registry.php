@@ -67,6 +67,17 @@ abstract class Registry
     }
 
     /**
+     * Retrieves a single item by its key.
+     *
+     * @param string $key The key of the item to retrieve.
+     * @return object|null The item if found, otherwise null.
+     */
+    public function get(string $key): ?object
+    {
+        return $this->items[$key] ?? null;
+    }
+
+    /**
      * Registers an item with the registry.
      * The item is keyed using the `getItemKey` method.
      *
