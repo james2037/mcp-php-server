@@ -7,13 +7,10 @@ namespace MCP\Server\Tool\Content;
 /**
  * Represents an image content item, typically containing base64 encoded image data and its MIME type.
  */
-final class ImageContent extends AbstractContent // Extend AbstractContent
+final class ImageContent extends AbstractMediaContent // Extend AbstractMediaContent
 {
-    /** @var string Base64 encoded image data. */
-    private string $data;
-    /** @var string The MIME type of the image data (e.g., "image/png", "image/jpeg"). */
-    private string $mimeType;
-    // Remove private ?Annotations $annotations;
+    // Properties $data and $mimeType are inherited from AbstractMediaContent
+    // Property $annotations is inherited from AbstractContent (via AbstractMediaContent)
 
     /**
      * Constructs a new ImageContent instance.
@@ -27,24 +24,27 @@ final class ImageContent extends AbstractContent // Extend AbstractContent
         string $mimeType,
         ?Annotations $annotations = null
     ) {
-        parent::__construct($annotations); // Call parent constructor
-        $this->data = $base64Data;
-        $this->mimeType = $mimeType;
+        parent::__construct($base64Data, $mimeType, $annotations); // Call AbstractMediaContent constructor
+    }
+
+    /**
+     * Returns the specific media type string.
+     *
+     * @return string
+     */
+    protected function getMediaType(): string
+    {
+        return 'image';
     }
 
     /**
      * Converts the image content to an array.
+     * Delegates to AbstractMediaContent's toArray method.
      *
      * @return array<string, mixed> The array representation of the image content.
      */
     public function toArray(): array
     {
-        $contentData = [
-            'type' => 'image',
-            'data' => $this->data,
-            'mimeType' => $this->mimeType,
-        ];
-
-        return array_merge($contentData, parent::toArray()); // Merge with parent::toArray()
+        return parent::toArray(); // All logic is now in AbstractMediaContent
     }
 }
