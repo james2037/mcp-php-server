@@ -28,15 +28,11 @@ class BlobResourceContents extends ResourceContents
      * Converts the blob resource contents to an array format.
      * Includes 'uri', 'blob', and 'mimeType'.
      *
-     * @return array{uri: string, blob: string, mimeType?: string} The array representation.
+     * @return array{uri: string, blob: string, mimeType: string} The array representation.
      */
     public function toArray(): array
     {
-        $data = ['uri' => $this->uri, 'blob' => $this->blob];
-        // $this->mimeType is guaranteed by constructor, but check doesn't hurt for consistency
-        if ($this->mimeType !== null) {
-            $data['mimeType'] = $this->mimeType;
-        }
+        $data = ['uri' => $this->uri, 'blob' => $this->blob, 'mimeType' => $this->mimeType];
         return $data;
     }
 }
