@@ -6,16 +6,20 @@ use MCP\Server\Tool\Tool;
 use MCP\Server\Tool\Attribute\Tool as ToolAttribute;
 use MCP\Server\Tool\Attribute\Parameter as ParameterAttribute;
 use MCP\Server\Tool\Attribute\ToolAnnotations;
+use MCP\Server\Tool\Content\ContentItemInterface;
 
 #[ToolAnnotations(title: 'Mock Test Tool', readOnlyHint: true)]
 #[ToolAttribute('test', 'Test Tool')]
 class MockTool extends Tool
 {
+    /**
+     * @return array<ContentItemInterface>
+     */
     protected function doExecute(
         #[ParameterAttribute('data', type: 'string', description: 'Input data')]
         array $arguments
     ): array {
-        return [$this->createTextContent('Result: ' . $arguments['data'])];
+        return [$this->text('Result: ' . $arguments['data'])];
     }
 
     /**
