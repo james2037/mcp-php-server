@@ -7,14 +7,13 @@ namespace MCP\Server\Tool\Content;
 /**
  * Represents an audio content item, typically containing base64 encoded audio data and its MIME type.
  */
-final class AudioContent implements ContentItemInterface
+final class AudioContent extends AbstractContent // Extend AbstractContent
 {
     /** @var string Base64 encoded audio data. */
     private string $data;
     /** @var string The MIME type of the audio data (e.g., "audio/mpeg"). */
     private string $mimeType;
-    /** @var Annotations|null Optional annotations for the audio content. */
-    private ?Annotations $annotations;
+    // Remove private ?Annotations $annotations;
 
     /**
      * Constructs a new AudioContent instance.
@@ -28,9 +27,9 @@ final class AudioContent implements ContentItemInterface
         string $mimeType,
         ?Annotations $annotations = null
     ) {
+        parent::__construct($annotations); // Call parent constructor
         $this->data = $base64Data;
         $this->mimeType = $mimeType;
-        $this->annotations = $annotations;
     }
 
     /**
@@ -40,18 +39,12 @@ final class AudioContent implements ContentItemInterface
      */
     public function toArray(): array
     {
-        $data = [
+        $contentData = [
             'type' => 'audio',
             'data' => $this->data,
             'mimeType' => $this->mimeType,
         ];
 
-        if ($this->annotations !== null) {
-            $annotationsArray = $this->annotations->toArray();
-            if (!empty($annotationsArray)) {
-                $data['annotations'] = $annotationsArray;
-            }
-        }
-        return $data;
+        return array_merge($contentData, parent::toArray()); // Merge with parent::toArray()
     }
 }
