@@ -77,9 +77,6 @@ abstract class Registry
         $this->items[$this->getItemKey($item)] = $item;
     }
 
-    // Changed from private to protected to allow potential child class access if needed,
-    // or keep as private if strictly internal. For now, private is fine as per original.
-    // Renamed from _getClassFromFile
     /**
      * Extracts the fully qualified class name from a PHP file.
      * Note: This method uses regular expressions and may not cover all edge cases
