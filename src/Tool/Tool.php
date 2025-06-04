@@ -233,12 +233,14 @@ abstract class Tool
         }
 
         foreach ($this->parameters as $name => $param) {
-            if ($param->required && !isset($arguments[$name])) {
+            if ($param->required && !array_key_exists($name, $arguments)) {
                 throw new \InvalidArgumentException("Missing required argument: {$name}");
             }
             // If parameter is present, validate its type.
             // If not required and not present, skip type validation.
-            if (isset($arguments[$name])) {
+            // For required parameters that are null (like a pAny = null), they should still be validated by type.
+            // So, we check if the key exists for type validation.
+            if (array_key_exists($name, $arguments)) {
                 if (!$this->validateType($arguments[$name], $param->type)) {
                     throw new \InvalidArgumentException(
                         "Invalid type for argument {$name}: expected {$param->type}, got " . gettype($arguments[$name])
@@ -255,8 +257,34 @@ abstract class Tool
      * @param string $type The expected type.
      * @return bool True if the value is of the expected type, false otherwise.
      */
-    private function validateType($value, string $type): bool
+    private function validateType(mixed $value, string $type): bool
     {
+        // If the type is 'any', any value (including null) is acceptable.
+        if ($type === 'any') {
+            return true;
+        }
+
+        // For other types, if the value is null, it's only valid if the type explicitly allows null
+        // (e.g. future support for nullable types like "string|null" or an attribute property).
+        // For now, basic types like 'string', 'integer' do not implicitly accept null
+        // unless we define them as such (e.g. by convention or a new 'nullable' property in ParameterAttribute).
+        // However, the current problem is about 'any' type and 'required' check.
+        // The validateType method for non-'any' types should typically return false for null
+        // if the type itself isn't nullable.
+        // This part of logic might need refinement if nullable types (e.g. ?string) are formally introduced.
+
+        // If value is null and type is not 'any', it's an invalid type for basic scalar types by default.
+        // This strictness might be too much if a required parameter of type 'string' can be null.
+        // But for now, let's assume required non-'any' types cannot be null.
+        if ($value === null) {
+            // This depends on how schema/types define nullability.
+            // For now, if it's not 'any', and it's null, let's consider it not matching basic types like 'string', 'integer'.
+            // This might need adjustment based on broader type system design.
+            // For the specific test case (pAny: null), type 'any' handles it.
+            // If we had pString: null (required:true, type:string), this would make it fail here.
+            return false; // Example: 'string' does not accept null unless explicitly stated.
+        }
+
         return match ($type) {
             'string' => is_string($value),
             'number' => is_numeric($value),
@@ -264,9 +292,6 @@ abstract class Tool
             'boolean' => is_bool($value),
             'array' => is_array($value),
             'object' => is_object($value),
-            // For 'any' or other custom types, we might need more sophisticated validation or assume true.
-            // 'any' type essentially means no type validation beyond presence if required.
-            'any' => true, // Explicitly allow 'any' type.
             default => true // Allow other unknown types by default, or could be stricter.
         };
     }
