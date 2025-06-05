@@ -202,4 +202,41 @@ class StdioTransportTest extends TestCase
         $errorStream = $accessorTransport->callParentGetErrorStream();
         $this->assertIsResource($errorStream, "STDERR should be a resource via parent getErrorStream");
     }
+
+    public function testReceiveAnotherValidBatchRequest(): void
+    {
+        $batch = [
+            ['jsonrpc' => '2.0', 'method' => 'sum', 'params' => [1, 2, 3], 'id' => 'req1'],
+            ['jsonrpc' => '2.0', 'method' => 'notify_hello', 'params' => ['name' => 'World']],
+            ['jsonrpc' => '2.0', 'method' => 'get_data', 'id' => 'req2']
+        ];
+        $jsonBatch = json_encode($batch);
+        $this->assertIsString($jsonBatch);
+        $this->transport->writeToInput($jsonBatch);
+
+        $messages = $this->transport->receive();
+        $this->assertIsArray($messages);
+        $this->assertCount(3, $messages);
+
+        // Message 1: Request with params and id
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[0]);
+        $this->assertEquals('sum', $messages[0]->method);
+        $this->assertEquals([1, 2, 3], $messages[0]->params);
+        $this->assertEquals('req1', $messages[0]->id);
+        $this->assertTrue($messages[0]->isRequest());
+
+        // Message 2: Notification with params
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[1]);
+        $this->assertEquals('notify_hello', $messages[1]->method);
+        $this->assertEquals(['name' => 'World'], $messages[1]->params);
+        $this->assertNull($messages[1]->id);
+        $this->assertFalse($messages[1]->isRequest());
+
+        // Message 3: Request without params, with id
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[2]);
+        $this->assertEquals('get_data', $messages[2]->method);
+        $this->assertNull($messages[2]->params);
+        $this->assertEquals('req2', $messages[2]->id);
+        $this->assertTrue($messages[2]->isRequest());
+    }
 }

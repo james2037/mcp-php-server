@@ -57,54 +57,52 @@ class StdioTransport implements TransportInterface
         }
 
         try {
-            $decodedInput = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
+            $trimmedLine = trim($line);
+            $isLikelyBatch = strpos($trimmedLine, '[') === 0;
 
-            // Check for batch request: a non-empty numerically indexed array
-            if (
-                is_array($decodedInput)
-                && (count($decodedInput) === 0
-                    || array_keys($decodedInput) === range(0, count($decodedInput) - 1))
-            ) {
-                if (empty($decodedInput)) {
-                    // Empty array received, spec implies it's invalid for batch,
-                    // but JsonRpcMessage::fromJsonArray will handle this (likely an error or empty messages).
-                    // For consistency, we let fromJsonArray parse it.
-                    return JsonRpcMessage::fromJsonArray($line);
+            // Conditional decoding: objects for batch (false), associative arrays for single (true).
+            // This $decodedInput is used for structural checks before passing the raw string.
+            $decodedInput = json_decode($trimmedLine, !$isLikelyBatch, 512, JSON_THROW_ON_ERROR);
+
+            if ($isLikelyBatch) {
+                // $decodedInput should be an array (of objects, due to 'false' in json_decode).
+                if (is_array($decodedInput)) {
+                    // Pass the original string to fromJsonArray, as it expects a string.
+                    return JsonRpcMessage::fromJsonArray($trimmedLine);
+                } else {
+                    // $trimmedLine started with '[' but didn't decode to a PHP array.
+                    throw new \RuntimeException(
+                        'Invalid JSON-RPC batch structure. Expected a JSON array after decoding.',
+                        JsonRpcMessage::PARSE_ERROR
+                    );
                 }
-                // It's a batch, let fromJsonArray handle full parsing
-                // and validation from original string
-                return JsonRpcMessage::fromJsonArray($line);
-            } elseif (
-                is_object($decodedInput) // Decoded as object if not assoc=true
-                || (is_array($decodedInput) && !empty($decodedInput)) // Decoded as non-empty assoc array
-            ) {
-                // It's a single request (object) or potentially an associative
-                // array representing a single request.
-                // Let fromJson handle full parsing and validation from original string
-                $message = JsonRpcMessage::fromJson($line);
-                return [$message];
-            } else {
-                // Invalid structure that is not explicitly an empty array
-                // or a valid single/batch candidate
-                throw new \RuntimeException(
-                    'Invalid JSON-RPC message structure. Expected object or array of objects.',
-                    JsonRpcMessage::PARSE_ERROR
-                );
+            } else { // Single request
+                if (is_array($decodedInput) && !empty($decodedInput)) { // Check for non-empty assoc array
+                    $message = JsonRpcMessage::fromJson($trimmedLine);
+                    return [$message];
+                } elseif (is_object($decodedInput)) { // Should not happen if assoc is true typically, but check for robustness
+                    $message = JsonRpcMessage::fromJson($trimmedLine);
+                    return [$message];
+                } else {
+                    // $decodedInput is not a non-empty associative array or an object.
+                    // This uses the generic message that tests expect.
+                    throw new \RuntimeException(
+                        'Invalid JSON-RPC message structure. Expected object or array of objects.',
+                        JsonRpcMessage::PARSE_ERROR
+                    );
+                }
             }
-        } catch (\JsonException $e) {
+        } catch (\JsonException $e) { // Catch JSON parsing errors first
             throw new \RuntimeException(
                 'JSON Parse Error: ' . $e->getMessage(),
                 JsonRpcMessage::PARSE_ERROR,
                 $e
             );
-        } catch (\Exception $e) {
-            // Catch other exceptions from JsonRpcMessage::fromJson or fromJsonArray
+        } catch (\Exception $e) { // Catch other exceptions from JsonRpcMessage processing
             $this->log("Error processing received message: " . $e->getMessage());
-            // Depending on desired behavior, re-throw or return error specific message
-            // For now, let's re-throw as a runtime exception consistent with parse errors
             throw new \RuntimeException(
                 'Error parsing JSON-RPC message: ' . $e->getMessage(),
-                JsonRpcMessage::INVALID_REQUEST, // Or PARSE_ERROR if more appropriate
+                JsonRpcMessage::INVALID_REQUEST,
                 $e
             );
         }

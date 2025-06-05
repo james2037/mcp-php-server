@@ -132,6 +132,104 @@ class JsonRpcMessage implements \JsonSerializable
     }
 
     /**
+     * Creates a JsonRpcMessage from a pre-decoded stdClass object.
+     *
+     * @param \stdClass $data The decoded JSON-RPC message object.
+     * @return self The created JsonRpcMessage instance.
+     * @throws \RuntimeException If the object structure is invalid.
+     */
+    public static function fromJsonObject(\stdClass $data): self
+    {
+        if (!property_exists($data, 'jsonrpc') || $data->jsonrpc !== '2.0') {
+            throw new \RuntimeException('Invalid JSON-RPC version', self::INVALID_REQUEST);
+        }
+
+        // Handle response messages (result or error)
+        if (property_exists($data, 'result') || property_exists($data, 'error')) {
+            // According to JSON-RPC 2.0 spec, ID must be present for responses,
+            // and should be the same as the ID of the request.
+            // It can be null if the request ID was null (though unusual) or if there was an error
+            // that prevented request ID parsing (e.g. Parse Error/Invalid Request).
+            // Our constructor new self('', null, $id) expects $id to be string|null.
+            $id = null;
+            if (property_exists($data, 'id')) {
+                // Ensure ID is string or null. Numeric IDs are cast to string.
+                $id = (is_string($data->id) || is_numeric($data->id)) ? (string)$data->id : null;
+            }
+             // If ID is strictly required and not just potentially null:
+             // if (!property_exists($data, 'id')) {
+             //     throw new \RuntimeException('Response must include ID', self::INVALID_REQUEST);
+             // }
+             // $id = (string)$data->id; // Assuming ID here must not be null for a response.
+
+            $msg = new self('', null, $id); // Method and params are not relevant for responses.
+
+            if (property_exists($data, 'result')) {
+                // Result can be any type, but we store it in an array field.
+                // If it's a structured type (object/array), ensure it's an array.
+                // If it's a scalar, it might be an issue if not wrapped in an array by convention.
+                // For now, mirroring original behavior: whatever $data->result is, assign it.
+                // The JsonRpcMessage::$result is type ?array. This implies result should be array or null.
+                // Let's ensure it's compatible.
+                if (is_object($data->result) || is_array($data->result)) {
+                    $msg->result = (array)$data->result;
+                } elseif ($data->result === null) {
+                    $msg->result = null;
+                } else {
+                    // If result is a scalar, this was not explicitly handled before.
+                    // Wrapping scalar in an array, or throwing error, are options.
+                    // To be safe and expect a "structured value" usually:
+                    throw new \RuntimeException('Response result must be a structured type (object/array) or null.', self::INVALID_REQUEST);
+                }
+            } else { // This means property_exists($data, 'error') is true
+                if (!is_object($data->error)) { // Error member MUST be an object
+                    throw new \RuntimeException('Invalid error object in JSON-RPC response (must be an object)', self::INVALID_REQUEST);
+                }
+                // Perform a shallow cast for the main error object
+                $errorArray = (array)$data->error;
+
+                // If the 'data' field within the error object exists and is an object, cast it to an array too
+                if (isset($errorArray['data']) && is_object($errorArray['data'])) {
+                    $errorArray['data'] = (array)$errorArray['data'];
+                }
+                $msg->error = $errorArray;
+            }
+            return $msg;
+        }
+
+        // Handle request or notification messages
+        if (!property_exists($data, 'method') || !is_string($data->method) || empty($data->method)) {
+            throw new \RuntimeException('Missing, invalid, or empty method name in JSON-RPC request', self::INVALID_REQUEST);
+        }
+
+        $params = null;
+        if (property_exists($data, 'params')) {
+            if (is_object($data->params) || is_array($data->params)) {
+                // JSON-RPC params can be an array (positional) or object (named).
+                // Our constructor expects ?array. So, convert object to array.
+                $params = (array)$data->params;
+            } else {
+                // Params exist but are not a structured type (object/array)
+                throw new \RuntimeException('Invalid params: must be object or array if present.', self::INVALID_PARAMS);
+            }
+        }
+
+        $id = null;
+        if (property_exists($data, 'id')) {
+            if (is_string($data->id) || is_numeric($data->id)) {
+                $id = (string)$data->id;
+            } elseif ($data->id === null) { // Explicitly null is allowed (fixed phpcs warning)
+                $id = null; // Explicitly null is allowed
+            } else {
+                // ID is present but of an invalid type (e.g., object, array)
+                throw new \RuntimeException('Invalid ID: must be string, number, or null.', self::INVALID_REQUEST);
+            }
+        }
+
+        return new self($data->method, $params, $id);
+    }
+
+    /**
      * Creates a JSON-RPC success response message.
      *
      * @param array<mixed> $result The result of the successful method execution.
@@ -203,10 +301,9 @@ class JsonRpcMessage implements \JsonSerializable
 
         $messages = [];
         foreach ($data as $item) {
-            // Re-encode each item to use the existing fromJson method
-            // This is less efficient but reuses existing parsing logic
-            $itemJson = json_encode($item, JSON_THROW_ON_ERROR);
-            $messages[] = self::fromJson($itemJson);
+            // $item is already a PHP stdClass object from the initial json_decode.
+            // Call the new fromJsonObject method directly.
+            $messages[] = self::fromJsonObject($item);
         }
 
         return $messages;

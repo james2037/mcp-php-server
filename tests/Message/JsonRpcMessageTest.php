@@ -405,4 +405,262 @@ class JsonRpcMessageTest extends TestCase
         $this->assertEquals(['foo' => 'bar'], $serialized['params']);
         $this->assertEquals('2.0', $serialized['jsonrpc']);
     }
+
+    public function testFromJsonArrayMixedRequestNotificationBatch(): void
+    {
+        $json = '[
+            {"jsonrpc": "2.0", "method": "do_work", "params": {"task": "important"}, "id": "req-001"},
+            {"jsonrpc": "2.0", "method": "log_message", "params": {"level": "info", "message": "Processing complete"}}
+        ]';
+        $messages = JsonRpcMessage::fromJsonArray($json);
+
+        $this->assertIsArray($messages);
+        $this->assertCount(2, $messages);
+
+        // First message (request)
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[0]);
+        $this->assertEquals('do_work', $messages[0]->method);
+        $this->assertEquals(['task' => 'important'], $messages[0]->params);
+        $this->assertEquals('req-001', $messages[0]->id);
+        $this->assertTrue($messages[0]->isRequest());
+
+        // Second message (notification)
+        $this->assertInstanceOf(JsonRpcMessage::class, $messages[1]);
+        $this->assertEquals('log_message', $messages[1]->method);
+        $this->assertEquals(['level' => 'info', 'message' => 'Processing complete'], $messages[1]->params);
+        $this->assertNull($messages[1]->id);
+        $this->assertFalse($messages[1]->isRequest());
+    }
+
+    // --- Tests for fromJsonObject ---
+
+    public function testFromJsonObjectValidRequest(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'method' => 'subtract',
+            'params' => (object)['subtrahend' => 23, 'minuend' => 42],
+            'id' => 'req-001'
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals('subtract', $message->method);
+        $this->assertEquals(['subtrahend' => 23, 'minuend' => 42], $message->params);
+        $this->assertEquals('req-001', $message->id);
+        $this->assertTrue($message->isRequest());
+        $this->assertEquals('2.0', $message->jsonrpc);
+    }
+
+    public function testFromJsonObjectValidRequestWithArrayParams(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'method' => 'sum',
+            'params' => [1, 2, 3], // Params as array
+            'id' => 'req-002'
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals('sum', $message->method);
+        $this->assertEquals([1, 2, 3], $message->params);
+        $this->assertEquals('req-002', $message->id);
+    }
+
+    public function testFromJsonObjectValidNotification(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'method' => 'log',
+            'params' => (object)['message' => 'hello']
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals('log', $message->method);
+        $this->assertEquals(['message' => 'hello'], $message->params);
+        $this->assertNull($message->id);
+        $this->assertFalse($message->isRequest());
+    }
+
+    public function testFromJsonObjectValidNotificationMissingParams(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'method' => 'ping'
+            // No 'params' property
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals('ping', $message->method);
+        $this->assertNull($message->params);
+        $this->assertNull($message->id);
+    }
+
+
+    public function testFromJsonObjectValidSuccessResponse(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'result' => (object)['status' => 'ok', 'data' => [1,2]],
+            'id' => 'resp-001'
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals(['status' => 'ok', 'data' => [1,2]], $message->result);
+        $this->assertEquals('resp-001', $message->id);
+        $this->assertNull($message->error);
+        // For responses, method/params are not primary, constructor sets method to ''
+        $this->assertEquals('', $message->method);
+    }
+
+    public function testFromJsonObjectValidSuccessResponseNullResult(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'result' => null,
+            'id' => 'resp-002'
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertNull($message->result);
+        $this->assertEquals('resp-002', $message->id);
+    }
+
+
+    public function testFromJsonObjectValidErrorResponse(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'error' => (object)['code' => -32000, 'message' => 'Server error'],
+            'id' => 'err-001'
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals(['code' => -32000, 'message' => 'Server error'], $message->error);
+        $this->assertEquals('err-001', $message->id);
+        $this->assertNull($message->result);
+    }
+
+    public function testFromJsonObjectValidErrorResponseWithData(): void
+    {
+        $errorData = (object)['details' => 'trace info'];
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'error' => (object)['code' => -32000, 'message' => 'Server error', 'data' => $errorData],
+            'id' => 'err-002'
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals(['code' => -32000, 'message' => 'Server error', 'data' => ['details' => 'trace info']], $message->error);
+        $this->assertEquals('err-002', $message->id);
+    }
+
+    public function testFromJsonObjectErrorResponseNullId(): void
+    {
+        $data = (object)[
+            'jsonrpc' => '2.0',
+            'error' => (object)['code' => -32700, 'message' => 'Parse error'],
+            'id' => null // ID can be null for some errors (e.g., parse error before ID is known)
+        ];
+        $message = JsonRpcMessage::fromJsonObject($data);
+        $this->assertEquals(['code' => -32700, 'message' => 'Parse error'], $message->error);
+        $this->assertNull($message->id);
+    }
+
+    public function testFromJsonObjectInvalidMissingJsonRpc(): void
+    {
+        $data = (object)['method' => 'foo', 'id' => 1];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid JSON-RPC version');
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectInvalidVersion(): void
+    {
+        $data = (object)['jsonrpc' => '1.0', 'method' => 'foo', 'id' => 1];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid JSON-RPC version');
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectRequestMissingMethod(): void
+    {
+        $data = (object)['jsonrpc' => '2.0', 'id' => 1];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Missing, invalid, or empty method name in JSON-RPC request');
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectRequestMethodNotString(): void
+    {
+        $data = (object)['jsonrpc' => '2.0', 'method' => 123, 'id' => 1];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Missing, invalid, or empty method name in JSON-RPC request');
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectRequestMethodEmpty(): void
+    {
+        $data = (object)['jsonrpc' => '2.0', 'method' => '', 'id' => 1];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Missing, invalid, or empty method name in JSON-RPC request');
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectInvalidParamsTypeScalar(): void
+    {
+        $data = (object)['jsonrpc' => '2.0', 'method' => 'foo', 'params' => 123, 'id' => 1];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid params: must be object or array if present.');
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_PARAMS);
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectInvalidIdTypeObject(): void
+    {
+        $data = (object)['jsonrpc' => '2.0', 'method' => 'foo', 'id' => (object)['id_val' => 1]];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid ID: must be string, number, or null.');
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectErrorNotObject(): void
+    {
+        $data = (object)['jsonrpc' => '2.0', 'error' => 'i am not an object', 'id' => 1];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid error object in JSON-RPC response (must be an object)');
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectResponseResultScalar(): void
+    {
+        // Based on current fromJsonObject logic, scalar results are not allowed.
+        $data = (object)['jsonrpc' => '2.0', 'result' => 'a scalar result', 'id' => 'res-scalar'];
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Response result must be a structured type (object/array) or null.');
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectResponseMissingId(): void
+    {
+        // Current fromJsonObject implementation defaults to null ID if 'id' property is missing for a response.
+        // This differs from the original fromJson which was stricter.
+        // Let's test this implemented behavior.
+        $data = (object)['jsonrpc' => '2.0', 'result' => (object)['status' => 'ok']];
+        $message = JsonRpcMessage::fromJsonObject($data); // Should not throw, ID will be null
+        $this->assertNull($message->id);
+        $this->assertEquals(['status' => 'ok'], $message->result);
+
+        // If strict ID presence for response was desired (like original fromJson):
+        // $this->expectException(\RuntimeException::class);
+        // $this->expectExceptionMessage('Response must include ID');
+        // JsonRpcMessage::fromJsonObject($data);
+    }
+
+    public function testFromJsonObjectResponseIdInvalidType(): void
+    {
+        // Current fromJsonObject implementation defaults to null ID if 'id' property is not string/numeric.
+        $data = (object)['jsonrpc' => '2.0', 'result' => (object)['status' => 'ok'], 'id' => (object)['complex' => 'id']];
+        $message = JsonRpcMessage::fromJsonObject($data); // Should not throw, ID will be null
+        $this->assertNull($message->id);
+
+        // If strict ID typing for response (string/numeric only, no auto-null for bad type) was desired:
+        // $this->expectException(\RuntimeException::class);
+        // $this->expectExceptionMessage('Invalid ID: must be string, number, or null.'); // Or specific for response
+        // JsonRpcMessage::fromJsonObject($data);
+    }
 }
