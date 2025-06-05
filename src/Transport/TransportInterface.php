@@ -69,14 +69,4 @@ interface TransportInterface
      * @return bool True if a stream is actively open, false otherwise.
      */
     public function isStreamOpen(): bool;
-
-    /**
-     * Hints to the transport that Server-Sent Events (SSE) are preferred for the response stream, if applicable.
-     *
-     * Transports that support SSE (e.g., HttpTransport) can use this to modify
-     * how they format and send responses. Transports that do not support SSE can ignore this hint.
-     *
-     * @param bool $prefer True to indicate a preference for SSE streaming, false otherwise.
-     */
-    public function preferSseStream(bool $prefer = true): void;
 }

@@ -203,15 +203,4 @@ class StdioTransport implements TransportInterface
     {
         return false;
     }
-
-    /**
-     * Indicates a preference for using Server-Sent Events (SSE) for streaming responses, if applicable.
-     * StdioTransport does not support SSE, so this is a no-op.
-     *
-     * @param bool $prefer True to prefer SSE, false otherwise.
-     */
-    public function preferSseStream(bool $prefer = true): void
-    {
-        // StdioTransport does not support SSE.
-    }
 }
