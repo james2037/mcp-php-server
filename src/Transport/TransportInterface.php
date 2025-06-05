@@ -51,16 +51,6 @@ interface TransportInterface
     public function send(JsonRpcMessage|array $message): void;
 
     /**
-     * Logs a message specific to the transport's operation.
-     *
-     * Example: For StdioTransport, this might write to STDERR.
-     * For HttpTransport, it might use a PSR-3 logger if integrated.
-     *
-     * @param string $message The message to log.
-     */
-    public function log(string $message): void;
-
-    /**
      * Checks if the transport connection is considered closed.
      *
      * For connection-oriented transports (like STDIN/STDOUT), this might mean EOF.
