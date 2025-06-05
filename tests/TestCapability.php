@@ -50,10 +50,10 @@ class TestCapability implements CapabilityInterface
             // JsonRpcMessage::$error is typed as '?object'. If isset, it's an object.
             if (isset($responseTemplate->error)) {
                 // Ensure the ID from the original request is used if the error template ID is placeholder or different
-                // Assuming $responseTemplate->error is an object (e.g. stdClass) with code and message properties
+                // $responseTemplate->error is an array['code' => ..., 'message' => ...] as per JsonRpcMessage::error()
                 return JsonRpcMessage::error(
-                    $responseTemplate->error->code, // Accessing public property.
-                    $responseTemplate->error->message, // Accessing public property.
+                    $responseTemplate->error['code'],
+                    $responseTemplate->error['message'],
                     $message->id // Always use the request's ID for the response envelope
                 );
             }
