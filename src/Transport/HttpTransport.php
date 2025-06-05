@@ -24,7 +24,7 @@ use Laminas\Diactoros\ServerRequestFactory;
  * Origin checks, complex ACK logic, and related session properties have been removed.
  * It primarily focuses on basic JSON-RPC via POST.
  */
-class HttpTransport extends AbstractTransport
+class HttpTransport implements TransportInterface
 {
     // Kept essential properties for basic POST JSON-RPC.
     /** @var ResponseInterface|null The PSR-7 response object being prepared. */
@@ -265,5 +265,21 @@ class HttpTransport extends AbstractTransport
                 ->withBody($this->streamFactory->createStream($errorPayload));
         }
         return $this->response;
+    }
+
+    /**
+     * Indicates a preference for using Server-Sent Events (SSE) for streaming responses, if applicable.
+     *
+     * Transports that support SSE (like HttpTransport) can use this hint to switch
+     * their response mode. Other transports can ignore this.
+     *
+     * @param bool $prefer True to prefer SSE, false otherwise.
+     */
+    public function preferSseStream(bool $prefer = true): void
+    {
+        // Default implementation does nothing, to be overridden by transports that support SSE.
+        // In a real HttpTransport that supports SSE, this method would set a flag
+        // to change response content-type and formatting in the send() method.
+        // For this simplified version, it remains a no-op.
     }
 }

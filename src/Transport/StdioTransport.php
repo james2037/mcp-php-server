@@ -13,7 +13,7 @@ use MCP\Server\Exception\TransportException;
  * Implements a transport using STDIN, STDOUT, and STDERR for line-based JSON messaging.
  * Each JSON-RPC message (or batch of messages) is expected to be on a single line.
  */
-class StdioTransport extends AbstractTransport
+class StdioTransport implements TransportInterface
 {
     /** @var resource The standard input stream. */
     private $stdin;
@@ -202,5 +202,16 @@ class StdioTransport extends AbstractTransport
     public function isStreamOpen(): bool
     {
         return false;
+    }
+
+    /**
+     * Indicates a preference for using Server-Sent Events (SSE) for streaming responses, if applicable.
+     * StdioTransport does not support SSE, so this is a no-op.
+     *
+     * @param bool $prefer True to prefer SSE, false otherwise.
+     */
+    public function preferSseStream(bool $prefer = true): void
+    {
+        // StdioTransport does not support SSE.
     }
 }
