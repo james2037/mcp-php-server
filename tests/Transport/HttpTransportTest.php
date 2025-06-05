@@ -252,4 +252,88 @@ class HttpTransportTest extends TestCase
         $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $decodedBody['error']['code']);
         $this->assertStringContainsString('Failed to encode JSON response', $decodedBody['error']['message']);
     }
+
+    /**
+     * @dataProvider invalidBatchItemProvider
+     * @param list<mixed> $invalidBatchPayload
+     */
+    public function testReceiveBatchWithInvalidItemStructure(array $invalidBatchPayload, string $caseName): void
+    {
+        $this->expectException(TransportException::class);
+        $this->expectExceptionCode(JsonRpcMessage::INVALID_REQUEST);
+        $this->expectExceptionMessage('Invalid JSON-RPC: Request must be a JSON object or an array of JSON objects.');
+
+        $jsonRpcString = json_encode($invalidBatchPayload);
+
+        $this->mockRequest->method('getMethod')->willReturn('POST');
+        $this->mockRequest->method('getHeaderLine')->with('Content-Type')->willReturn('application/json');
+
+        // Configure the mockStream instance that was created in setUp()
+        // getBody() on mockRequest already returns $this->mockStream from setUp.
+        $this->mockStream->method('__toString')->willReturn($jsonRpcString);
+
+        $transport = $this->createTransport();
+        $transport->receive();
+    }
+
+    /**
+     * @return array<string, array{list<mixed>, string}>
+     */
+    public static function invalidBatchItemProvider(): array
+    {
+        // Using the case name as part of the dataset helps in identifying the failing case from test output.
+        return [
+            'string_in_batch' => [[['method' => 'foo'], "not_an_object"], 'string_in_batch'],
+            'array_in_batch'  => [[['method' => 'foo'], [1, 2, 3]], 'array_in_batch'],
+        ];
+    }
+
+    public function testIsStreamOpenReturnsFalse(): void
+    {
+        $transport = $this->createTransport();
+        $this->assertFalse($transport->isStreamOpen());
+    }
+
+    public function testIsClosedInitialState(): void
+    {
+        $transport = $this->createTransport();
+        $this->assertFalse($transport->isClosed(), "isClosed() should be false before send() is called.");
+    }
+
+    public function testIsClosedAfterSend(): void
+    {
+        $transport = $this->createTransport();
+        $transport->send(null); // Call send() to change the state
+        $this->assertTrue($transport->isClosed(), "isClosed() should be true after send() is called.");
+    }
+
+    public function testGetResponseWhenResponseIsNull(): void
+    {
+        $transport = $this->createTransport();
+
+        // Use Reflection to set the private $response property to null
+        $reflection = new \ReflectionClass(HttpTransport::class);
+        $responseProperty = $reflection->getProperty('response');
+        $responseProperty->setAccessible(true); // Allow modification of private property
+        $responseProperty->setValue($transport, null);
+
+        $response = $transport->getResponse();
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertStringContainsString('application/json', $response->getHeaderLine('Content-Type'));
+
+        $expectedErrorPayload = [
+            'jsonrpc' => '2.0',
+            'error' => [
+                'code' => JsonRpcMessage::INTERNAL_ERROR, // -32603
+                'message' => 'Response not prepared or available.'
+            ],
+            'id' => null
+        ];
+        $this->assertJsonStringEqualsJsonString(
+            json_encode($expectedErrorPayload, JSON_THROW_ON_ERROR),
+            (string) $response->getBody()
+        );
+    }
 }
