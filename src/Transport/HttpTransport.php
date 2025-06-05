@@ -174,24 +174,9 @@ class HttpTransport implements TransportInterface
             // it might result in a parsing error on the client if it's not valid JSON-RPC (e.g. just "null").
             // For now, allow encoding null, which results in JSON "null".
             $payloadToEncode = null;
-        } else {
-            // Should not be reached due to type hints. Internal error if it does.
-            // Prepare a JSON-RPC error response.
-            $errorPayload = [
-                'jsonrpc' => '2.0',
-                'error' => [
-                    'code' => JsonRpcMessage::INTERNAL_ERROR,
-                    'message' => 'Server error: Invalid message type for sending.'
-                ],
-                'id' => null
-            ];
-            $encodedErrorString = json_encode($errorPayload);
-            $this->response = $this->responseFactory->createResponse(500)
-                ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream($encodedErrorString !== false ? $encodedErrorString : '{"jsonrpc":"2.0","error":{"code":-32000,"message":"Server JSON encoding error"}}'));
-            $this->responsePrepared = true;
-            return;
         }
+        // The 'else' block that handled non-JsonRpcMessage/array/null types has been removed
+        // as it was deemed unreachable due to PHP parameter type hints.
 
         $jsonPayloadString = json_encode($payloadToEncode);
 
