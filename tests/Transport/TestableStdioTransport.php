@@ -15,6 +15,10 @@ class TestableStdioTransport extends StdioTransport
     private $output; // PHPCS: PSR2.Classes.PropertyDeclaration.Underscore
     /** @var resource */
     private $error; // PHPCS: PSR2.Classes.PropertyDeclaration.Underscore
+    private int $receiveCallCount = 0;
+    /** @var array<int, array<int, mixed>|null> */
+    private array $receiveOverrideQueue = [];
+    private ?\Throwable $exceptionToThrowOnReceiveOnce = null;
 
     public function __construct()
     {
@@ -130,5 +134,43 @@ class TestableStdioTransport extends StdioTransport
         if (is_resource($this->error)) {
             fclose($this->error);
         }
+    }
+
+    /**
+     * @return array<int, \MCP\Server\Message\JsonRpcMessage>|null
+     */
+    public function receive(): ?array
+    {
+        $this->receiveCallCount++;
+
+        if ($this->exceptionToThrowOnReceiveOnce !== null) {
+            $e = $this->exceptionToThrowOnReceiveOnce;
+            $this->exceptionToThrowOnReceiveOnce = null; // Consume it
+            throw $e;
+        }
+
+        if (!empty($this->receiveOverrideQueue)) {
+            return array_shift($this->receiveOverrideQueue);
+        }
+        return parent::receive();
+    }
+
+    public function getReceiveCallCount(): int
+    {
+        return $this->receiveCallCount;
+    }
+
+    /**
+     * @param array<int, mixed>|null $messages The array of messages or null to return from receive().
+     *                                         The items in the array can be mixed types for testing.
+     */
+    public function queueReceiveOverride(?array $messages): void
+    {
+        $this->receiveOverrideQueue[] = $messages;
+    }
+
+    public function throwOnNextReceive(\Throwable $e): void
+    {
+        $this->exceptionToThrowOnReceiveOnce = $e;
     }
 }
