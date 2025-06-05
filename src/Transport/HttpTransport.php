@@ -266,20 +266,4 @@ class HttpTransport implements TransportInterface
         }
         return $this->response;
     }
-
-    /**
-     * Indicates a preference for using Server-Sent Events (SSE) for streaming responses, if applicable.
-     *
-     * Transports that support SSE (like HttpTransport) can use this hint to switch
-     * their response mode. Other transports can ignore this.
-     *
-     * @param bool $prefer True to prefer SSE, false otherwise.
-     */
-    public function preferSseStream(bool $prefer = true): void
-    {
-        // Default implementation does nothing, to be overridden by transports that support SSE.
-        // In a real HttpTransport that supports SSE, this method would set a flag
-        // to change response content-type and formatting in the send() method.
-        // For this simplified version, it remains a no-op.
-    }
 }

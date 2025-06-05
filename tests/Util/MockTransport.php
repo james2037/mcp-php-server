@@ -80,12 +80,6 @@ class MockTransport implements TransportInterface
         // error_log("MockTransport Log: " . $message); // For debugging tests
     }
 
-    public function preferSseStream(bool $prefer = true): void
-    {
-        // No-op for this mock implementation.
-        // Could store the preference if tests need to assert it was called.
-    }
-
     /**
      * Checks if the transport stream is currently open.
      * For this mock, defaults to false. Can be made configurable if needed.
