@@ -126,10 +126,6 @@ class StdioTransport implements TransportInterface
             $json = $message->toJson();
         }
 
-        if (strpos($json, "\n") !== false) {
-            throw new TransportException("Message to be sent contains internal newlines, which is not allowed for StdioTransport.");
-        }
-
         $written = fwrite($this->stdout, $json . "\n");
         if ($written === false || $written < strlen($json) + 1) { // Check if less than expected was written
             throw new TransportException("Failed to write complete message to STDOUT.");
