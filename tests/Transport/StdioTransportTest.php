@@ -141,11 +141,11 @@ class StdioTransportTest extends TestCase
 
     public function testLogging(): void // Updated assertion
     {
-        $this->transport->log('Test log message');
+        // Test errorLog as it's unconditional. debugLog is conditional.
+        $this->transport->errorLog('Test error log message');
         $errorLogOutput = $this->transport->readFromError();
-        // StdioTransport::log uses fwrite($this->stderr, $message . "\n");
-        // It does not add static::class prefix when errorStream is available (which it is in TestableStdioTransport)
-        $this->assertEquals("Test log message\n", $errorLogOutput);
+        // StdioTransport::errorLog prepends [ERROR] and a space, then adds a newline.
+        $this->assertEquals("[ERROR] Test error log message\n", $errorLogOutput);
     }
 
     public function testIsClosed(): void

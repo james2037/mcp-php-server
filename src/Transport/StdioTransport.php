@@ -21,6 +21,8 @@ class StdioTransport implements TransportInterface
     private $stdout;
     /** @var resource The standard error stream. */
     private $stderr;
+    /** @var bool Whether debug logging to STDERR is enabled. */
+    private bool $debugEnabled = false;
 
     /**
      * Constructs a new StdioTransport instance.
@@ -99,7 +101,7 @@ class StdioTransport implements TransportInterface
                 $e
             );
         } catch (\Exception $e) { // Catch other exceptions from JsonRpcMessage processing
-            $this->log("Error processing received message: " . $e->getMessage());
+            $this->errorLog("Error processing received message: " . $e->getMessage());
             throw new \RuntimeException(
                 'Error parsing JSON-RPC message: ' . $e->getMessage(),
                 JsonRpcMessage::INVALID_REQUEST,
@@ -133,13 +135,37 @@ class StdioTransport implements TransportInterface
     }
 
     /**
-     * Logs a message to STDERR, followed by a newline.
+     * Enables or disables debug logging to STDERR.
      *
-     * @param string $message The message to log.
+     * @param bool $enabled True to enable debug logging, false to disable.
      */
-    public function log(string $message): void
+    public function setDebug(bool $enabled): void
     {
-        fwrite($this->stderr, $message . "\n");
+        $this->debugEnabled = $enabled;
+    }
+
+    /**
+     * Logs a debug message to STDERR if debug mode is enabled, followed by a newline.
+     *
+     * @param string $message The debug message to log.
+     */
+    public function debugLog(string $message): void
+    {
+        if ($this->debugEnabled) {
+            fwrite($this->stderr, "[DEBUG] " . $message . "\n");
+            fflush($this->stderr);
+        }
+    }
+
+    /**
+     * Logs an error message to STDERR, followed by a newline.
+     * This log always writes, regardless of debug mode.
+     *
+     * @param string $message The error message to log.
+     */
+    public function errorLog(string $message): void
+    {
+        fwrite($this->stderr, "[ERROR] " . $message . "\n");
         fflush($this->stderr);
     }
 

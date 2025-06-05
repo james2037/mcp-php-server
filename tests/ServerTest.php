@@ -7,6 +7,7 @@ use MCP\Server\Server;
 use MCP\Server\Capability\CapabilityInterface;
 use MCP\Server\Message\JsonRpcMessage;
 use MCP\Server\Tests\Transport\TestableStdioTransport;
+use MCP\Server\Transport\StdioTransport; // Added for mock
 // TestCapability is now in a separate file.
 use MCP\Server\Tests\TestCapability;
 use MCP\Server\Capability\ResourcesCapability;
@@ -728,5 +729,72 @@ class ServerTest extends TestCase
         self::assertIsArray($errorBody['error'], "The 'error' field should be an array.");
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorBody['error']['code'], "JSON-RPC error code should be METHOD_NOT_FOUND for MethodNotSupportedException.");
         $this->assertStringContainsString($unsupportedMethodName, $errorBody['error']['message'], "Error message should contain the method name.");
+    }
+
+    public function testSingleInitializeRequestGetsSingleObjectResponseStdio(): void
+    {
+        /** @var \MCP\Server\Transport\StdioTransport&MockObject $mockTransport */
+        $mockTransport = $this->createMock(\MCP\Server\Transport\StdioTransport::class);
+
+        // Server is instantiated with the mock transport
+        $server = new Server('TestServerSingleStdio', '1.0.0', $mockTransport);
+
+        // Prepare the initialize request message
+        $initializeRequestId = "init_single_stdio_0";
+        $initializeRequestParams = [
+            'protocolVersion' => '2024-11-05',
+            'capabilities' => [], // Empty array for capabilities
+            'clientInfo' => ['name' => 'claude-ai', 'version' => '0.1.0']
+        ];
+        $initializeRequestMessage = new JsonRpcMessage(
+            'initialize',
+            $initializeRequestParams,
+            $initializeRequestId
+        );
+
+        // Configure the mock transport's receive() method
+        $mockTransport->expects($this->exactly(2)) // Expect receive to be called twice
+            ->method('receive')
+            ->willReturnOnConsecutiveCalls(
+                [$initializeRequestMessage], // First call: return the initialize request
+                []                        // Second call: return empty array to terminate loop
+            );
+
+        // Configure the mock transport's send() method to capture the argument
+        $sentArgument = null;
+        $mockTransport->expects($this->once()) // Expect send to be called once
+            ->method('send')
+            ->with($this->callback(function ($arg) use (&$sentArgument) {
+                $sentArgument = $arg;
+                return true; // Callback must return true for 'with' to succeed
+            }));
+
+        // Run the server
+        $server->run();
+
+        // Assertions
+        $this->assertInstanceOf(
+            JsonRpcMessage::class,
+            $sentArgument,
+            'Argument passed to send() should be a JsonRpcMessage object.'
+        );
+
+        /** @var JsonRpcMessage $sentMessage */
+        $sentMessage = $sentArgument; // Type cast for static analysis
+
+        $this->assertEquals($initializeRequestId, $sentMessage->id, "Response ID should match request ID.");
+        $this->assertNull($sentMessage->error, "Response should not be an error.");
+        $this->assertNotNull($sentMessage->result, "Response should have a result.");
+        $this->assertIsArray($sentMessage->result, "Response result should be an array.");
+
+        $this->assertArrayHasKey('protocolVersion', $sentMessage->result);
+        $this->assertEquals('2025-03-26', $sentMessage->result['protocolVersion'], "Protocol version in result is incorrect.");
+        $this->assertArrayHasKey('serverInfo', $sentMessage->result);
+        $this->assertEquals('TestServerSingleStdio', $sentMessage->result['serverInfo']['name']);
+        $this->assertEquals('1.0.0', $sentMessage->result['serverInfo']['version']);
+        $this->assertArrayHasKey('capabilities', $sentMessage->result);
+        // Further checks on capabilities can be added if needed, e.g. presence of default caps
+        $this->assertArrayHasKey('logging', $sentMessage->result['capabilities']);
+        $this->assertArrayHasKey('completions', $sentMessage->result['capabilities']);
     }
 }

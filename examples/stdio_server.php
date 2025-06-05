@@ -42,10 +42,30 @@ class GreetingResource extends BaseResource
     }
 }
 
-// 1. Instantiate the Server
-$server = new Server('MySimpleServer (STDIO)', '1.0.0');
+// 1. Create Transport
+$transport = new StdioTransport();
 
-// 2. Setup Tools Capability
+// Check for debug mode
+$isDebug = false;
+// Check environment variable
+if (getenv('MCP_DEBUG') === 'true') {
+    $isDebug = true;
+}
+// Check command-line arguments
+if (in_array('--debug', $argv ?? [], true)) {
+    $isDebug = true;
+}
+
+if ($isDebug) {
+    $transport->setDebug(true);
+    // This message will only appear if debug mode was successfully enabled in StdioTransport
+    $transport->debugLog('Debug logging enabled by server configuration.');
+}
+
+// 2. Instantiate the Server, injecting the transport
+$server = new Server('MySimpleServer (STDIO)', '1.0.0', $transport);
+
+// 3. Setup Tools Capability
 $toolsCapability = new ToolsCapability();
 $toolsCapability->addTool(new EchoTool());
 $server->addCapability($toolsCapability);
@@ -55,9 +75,8 @@ $resourcesCapability = new ResourcesCapability();
 $resourcesCapability->addResource(new GreetingResource());
 $server->addCapability($resourcesCapability);
 
-// 4. Connect StdioTransport
-$transport = new StdioTransport();
-$server->connect($transport);
+// 4. Transport is already connected via constructor. connect() call is no longer needed.
+// $server->connect($transport); // This line can be removed.
 
 // 5. Run the Server
 fwrite(STDERR, "STDIO Server listening...\n"); // Message to stderr

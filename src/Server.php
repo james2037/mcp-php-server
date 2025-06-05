@@ -56,8 +56,11 @@ class Server
      */
     public function __construct(
         private readonly string $name,
-        private readonly string $version = '1.0.0'
+        private readonly string $version = '1.0.0',
+        // Allow transport to be injected via constructor
+        ?TransportInterface $transport = null
     ) {
+        $this->transport = $transport;
     }
 
     // setNextResponsePrefersSse method removed
@@ -162,7 +165,13 @@ class Server
                 }
 
                 if (!empty($responseMessages)) {
-                    $this->transport->send($responseMessages);
+                    // If a single request resulted in a single response, send it directly.
+                    // Otherwise, send as an array (batch response or no response for notifications).
+                    if (count($responseMessages) === 1 && is_array($receivedMessages) && count($receivedMessages) === 1) {
+                        $this->transport->send($responseMessages[0]);
+                    } else {
+                        $this->transport->send($responseMessages);
+                    }
                 }
             } catch (\Throwable $e) {
                 $logCtx = ['trace' => $e->getTraceAsString()];
@@ -379,25 +388,35 @@ class Server
      */
     private function handleInitialize(JsonRpcMessage $message): JsonRpcMessage
     {
+        $this->debugLog("Handling initialize request: " . json_encode($message));
+
         if ($this->isAuthorizationRequired) {
             $tokenFromEnv = getenv('MCP_AUTHORIZATION_TOKEN');
             if ($tokenFromEnv === false || $tokenFromEnv === '') {
                 $this->logMessage('error', 'Client failed to provide MCP_AUTHORIZATION_TOKEN during initialization.', 'Server.Authorization');
-                return JsonRpcMessage::error(-32000, 'Authorization required: MCP_AUTHORIZATION_TOKEN environment variable not set or empty.', $message->id);
+                $response = JsonRpcMessage::error(-32000, 'Authorization required: MCP_AUTHORIZATION_TOKEN environment variable not set or empty.', $message->id);
+                $this->debugLog("Returning initialize error response: " . json_encode($response));
+                return $response;
             }
             if ($this->expectedAuthTokenValue === null) {
                 $this->logMessage('critical', 'Authorization is required but no expected token is configured on the server.', 'Server.Authorization');
-                return JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Server authorization configuration error.', $message->id);
+                $response = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, 'Server authorization configuration error.', $message->id);
+                $this->debugLog("Returning initialize error response: " . json_encode($response));
+                return $response;
             }
             if (!hash_equals((string)$this->expectedAuthTokenValue, $tokenFromEnv)) {
                 $this->logMessage('error', 'Client provided an invalid MCP_AUTHORIZATION_TOKEN during initialization.', 'Server.Authorization');
-                return JsonRpcMessage::error(-32001, 'Authorization failed: Invalid token.', $message->id);
+                $response = JsonRpcMessage::error(-32001, 'Authorization failed: Invalid token.', $message->id);
+                $this->debugLog("Returning initialize error response: " . json_encode($response));
+                return $response;
             }
             $this->logMessage('info', 'Client successfully authorized via MCP_AUTHORIZATION_TOKEN.', 'Server.Authorization');
         }
 
         if (!isset($message->params['protocolVersion'])) {
-            return JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing protocol version parameter in initialize request.', $message->id);
+            $response = JsonRpcMessage::error(JsonRpcMessage::INVALID_PARAMS, 'Missing protocol version parameter in initialize request.', $message->id);
+            $this->debugLog("Returning initialize error response: " . json_encode($response));
+            return $response;
         }
 
         // Session ID handling removed as HttpTransport no longer manages these via getClientSessionId/setServerSessionId
@@ -407,11 +426,13 @@ class Server
                 $capability->initialize();
             }
         } catch (\Throwable $e) {
-            return JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, $e->getMessage(), $message->id);
+            $response = JsonRpcMessage::error(JsonRpcMessage::INTERNAL_ERROR, $e->getMessage(), $message->id);
+            $this->debugLog("Returning initialize error response: " . json_encode($response));
+            return $response;
         }
 
         $this->initialized = true;
-        return JsonRpcMessage::result(
+        $response = JsonRpcMessage::result(
             [
                 'protocolVersion' => '2025-03-26',
                 'capabilities' => $this->getServerCapabilitiesArray(),
@@ -420,6 +441,8 @@ class Server
             ],
             $message->id
         );
+        $this->debugLog("Returning initialize success response: " . json_encode($response));
+        return $response;
     }
 
     /**
@@ -449,6 +472,7 @@ class Server
      */
     private function processSingleMessage(JsonRpcMessage $currentMessage): ?JsonRpcMessage
     {
+        $this->debugLog("Processing message id: {$currentMessage->id}, method: {$currentMessage->method}");
         try {
             $response = $this->handleMessage($currentMessage);
             if ($response !== null) {
@@ -644,5 +668,21 @@ class Server
         $messagePriority = self::$logLevelPriorities[$messageLevelLower] ?? LOG_DEBUG;
         $clientPriority = self::$logLevelPriorities[$clientSetLogLevelLower] ?? LOG_DEBUG;
         return $messagePriority <= $clientPriority;
+    }
+
+    /**
+     * Logs a debug message via StdioTransport if it's in use and debug mode is enabled on it.
+     *
+     * @param string $message The debug message to log.
+     * @return void
+     */
+    private function debugLog(string $message): void
+    {
+        if ($this->transport instanceof \MCP\Server\Transport\StdioTransport) {
+            // The debugLog method on StdioTransport already checks its internal debugEnabled flag.
+            $this->transport->debugLog($message);
+        }
+        // If not StdioTransport, or if another debug mechanism is desired for other transports,
+        // it could be added here. For now, it only logs if StdioTransport is active.
     }
 }
