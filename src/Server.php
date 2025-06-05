@@ -193,10 +193,6 @@ class Server
      */
     private function runHttpRequestCycle(): void
     {
-        if (!($this->transport instanceof HttpTransport)) {
-            $this->logMessage('critical', 'HttpTransport not available in runHttpRequestCycle', 'Server.run');
-            return;
-        }
         /** @var HttpTransport $httpTransport */
         $httpTransport = $this->transport;
 

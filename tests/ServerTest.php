@@ -729,4 +729,374 @@ class ServerTest extends TestCase
         $this->assertEquals(JsonRpcMessage::METHOD_NOT_FOUND, $errorBody['error']['code'], "JSON-RPC error code should be METHOD_NOT_FOUND for MethodNotSupportedException.");
         $this->assertStringContainsString($unsupportedMethodName, $errorBody['error']['message'], "Error message should contain the method name.");
     }
+
+    public function testRunHandlesNonJsonRpcMessageInBatch(): void
+    {
+        $server = new Server('test-mixed-batch-server', '1.0.0');
+        $transport = new TestableStdioTransport();
+        $capability = new TestCapability();
+
+        $server->addCapability($capability);
+        $server->connect($transport);
+
+        // 1. Queue Initialize request
+        $initRequestId = 'init_mixed_batch_' . uniqid();
+        // StdioTransport::receive() typically returns an array containing a single JsonRpcMessage.
+        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26'], $initRequestId);
+        $transport->queueReceiveOverride([$initMessage]); // Pass as an array, as if from StdioTransport::receive
+
+        // 2. Queue the mixed batch
+        $validRpcId1 = 'valid_rpc_1_' . uniqid();
+        $validRpcMessage1 = new JsonRpcMessage('test.method', ['data' => 'message1'], $validRpcId1);
+
+        $nonRpcObject = new \stdClass();
+        $nonRpcObject->foo = 'bar';
+
+        $validRpcId2 = 'valid_rpc_2_' . uniqid();
+        $validRpcMessage2 = new JsonRpcMessage('test.method', ['data' => 'message2'], $validRpcId2);
+
+        $mixedBatch = [$validRpcMessage1, $nonRpcObject, $validRpcMessage2];
+        $transport->queueReceiveOverride($mixedBatch);
+
+        // 3. Queue null to stop the server loop
+        $transport->queueReceiveOverride(null);
+
+        $server->run();
+
+        // Assertions:
+        // A. Both valid messages were processed by TestCapability.
+        //    The log "[ERROR] Server.run: Received non-JsonRpcMessage object in batch." confirms the invalid item was skipped.
+        $receivedCapabilityMessages = $capability->getReceivedMessages();
+        $this->assertCount(2, $receivedCapabilityMessages, "Capability should have received both valid messages.");
+        if (count($receivedCapabilityMessages) == 2) {
+            $this->assertEquals($validRpcId1, $receivedCapabilityMessages[0]->id);
+            $this->assertEquals($validRpcId2, $receivedCapabilityMessages[1]->id);
+        }
+
+        // Test Goal: Ensure the server hits the 'if (!$currentMessage instanceof JsonRpcMessage)' check,
+        // skips the invalid item, and correctly processes surrounding valid items in the batch.
+
+        // B. Server should have sent back:
+        //    1. The init response.
+        //    2. A batch response containing results for $validRpcMessage1 and $validRpcMessage2.
+        $output = $transport->readMultipleJsonOutputs();
+        $this->assertCount(2, $output, "Should have 2 output items: init response and one batch response. Actual output: " . json_encode($output));
+
+        $initResponse = $this->findResponseById($output, $initRequestId); // findResponseById checks top-level and also inside batches
+        $this->assertNotNull($initResponse, "Init response not found in output: " . json_encode($output));
+        if ($initResponse) {
+            $this->assertArrayHasKey('result', $initResponse, "Init response should be a success.");
+        }
+
+        // Find the batch response payload (it will be one of the items in $output)
+        $batchResponsePayload = null;
+        foreach ($output as $outItem) {
+            if (is_array($outItem) && count($outItem) === 2 && isset($outItem[0]['id'])) { // Heuristic for the batch of 2
+                if (($this->findResponseById($outItem, $validRpcId1) !== null) && ($this->findResponseById($outItem, $validRpcId2) !== null)) {
+                    $batchResponsePayload = $outItem;
+                    break;
+                }
+            }
+        }
+        $this->assertNotNull($batchResponsePayload, "Batch response payload for the two valid messages not found. Output: " . json_encode($output));
+        if ($batchResponsePayload) {
+            $this->assertCount(2, $batchResponsePayload, "Batch response should contain 2 results.");
+            $response1 = $this->findResponseById($batchResponsePayload, $validRpcId1);
+            $this->assertNotNull($response1, "Response for $validRpcId1 not found in batch.");
+            if ($response1) {
+                $this->assertArrayHasKey('result', $response1);
+            }
+
+            $response2 = $this->findResponseById($batchResponsePayload, $validRpcId2);
+            $this->assertNotNull($response2, "Response for $validRpcId2 not found in batch.");
+            if ($response2) {
+                $this->assertArrayHasKey('result', $response2);
+            }
+        }
+
+
+        // C. Check receive call count
+        // Call 1: Init message (queued as array [initMessage])
+        // Call 2: Mixed batch (queued)
+        // Call 3: Null (queued to stop) -> leads to continue in Server::run loop if transport not 'closed'
+        // Call 4: parent::receive() called, returns null, transport 'closed' -> loop breaks
+        $this->assertEquals(4, $transport->getReceiveCallCount());
+    }
+
+    public function testRunCatchesThrowableFromTransportReceive(): void
+    {
+        $server = new Server('test-receive-exception-server', '1.0.0');
+        $transport = new TestableStdioTransport();
+
+        /** @var CapabilityInterface&MockObject $mockCapability */
+        $mockCapability = $this->createMock(CapabilityInterface::class);
+        $mockCapability->method('getCapabilities')->willReturn(['mockcap' => new \stdClass()]);
+        $mockCapability->expects($this->once())->method('initialize');
+        $mockCapability->expects($this->once())->method('shutdown'); // Key assertion for graceful shutdown
+
+        $server->addCapability($mockCapability);
+        $server->connect($transport);
+
+        // 1. Queue Initialize request
+        $initRequestId = 'init_receive_exception_' . uniqid();
+        $initMessage = new JsonRpcMessage('initialize', ['protocolVersion' => '2025-03-26'], $initRequestId);
+        $transport->queueReceiveOverride([$initMessage]);
+
+        // 2. Configure transport to throw an exception on the next receive call
+        $transport->throwOnNextReceive(new \RuntimeException("Simulated receive error"));
+
+        // 3. Queue null to ensure the loop would terminate if the exception wasn't caught
+        // and the server continued. This helps verify the exception handling leads to shutdown.
+        $transport->queueReceiveOverride(null);
+
+        // Server's run() method is expected to catch the RuntimeException.
+        // If it's not caught, PHPUnit will fail the test due to an unhandled exception.
+        $server->run();
+
+        // Assertions:
+        // 1. Mock capability's shutdown was called (verified by PHPUnit's mock expectations for $this->once()).
+        // 2. Test completion without re-thrown exception implies it was caught by Server::run().
+        // 3. Check receive call count.
+        //    Call 1: Init message (queued).
+        //    Call 2: Throws exception.
+        //    In Server::run() (stdio loop), a generic \Throwable (like \RuntimeException) is caught,
+        //    logged, but the loop continues. $this->shuttingDown is NOT set for generic Throwables.
+        //    Call 3: The queued 'null' is processed by receive(). isClosed() is likely false, loop continues.
+        //    Call 4: parent::receive() is called, returns null. isClosed() is true. Loop terminates.
+        //    Therefore, receive() should be called 4 times.
+        $this->assertEquals(4, $transport->getReceiveCallCount(), "Transport's receive() should be called for init, exception, queued null, and final parent::receive()->null.");
+    }
+
+    public function testRunHttpRequestCycleCatchesThrowableInBatchItemProcessing(): void
+    {
+        $httpTransport = new TestableHttpTransport(new ResponseFactory(), new StreamFactory());
+        $server = new Server('test-http-batch-exception-server', '1.0.0');
+        $capability = new TestCapability(); // For test.method
+        $server->addCapability($capability);
+        $server->connect($httpTransport);
+
+        $initId = 'init_batch_ex_' . uniqid();
+        $errorItemId = 'error_item_' . uniqid();
+        $item3Id = 'item3_' . uniqid();
+
+        $batchRequestPayload = [
+            ['jsonrpc' => '2.0', 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-03-26'], 'id' => $initId],
+            ['invalid_structure' => true, 'id' => $errorItemId], // This item should cause an exception
+            ['jsonrpc' => '2.0', 'method' => 'test.method', 'params' => ['data' => 'item3_data'], 'id' => $item3Id]
+        ];
+
+        // TestCapability::handleMessage will provide a generic success response with the correct ID for 'test.method'.
+
+        $mockRequest = $this->createMockRequest($batchRequestPayload);
+        $httpTransport->setMockRequest($mockRequest);
+
+        $server->run(); // This executes runHttpRequestCycle
+
+        $capturedResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedResponse);
+        $this->assertEquals(200, $capturedResponse->getStatusCode()); // JSON-RPC errors still use HTTP 200
+
+        $responseBody = json_decode((string) $capturedResponse->getBody(), true);
+        $this->assertIsArray($responseBody, "Response body should be a JSON array (batch response)");
+        $this->assertCount(3, $responseBody, "Batch response should contain 3 items");
+
+        // Find responses by ID (findResponseById can search within a batch if $responseBody is the batch itself)
+        $initItemResponse = $this->findResponseById($responseBody, $initId);
+        $errorItemResponse = $this->findResponseById($responseBody, $errorItemId);
+        $item3Response = $this->findResponseById($responseBody, $item3Id);
+
+        // Assert Initialize was successful
+        $this->assertNotNull($initItemResponse, "Initialize response not found in batch.");
+        if ($initItemResponse) {
+            $this->assertArrayHasKey('result', $initItemResponse, "Initialize response should be a success.");
+            $this->assertArrayNotHasKey('error', $initItemResponse, "Initialize response should not be an error.");
+            // Ensure 'result' is an array before accessing sub-keys
+            $this->assertIsArray($initItemResponse['result']);
+            $this->assertEquals('2025-03-26', $initItemResponse['result']['protocolVersion']);
+        }
+
+        // Assert Malformed item resulted in an error
+        $this->assertNotNull($errorItemResponse, "Error response for malformed item not found in batch.");
+        if ($errorItemResponse) {
+            $this->assertArrayHasKey('error', $errorItemResponse, "Malformed item should have an error response.");
+            $this->assertArrayNotHasKey('result', $errorItemResponse, "Malformed item should not have a result.");
+            // Ensure 'error' is an array before accessing sub-keys
+            $this->assertIsArray($errorItemResponse['error']);
+            $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $errorItemResponse['error']['code'], "Error code for malformed item processing should be INTERNAL_ERROR.");
+            $this->assertStringContainsString("Error processing item in batch", $errorItemResponse['error']['message'], "Error message mismatch for malformed item.");
+        }
+
+        // Assert test.method was successful
+        $this->assertNotNull($item3Response, "test.method response not found in batch.");
+        if ($item3Response) {
+            $this->assertArrayHasKey('result', $item3Response, "test.method response should be a success.");
+            $this->assertArrayNotHasKey('error', $item3Response, "test.method response should not be an error.");
+        }
+
+        // Assert TestCapability received the call for test.method
+        $receivedCapabilityMessages = $capability->getReceivedMessages();
+        $this->assertCount(1, $receivedCapabilityMessages, "Capability should have received one message for 'test.method'.");
+        if (!empty($receivedCapabilityMessages)) {
+            $this->assertEquals($item3Id, $receivedCapabilityMessages[0]->id);
+            $this->assertEquals('test.method', $receivedCapabilityMessages[0]->method);
+        }
+    }
+
+    public function testRunHttpRequestCycleHandlesJsonEncodeFailureInSingleRequest(): void
+    {
+        $httpTransport = new TestableHttpTransport(new ResponseFactory(), new StreamFactory());
+        $server = new Server('test-http-single-json-encode-fail', '1.0.0');
+        // No capability needed as the failure happens before capability routing for a non-init method.
+        $server->connect($httpTransport);
+
+        $errorItemId = 'single_err_json_encode_' . uniqid();
+
+        // This raw payload will be returned directly by TestableHttpTransport::receive()
+        $rawPayload = [
+            'jsonrpc' => '2.0',
+            'method' => 'some_method', // Not 'initialize'
+            'params' => ['bad_string' => "\xB1\x31"], // Bad UTF-8 string
+            'id' => $errorItemId
+        ];
+        $httpTransport->setPreDecodedPayload($rawPayload);
+
+        // Server::runHttpRequestCycle processes one request.
+        // $rawPayload is a single request.
+        // Inside runHttpRequestCycle, for a single request:
+        //   try {
+        //     $messageJson = json_encode($rawPayload); // This is expected to fail
+        //     if ($messageJson === false) {
+        //       throw new \RuntimeException("Failed to re-encode single request for parsing.", JsonRpcMessage::PARSE_ERROR);
+        //     }
+        //     // ... further processing ...
+        //   } catch (\Throwable $e) {
+        //     // The RuntimeException with PARSE_ERROR code will be caught here.
+        //     // $errorCode will be $e->getCode() which is JsonRpcMessage::PARSE_ERROR.
+        //     // $responsePayload = JsonRpcMessage::error($errorCode, ...);
+        //   }
+        // The server is not initialized when 'some_method' is called. However, the json_encode failure
+        // happens before the server even checks for initialization for this specific method.
+        // The primary error caught is the re-encoding failure.
+
+        $server->run(); // Executes runHttpRequestCycle
+
+        $capturedResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedResponse);
+        $this->assertEquals(200, $capturedResponse->getStatusCode()); // JSON-RPC errors are sent with HTTP 200
+
+        $responseBody = json_decode((string) $capturedResponse->getBody(), true);
+        $this->assertIsArray($responseBody);
+        $this->assertArrayNotHasKey(0, $responseBody, "Should be a single error response, not a batch.");
+
+        $this->assertArrayHasKey('error', $responseBody);
+        $this->assertNotNull($responseBody['error']);
+        $this->assertEquals(JsonRpcMessage::PARSE_ERROR, $responseBody['error']['code']);
+        $this->assertStringContainsString("Failed to re-encode single request for parsing.", $responseBody['error']['message']);
+        $this->assertEquals($errorItemId, $responseBody['id']);
+    }
+
+    public function testRunHttpRequestCycleCatchesThrowableFromProcessSingleMessage(): void
+    {
+        $httpTransport = new TestableHttpTransport(new ResponseFactory(), new StreamFactory());
+        $server = new Server('test-http-process-msg-ex', '1.0.0');
+
+        /** @var CapabilityInterface&MockObject $mockCapability */
+        $mockCapability = $this->createMock(CapabilityInterface::class);
+
+        $server->addCapability($mockCapability);
+        $server->connect($httpTransport);
+
+        // --- Phase 1: Initialize Server ---
+        $initId = 'init_process_msg_ex_' . uniqid();
+        $initPayload = ['jsonrpc' => '2.0', 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-03-26'], 'id' => $initId];
+
+        $mockCapability->method('getCapabilities')->willReturn(['mock_method' => (object)['description' => 'A mock method']]);
+        $mockCapability->expects($this->once())->method('initialize');
+        // Ensure canHandleMessage for 'initialize' is false so server handles it.
+        // And true for 'mock_method' later.
+        $mockCapability->method('canHandleMessage')
+            ->willReturnCallback(function (JsonRpcMessage $message) {
+                return $message->method === 'mock_method';
+            });
+
+        $httpTransport->setPreDecodedPayload($initPayload);
+        $server->run(); // First run for initialization
+
+        $initCapturedResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($initCapturedResponse);
+        $this->assertEquals(200, $initCapturedResponse->getStatusCode());
+        $initResponseBody = json_decode((string) $initCapturedResponse->getBody(), true);
+        $this->assertNotNull($initResponseBody, "Init response body should not be null");
+        if ($initResponseBody) {
+            $this->assertArrayHasKey('result', $initResponseBody, "Initialize should succeed.");
+        }
+
+
+        // --- Phase 2: Send method call that causes capability to throw ---
+        $mockMethodId = 'mock_method_ex_' . uniqid();
+        $mockMethodPayload = ['jsonrpc' => '2.0', 'method' => 'mock_method', 'params' => ['foo' => 'bar'], 'id' => $mockMethodId];
+
+        // Configure handleMessage to throw for 'mock_method'
+        $mockCapability->method('handleMessage')
+            ->with($this->callback(function (JsonRpcMessage $message) use ($mockMethodId) {
+                return $message->method === 'mock_method' && $message->id === $mockMethodId;
+            }))
+            ->willThrowException(new \RuntimeException("Simulated capability error"));
+
+        $httpTransport->setPreDecodedPayload($mockMethodPayload);
+        $server->run(); // Second run for the method call
+
+        $errorCapturedResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($errorCapturedResponse);
+        $this->assertEquals(200, $errorCapturedResponse->getStatusCode());
+
+        $errorResponseBody = json_decode((string) $errorCapturedResponse->getBody(), true);
+        $this->assertIsArray($errorResponseBody);
+        $this->assertArrayNotHasKey(0, $errorResponseBody, "Should be a single error response, not a batch.");
+
+        $this->assertArrayHasKey('error', $errorResponseBody);
+        $this->assertNotNull($errorResponseBody['error']);
+        $this->assertIsArray($errorResponseBody['error']); // Ensure error is an array before accessing keys
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $errorResponseBody['error']['code']);
+        $this->assertEquals("Simulated capability error", $errorResponseBody['error']['message']); // Exact message match
+        $this->assertEquals($mockMethodId, $errorResponseBody['id']);
+    }
+
+    public function testRunHttpRequestCycleCatchesOuterThrowableFromTransportReceive(): void
+    {
+        $httpTransport = new TestableHttpTransport(new ResponseFactory(), new StreamFactory());
+        $server = new Server('test-http-outer-ex-server', '1.0.0');
+        // No capability is needed as the error occurs in the transport's receive method itself.
+        $server->connect($httpTransport);
+
+        $exceptionMessage = "Simulated transport receive critical error";
+        $httpTransport->setExceptionToThrowOnReceive(new \RuntimeException($exceptionMessage));
+
+        // No mock request needs to be set on TestableHttpTransport if receive() throws before using it.
+        // However, TestableHttpTransport::receive() calls $this->getRequest() first if preDecodedPayload and exceptionToThrow are null.
+        // The current TestableHttpTransport::receive() checks $exceptionToThrowOnReceive first. So this is fine.
+
+        $server->run(); // Executes runHttpRequestCycle
+
+        $capturedResponse = $httpTransport->getCapturedResponse();
+        $this->assertNotNull($capturedResponse);
+        $this->assertEquals(200, $capturedResponse->getStatusCode()); // JSON-RPC errors are sent with HTTP 200
+
+        $responseBody = json_decode((string) $capturedResponse->getBody(), true);
+        $this->assertIsArray($responseBody);
+        $this->assertArrayNotHasKey(0, $responseBody, "Should be a single error response, not a batch.");
+
+        $this->assertArrayHasKey('error', $responseBody);
+        $this->assertNotNull($responseBody['error']);
+        $this->assertIsArray($responseBody['error']);
+
+        // Assertions for the generic "Internal server error" response
+        $this->assertEquals(JsonRpcMessage::INTERNAL_ERROR, $responseBody['error']['code']);
+        $this->assertEquals('Internal server error.', $responseBody['error']['message']);
+        $this->assertNull($responseBody['id']);
+
+        // Implicitly, the test passing means the exception was caught and handled.
+        // The log "Critical Server Error in HTTP cycle: Simulated transport receive critical error"
+        // should have been made (verified by observing test output in previous runs for similar logs).
+    }
 }

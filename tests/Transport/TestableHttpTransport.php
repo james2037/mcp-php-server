@@ -17,6 +17,8 @@ class TestableHttpTransport extends HttpTransport
 {
     private ?ServerRequestInterface $mockRequest = null;
     private ?\Throwable $exceptionToThrowOnReceive = null;
+    /** @var array<string, mixed>|array<int, array<string, mixed>>|null */
+    private ?array $preDecodedPayload = null;
 
     public function __construct(
         ?ResponseFactoryInterface $responseFactory = null,
@@ -68,6 +70,12 @@ class TestableHttpTransport extends HttpTransport
      */
     public function receive(): array
     {
+        if ($this->preDecodedPayload !== null) {
+            $payload = $this->preDecodedPayload;
+            $this->preDecodedPayload = null; // Consume it
+            return $payload;
+        }
+
         if ($this->exceptionToThrowOnReceive !== null) {
             $e = $this->exceptionToThrowOnReceive;
             $this->exceptionToThrowOnReceive = null; // Clear after use to prevent re-throwing
@@ -132,5 +140,13 @@ class TestableHttpTransport extends HttpTransport
         // HttpTransport::getResponse() returns $this->response.
         // HttpTransport::getResponse() always returns a ResponseInterface, so no null check needed here.
         return $this->getResponse();
+    }
+
+    /**
+     * @param array<string, mixed>|array<int, array<string, mixed>> $payload
+     */
+    public function setPreDecodedPayload(array $payload): void
+    {
+        $this->preDecodedPayload = $payload;
     }
 }
