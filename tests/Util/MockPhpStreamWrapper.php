@@ -1,6 +1,6 @@
 <?php
 
-namespace MCP\Server\Message;
+namespace MCP\Server\Tests\Util;
 
 // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 class MockPhpStreamWrapper
